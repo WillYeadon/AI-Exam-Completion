@@ -10,7 +10,6 @@ Read the full paper [here](https://arxiv.org).
 
 # Installation
 
-```plaintext
 The repository contains all the scripts required to process a series of .tex files used for Physics exams and generate completed PDFs. However, please note that the API keys have been removed. To use the scripts, you will need to create an account on OpenAI and generate your own API keys. Additionally, since the exam questions cannot be publicly released, the "example-raw-tex" folder contains only blank "example questions" for demonstration purposes.
 
 It is important to keep a close eye on what you're actually extracting from the .tex files thus I recommend running the scripts individually. In principle, you can loop through all the years to create a single large database. However, I found it more efficient to keep things segregated by year and use a different API key for each run of the response script, allowing for parallel processing of the years. 

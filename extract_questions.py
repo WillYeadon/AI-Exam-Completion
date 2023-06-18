@@ -15,7 +15,7 @@ def extract_preamble(content):
 def extract_question_number_from_filename(filename):
     return re.search(r'~(Q\d+)\.tex', filename).group(1)
 
-directory = '2017-papers-raw'
+directory = 'example-raw-tex/2020'
 tex_files = [os.path.join(directory, file) for file in os.listdir(directory) if file.endswith('.tex')]
 
 
@@ -50,4 +50,4 @@ for tex_file in tex_files:
         data['Responses'].append("")
 
 df = pd.DataFrame(data)
-df.to_excel('questions-2017.xlsx', index=False)
+df.to_excel('questions-2020.xlsx', index=False)

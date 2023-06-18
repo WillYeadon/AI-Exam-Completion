@@ -118,8 +118,7 @@ tokenizer.train_from_iterator(["dummy text"], trainer=BpeTrainer(vocab_size=5000
 openai.api_key = ""
 
 # Load the Excel workbook
-#df = pd.read_excel("2022-2018-checked.xlsx")
-df = pd.read_excel("2022-only.xlsx")
+df = pd.read_excel("questions-2020-checked-marks.xlsx")
 
 used_packages = set()
 preamble = ""
@@ -208,7 +207,7 @@ df['Filename'] = df['Year'] + '-' + df['Filename'].str.replace(r'\\', '')
 df['Filename'] = df['Filename'].str.extract(r'(\d+-\w+(?:\s\w+)*)')
 
 # Save the updated DataFrame to the questions_with_answers.xlsx file
-df.to_excel("questions_with_answers_2022-2018.xlsx", index=False)
+df.to_excel("questions_with_answers_2020.xlsx", index=False)
 
 print("\nPackages used:")
 for package in used_packages:

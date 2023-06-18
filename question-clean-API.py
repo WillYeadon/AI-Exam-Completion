@@ -73,7 +73,8 @@ def check_and_correct_questions(excel_file, openai_api_key):
     for sheet_name, sheet_data in excel_file.items():
         sheet_data['Checked Questions'] = pd.Series(dtype=str)
 
-        if 'Questions' not in sheet_data.columns:
+        # Wrong file stop
+        if 'Question' not in sheet_data.columns:
             continue
     
         for index, response in sheet_data['Cleaned Questions'].iteritems():
@@ -92,9 +93,9 @@ def check_and_correct_questions(excel_file, openai_api_key):
                         print("Retrying after a delay due to API error")
                         time.sleep(5)
 
-                # Save the modified Excel file every 10 questions
-                if index % 10 == 0:
-                    save_excel_file(excel_file, "questions-gpt-3-checked-q.xlsx")
+                # Optionally save the modified Excel file every 10 questions
+                #if index % 10 == 0:
+                save_excel_file(excel_file, "questions-2020-checked.xlsx")
 
 
 def save_excel_file(excel_file, file_name):
@@ -103,11 +104,11 @@ def save_excel_file(excel_file, file_name):
             sheet_data.to_excel(writer, sheet_name=sheet_name, index=False)
 
 def main():
-    file_name = 'questions-gpt-3.xlsx'
+    file_name = 'questions-2020.xlsx'
     excel_file = read_excel_file(file_name)
     openai_api_key = ""
     check_and_correct_questions(excel_file, openai_api_key)
-    save_excel_file(excel_file, "questions-gpt-3-checked-q.xlsx")
+    save_excel_file(excel_file, "questions-2020-checked.xlsx")
 
 if __name__ == "__main__":
     main()

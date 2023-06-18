@@ -2,7 +2,7 @@ import pandas as pd
 import re
 
 # Load the Excel file
-file_name = "2022-2018-checked-questions-only.xlsx"
+file_name = "questions-2020-checked.xlsx"
 df = pd.read_excel(file_name, engine="openpyxl")
 
 # Function to extract marks
@@ -16,10 +16,9 @@ def extract_marks(cell):
     else:
         return 0
 
-
 # Apply the function to the 'Checked Questions' column
-df["Marks"] = df["Cleaned Questions"].apply(extract_marks)
+df["Marks"] = df["Checked Questions"].apply(extract_marks)
 #df["Marks"] = df["Cleaned Questions"].apply(extract_marks)
 
 # Save the updated DataFrame to a new Excel file
-df.to_excel("cleaned_2022-2018-checked-questions-only.xlsx", index=False, engine="openpyxl")
+df.to_excel("questions-2020-checked-marks.xlsx", index=False, engine="openpyxl")

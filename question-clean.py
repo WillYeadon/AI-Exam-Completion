@@ -24,11 +24,11 @@ def clean_question(question):
 
 
 # Load your Excel file
-df = pd.read_excel("questions-gpt-3.xlsx")
-df['Questions'] = df['Questions'].str.replace('_x000D_', '\n')
+df = pd.read_excel("questions-2020.xlsx")
+df['Question'] = df['Question'].str.replace('_x000D_', '\n')
 
 # Clean the questions
-df['Cleaned Questions'] = df['Questions'].apply(clean_question)
+df['Cleaned Questions'] = df['Question'].apply(clean_question)
 
 # Save the cleaned questions back to the Excel file
-df.to_excel("questions-gpt-3.xlsx", index=False)
+df.to_excel("questions-2020.xlsx", index=False)

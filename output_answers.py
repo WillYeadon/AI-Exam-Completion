@@ -15,7 +15,7 @@ def compile_tex_to_pdf(tex_filename, pdf_filename):
     return True
 
 # Load data from Excel file
-df = pd.read_excel('gpt-4-questions_answers_marks.xlsx')
+df = pd.read_excel('TP3-2019-GPT-4-checked-with-answers.xlsx')
 
 df['Graphics'] = df['Graphics'].fillna(0).astype(int)
 df['Retried'] = df['Retried'].fillna(0).astype(int)

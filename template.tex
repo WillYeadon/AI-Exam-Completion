@@ -1,0 +1,46 @@
+\documentclass[11pt]{article}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{enumitem}
+\usepackage{lipsum}
+\usepackage{hyperref}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{geometry}
+\usepackage{braket}
+\usepackage{longtable} % Add longtable package for the table
+
+\geometry{a4paper, left=5mm, top=20mm, right=5mm, bottom=20mm}
+
+\hfuzz=\maxdimen
+
+\begin{document}
+
+\title{\textbf{Exam:} {{ filename }}}
+\date{}
+\maketitle
+
+% Add a table for Question Number, Graphics, and Retried columns
+\begin{longtable}{|c|c|c|c|}
+    \hline
+    \textbf{Question Number} & \textbf{Graphics} & \textbf{Retried} & \textbf{Available Marks} \\
+    \hline
+    \endhead
+    {% for row in rows %}
+        {{ row['Question Number'] }} & {{ row['Graphics'] }} & {{ row['Retried'] }} & {{ row['Available Marks'] }} \\
+        \hline
+    {% endfor %}
+\end{longtable}
+
+\newpage
+
+{% for row in rows %}
+    \section*{\textbf{Question {{ row['Question Number'] }}:}}
+    \textbf{Marks available {{ row['Available Marks'] }}:}
+    {{ row['Checked Questions'] }}
+    \section*{\textbf{Answer:}}
+    {{ row['Responses'] }}
+    \vspace{10mm}
+{% endfor %}
+\end{document}

@@ -4,7 +4,7 @@ import pandas as pd
 import time
 
 # Load the Excel workbook
-file_name = 'questions_with_answers.xlsx'
+file_name = 'TP3-2019-GPT-4-checked-with-answers.xlsx'
 excel_file = pd.read_excel(file_name, sheet_name=None, engine='openpyxl')
 
 # Regular expressions to match LaTeX \includegraphics blocks and the remaining case

@@ -95,7 +95,7 @@ def check_and_correct_questions(excel_file, openai_api_key):
 
                 # Optionally save the modified Excel file every 10 questions
                 #if index % 10 == 0:
-                save_excel_file(excel_file, "questions-2020-checked.xlsx")
+                save_excel_file(excel_file, "TP3-2019-GPT-4-checked.xlsx")
 
 
 def save_excel_file(excel_file, file_name):
@@ -104,11 +104,11 @@ def save_excel_file(excel_file, file_name):
             sheet_data.to_excel(writer, sheet_name=sheet_name, index=False)
 
 def main():
-    file_name = 'questions-2020.xlsx'
+    file_name = 'TP3-2019-GPT-4.xlsx'
     excel_file = read_excel_file(file_name)
-    openai_api_key = ""
+    openai_api_key = "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"
     check_and_correct_questions(excel_file, openai_api_key)
-    save_excel_file(excel_file, "questions-2020-checked.xlsx")
+    save_excel_file(excel_file, "TP3-2019-GPT-4-checked.xlsx")
 
 if __name__ == "__main__":
     main()

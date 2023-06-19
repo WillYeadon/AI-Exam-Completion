@@ -106,7 +106,7 @@ def save_excel_file(excel_file, file_name):
 def main():
     file_name = 'TP3-2019-GPT-4.xlsx'
     excel_file = read_excel_file(file_name)
-    openai_api_key = "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"
+    openai_api_key = ""
     check_and_correct_questions(excel_file, openai_api_key)
     save_excel_file(excel_file, "TP3-2019-GPT-4-checked.xlsx")
 

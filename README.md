@@ -6,7 +6,7 @@ This repository contains scripts for extracting exam questions from '.tex' files
 
 In addition, there is a script dedicated to extracting marks associated with each question. Subsequently, the questions, answers, and marks are combined using a Jinja template to create completed exam PDFs for each year.
 
-Read the full paper [here](https://arxiv.org).
+Read the full paper [here](https://arxiv.org/abs/2306.15609).
 
 # Installation
 

@@ -37,6 +37,8 @@ mean_human = human_scores.mean()
 mean_ai = ai_scores.mean()
 sd_human = human_scores.std()
 sd_ai = ai_scores.std()
+se_human = round(sd_human/np.sqrt(150),1)
+se_ai = round(sd_ai/np.sqrt(150),1)
 
 print('Human: ', mean_human, sd_human)
 print('AI: ', mean_ai, sd_ai)
@@ -48,16 +50,16 @@ ax.vlines(mean_ai, 0, ai_scores.count(), color=vlines[1], linestyle='--', label=
 y_pos_human = 52
 y_pos_ai = 55
 
-ax.errorbar(mean_human, y_pos_human, xerr=sd_human, fmt='o', color=colors[1], capsize=5)
-ax.errorbar(mean_ai, y_pos_ai, xerr=sd_ai, fmt='o', color=colors[0], capsize=5)
+ax.errorbar(mean_human, y_pos_human, xerr=se_human, fmt='o', color=colors[1], capsize=5)
+ax.errorbar(mean_ai, y_pos_ai, xerr=se_ai, fmt='o', color=colors[0], capsize=5)
 ax.legend(title='Type', loc='upper right', fontsize='small', 
           labels=['Human', 'AI', f'Human Avg: {mean_human:.2f} (SD: {sd_human:.2f})', f'AI Avg: {mean_ai:.2f} (SD: {sd_ai:.2f})'])
 
 legend_elements = [
     Patch(facecolor='#E76F51', edgecolor='black', label='AI'),
     Patch(facecolor='#2A9D8F', edgecolor='black', label='Human'),
-    Line2D([0], [0], color='#b85840', lw=2, linestyle='--', label=f'AI Avg: {mean_ai:.2f} (SD: {sd_ai:.2f})'),
-    Line2D([0], [0], color='#217d72', lw=2, linestyle='--', label=f'Human Avg: {mean_human:.2f} (SD: {sd_human:.2f})')
+    Line2D([0], [0], color='#b85840', lw=2, linestyle='--', label=f'AI Avg: {mean_ai:.1f} (SE: {se_ai})'),
+    Line2D([0], [0], color='#217d72', lw=2, linestyle='--', label=f'Human Avg: {mean_human:.1f} (SE: {se_human})')
 ]
 
 ax.legend(handles=legend_elements, title='Type', loc='upper right', fontsize='small')

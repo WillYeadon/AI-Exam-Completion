@@ -7,7 +7,7 @@ The API used is from OpenAI but it shouldn't be too much fuss to change this cod
 * For physics exams the main issue is parsing the latex equations. The solution I used was to compile the API responses in latex then send back the response and any error should it fail to compile. Be warned, error messages can be long so you'll be spending a lot on API calls!
 * For coding assignments, I converted the raw .ipynb to .py files and ran the returned API calls into python. GPT-3.5 and GPT-4 are suprisingly good at returning error-free python if you're careful with the prompt engineering.
 
-There are lots of methodological details in these preprints looking at: physics essays](https://arxiv.org/abs/2403.05458), physics [written exams](https://arxiv.org/abs/2306.15609) and physics [coding assignments](https://arxiv.org/abs/2403.16977). 
+There are lots of methodological details in these preprints looking at: physics [essays](https://arxiv.org/abs/2403.05458), physics [written exams](https://arxiv.org/abs/2306.15609) and physics [coding assignments](https://arxiv.org/abs/2403.16977). 
 
 The same code was used to look at Old English Essays [here](https://doi.org/10.21203/rs.3.rs-3483059/v1) If you're interested at doing this at your own institution please feel free to contact me for more details.
 

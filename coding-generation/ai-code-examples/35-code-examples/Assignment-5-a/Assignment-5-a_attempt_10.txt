@@ -1,0 +1,71 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+def transition_probability(half_life, time_step):
+    return 1 - 2**(-time_step / half_life)
+
+def evolve_state(state, prob):
+    if np.random.rand() < prob:
+        return state + 1
+    return state
+
+def evolve_system(states, prob):
+    new_states = []
+    for state in states:
+        new_state = evolve_state(state, prob)
+        new_states.append(new_state)
+    return new_states
+
+def evolve_full_system(states_A, states_B, states_C, prob_A, prob_B, prob_C, n_steps, neutron_flux):
+    all_states_A = [states_A]
+    all_states_B = [states_B]
+    all_states_C = [states_C]
+
+    for i in range(n_steps):
+        if neutron_flux:
+            states_C = evolve_system(states_C, prob_C)
+            prob_A_step = transition_probability(10.1, 1)
+        else:
+            prob_A_step = 0
+        states_A = evolve_system(states_A, prob_A + prob_A_step)
+        states_B = evolve_system(states_B, prob_B)
+        
+        all_states_A.append(states_A)
+        all_states_B.append(states_B)
+        all_states_C.append(states_C)
+
+    return all_states_A, all_states_B, all_states_C
+
+# Initial number of nuclei
+A = 0
+B = 0
+C = 250
+
+n_steps = 200
+neutron_flux = True
+
+states_A, states_B, states_C = evolve_full_system(A, B, C, transition_probability(10.1, 1), transition_probability(15.7, 1), transition_probability(3.2, 1), n_steps, neutron_flux)
+
+plt.figure(figsize=(12, 6))
+plt.plot(range(n_steps+1), [len(states_A) for states_A in states_A], label='Nuclei A')
+plt.plot(range(n_steps+1), [len(states_B) for states_B in states_B], label='Nuclei B')
+plt.plot(range(n_steps+1), [len(states_C) for states_C in states_C], label='Nuclei C')
+plt.xlabel('Time Steps')
+plt.ylabel('Number of Nuclei')
+plt.title('Decay and Activation of Nuclei over Time')
+plt.legend()
+plt.show()
+
+neutron_flux = False
+
+states_A, states_B, states_C = evolve_full_system(states_A[-1][-1], states_B[-1][-1], states_C[-1][-1], transition_probability(10.1, 1), transition_probability(15.7, 1), 0, n_steps, neutron_flux)
+
+plt.figure(figsize=(12, 6))
+plt.plot(range(n_steps+1, 2*n_steps+2), [len(states_A) for states_A in states_A], label='Nuclei A')
+plt.plot(range(n_steps+1, 2*n_steps+2), [len(states_B) for states_B in states_B], label='Nuclei B')
+plt.plot(range(n_steps+1, 2*n_steps+2), [len(states_C) for states_C in states_C], label='Nuclei C')
+plt.xlabel('Time Steps')
+plt.ylabel('Number of Nuclei')
+plt.title('Decay of Nuclei after Neutron Flux is Off')
+plt.legend()
+plt.show()

@@ -1,0 +1,93 @@
+import numpy as np
+import random
+import matplotlib.pyplot as plt
+
+# Determining if a transition occurs
+def transition_occur(probability):
+    r = random.random()
+    return r < probability
+
+# Function to transition the current state based on rules
+def transition_state(current_state, transition_rules):
+    new_state = current_state.copy()
+    for rule in transition_rules:
+        from_state, to_state, probability = rule
+        if current_state[from_state] > 0:  # Ensure there's something to transition
+            if transition_occur(probability):
+                new_state[from_state] -= 1
+                new_state[to_state] += 1
+    return new_state
+
+# Function to transition all states in the list
+def transition_all_states(states, transition_rules):
+    return [transition_state(state, transition_rules) for state in states]
+
+# Function to evolve system
+def evolve_system(NA, NB, NC, n_timesteps, timestep_duration, flux_on=True):
+    NA_arr = [NA]
+    NB_arr = [NB]
+    NC_arr = [NC]
+    
+    # Compute decay probabilities for A and B
+    decay_prob_A = 1 - np.exp(-timestep_duration / 10.1)  # Half-life of A
+    decay_prob_B = 1 - np.exp(-timestep_duration / 15.7)  # Half-life of B
+    
+    if flux_on:
+        activation_prob_C = 1 - np.exp(-timestep_duration / 3.2)  # Effective half-life for C to A
+    else:
+        activation_prob_C = 0
+
+    # Define transition rules
+    transition_rules = [
+        (0, 1, decay_prob_A),  # A -> B
+        (1, 2, decay_prob_B),  # B -> C
+        (2, 0, activation_prob_C)  # C -> A
+    ]
+    
+    state = [NA, NB, NC]
+    
+    for _ in range(n_timesteps):
+        state = transition_state(state, transition_rules)
+        NA_arr.append(state[0])
+        NB_arr.append(state[1])
+        NC_arr.append(state[2])
+        
+    return np.array(NA_arr), np.array(NB_arr), np.array(NC_arr)
+
+# Simulation settings
+initial_NC = 250
+initial_NA = 0
+initial_NB = 0
+n_timesteps = 200
+timestep_duration = 100 / n_timesteps
+
+# Evolve with neutron flux on
+NA_on, NB_on, NC_on = evolve_system(initial_NA, initial_NB, initial_NC, n_timesteps, timestep_duration, flux_on=True)
+
+# Use the final states from the first evolution as initial states for the next
+final_NA = NA_on[-1]
+final_NB = NB_on[-1]
+final_NC = NC_on[-1]
+
+# Evolve with neutron flux off
+NA_off, NB_off, NC_off = evolve_system(final_NA, final_NB, final_NC, n_timesteps, timestep_duration, flux_on=False)
+
+# Combine results
+NA = np.concatenate((NA_on, NA_off[1:]))
+NB = np.concatenate((NB_on, NB_off[1:]))
+NC = np.concatenate((NC_on, NC_off[1:]))
+
+# Time array
+time = np.linspace(0, 200, 2 * n_timesteps + 1)
+
+# Plotting
+plt.figure(figsize=(10, 6))
+plt.plot(time, NA, label='A Nuclei')
+plt.plot(time, NB, label='B Nuclei')
+plt.plot(time, NC, label='C Nuclei')
+plt.xlabel('Time (hours)')
+plt.ylabel('Number of Nuclei')
+plt.title('Evolution of Nuclei Over Time')
+plt.legend()
+plt.grid(True)
+plt.show()

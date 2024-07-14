@@ -1,0 +1,57 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Constants
+g = 9.81  # m/s^2
+dt = 0.01  # s
+rho = 1.2  # kg/m^3
+A = 10 ** -3  # m^2
+C = 0.5
+theta = np.radians(60)  # Convert angle to radians
+
+def find_zero_linear(x1, x2, y1, y2):
+    return x1 - (x2 - x1) * y1 / (y2 - y1)
+
+# Function to calculate projectile motion with air resistance
+def projectile_motion_with_air_resistance(v0):
+    x = 0
+    y = 0
+    vx = v0 * np.cos(theta)
+    vy = v0 * np.sin(theta)
+
+    while y >= 0:
+        v = np.sqrt(vx**2 + vy**2)
+        ax = -C * rho * A * v * vx / 2
+        ay = -g - C * rho * A * v * vy / 2
+        x = x + vx * dt
+        y = y + vy * dt
+        vx = vx + ax * dt
+        vy = vy + ay * dt
+
+    # Finding the x coordinate when y = 0 using linear approximation
+    range_x = find_zero_linear(x - dt, x, y - dt*vy, y)
+
+    return range_x
+
+# Initializing variables
+v0_values = np.linspace(50, 150, 100)  # Initial velocities
+ranges_with_air_resistance = []
+ranges_without_air_resistance = []
+
+# Calculating ranges for different initial velocities
+for v0 in v0_values:
+    range_with_air_resistance = projectile_motion_with_air_resistance(v0)
+    range_without_air_resistance = (v0 ** 2 * np.sin(2*theta)) / g
+    ranges_with_air_resistance.append(range_with_air_resistance)
+    ranges_without_air_resistance.append(range_without_air_resistance)
+
+# Plotting
+plt.figure(figsize=(10, 6))
+plt.plot(v0_values, ranges_with_air_resistance, label='With Air Resistance')
+plt.plot(v0_values, ranges_without_air_resistance, label='Without Air Resistance')
+plt.xlabel('Initial Velocity (m/s)')
+plt.ylabel('Range (m)')
+plt.title('Range of Projectile vs Initial Velocity')
+plt.legend()
+plt.grid(True)
+plt.show()

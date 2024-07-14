@@ -1,0 +1,81 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Function definition
+def f(x):
+    return x - np.tanh(2*x)
+
+# Derivative of the function
+def f_prime(x):
+    return 1 - 2*np.cosh(2*x)**-2
+
+# Newton-Raphson method
+def newton_raphson(x0, tol, max_iter):
+    x = x0
+    iter = 0
+    while iter < max_iter:
+        x_new = x - f(x) / f_prime(x)
+        if abs(x_new - x) < tol:
+            return x_new, iter+1
+        x = x_new
+        iter += 1
+    return None, max_iter
+
+# Bisection method
+def bisection(a, b, tol, max_iter):
+    iter = 0
+    while iter < max_iter:
+        c = (a + b) / 2
+        if f(c) == 0 or (b - a) / 2 < tol:
+            return c, iter+1
+        if np.sign(f(c)) == np.sign(f(a)):
+            a = c
+        else:
+            b = c
+        iter += 1
+    return None, max_iter
+
+# Secant method
+def secant(x0, x1, tol, max_iter):
+    iter = 0
+    while iter < max_iter:
+        x_new = x1 - f(x1) * (x1 - x0) / (f(x1) - f(x0))
+        if abs(x_new - x1) < tol:
+            return x_new, iter+1
+        x0 = x1
+        x1 = x_new
+        iter += 1
+    return None, max_iter
+
+# Initial values
+x0 = 1
+x1 = 2
+a = 0
+b = 2
+tol = 1e-6
+max_iter = 100
+
+# Arrays to store iteration counts
+iter_newton = []
+iter_bisection = []
+iter_secant = []
+
+# Perform iterations
+for i in range(1, 50):
+    _, iter_n = newton_raphson(x0, tol, i)
+    _, iter_b = bisection(a, b, tol, i)
+    _, iter_s = secant(x0, x1, tol, i)
+    
+    iter_newton.append(iter_n)
+    iter_bisection.append(iter_b)
+    iter_secant.append(iter_s)
+
+# Plotting
+plt.figure()
+plt.plot(range(1,50), iter_newton, label='Newton-Raphson')
+plt.plot(range(1,50), iter_bisection, label='Bisection')
+plt.plot(range(1,50), iter_secant, label='Secant')
+plt.xlabel('Iterations')
+plt.ylabel('Number of iterations to converge')
+plt.legend()
+plt.show()

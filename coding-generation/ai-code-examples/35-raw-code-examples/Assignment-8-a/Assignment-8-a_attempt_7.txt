@@ -1,0 +1,47 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+class Walker:
+    def __init__(self, ndim=1, step_size=1):
+        self.positions = [np.zeros(ndim)]
+        self.steps = np.array([[step_size if j == i else 0 for j in range(ndim)] for i in range(ndim)] +
+                              [[-step_size if j == i else 0 for j in range(ndim)] for i in range(ndim)])
+        self.ndim = ndim
+
+    def pickStep(self):
+        return self.steps[np.random.choice(len(self.steps))]
+
+    def doSteps(self, n):
+        for _ in range(n):
+            step = self.pickStep()
+            self.positions.append(self.positions[-1] + step)
+        return np.array(self.positions)
+
+# Create 100 1D walkers
+n_walkers = 100
+n_steps = 1000
+walker_trajectories = []
+
+for _ in range(n_walkers):
+    walker = Walker()
+    trajectory = walker.doSteps(n_steps)
+    walker_trajectories.append(trajectory)
+
+walker_trajectories = np.array(walker_trajectories)
+
+# Calculate average position and average squared position
+avg_position = np.mean(walker_trajectories, axis=0)
+avg_squared_position = np.mean(walker_trajectories**2, axis=0)
+
+# Plotting
+plt.figure(figsize=(12, 6))
+
+plt.plot(avg_position, label='Average Position')
+plt.plot(avg_squared_position, label='Average Squared Position')
+
+plt.title("Average Position and Average Squared Position of 100 1D Walkers")
+plt.xlabel("Number of Steps")
+plt.ylabel("Position")
+plt.legend()
+plt.grid(True)
+plt.show()

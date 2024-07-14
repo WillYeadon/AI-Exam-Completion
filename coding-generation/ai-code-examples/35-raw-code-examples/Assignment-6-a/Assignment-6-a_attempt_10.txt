@@ -1,0 +1,38 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Monte Carlo estimate for pi
+def findPi(n_points):
+    points = np.random.rand(2, n_points) * 2 - 1 
+    inside_circle = (points[0]**2 + points[1]**2) < 1
+    estimated_pi = 4 * np.sum(inside_circle) / n_points
+    return estimated_pi
+
+# Monte Carlo estimate for volume of unit ball in dim dimensions
+def integrate(dim, n_points):
+    points = np.random.rand(dim, n_points) * 2 - 1 
+    norm = np.linalg.norm(points, axis=0)
+    inside_ball = norm < 1
+    volume_unit_cube = (2**dim)
+    estimated_volume = volume_unit_cube * np.sum(inside_ball) / n_points
+    return estimated_volume
+
+# Test the functions
+n_points = 10000
+dimensions = [2, 3, 4, 5, 10, 20]
+errors = []
+
+for dim in dimensions:
+    estimated_volume = integrate(dim, n_points)
+    true_volume = np.pi**(dim/2) / np.math.gamma(dim/2 + 1)
+    error = abs(estimated_volume - true_volume)
+    errors.append(error)
+
+# Plotting the errors
+plt.figure()
+plt.plot(dimensions, errors, marker='o', label='Error')
+plt.xlabel('Dimensions')
+plt.ylabel('Error')
+plt.title('Monte Carlo Integration Error vs Dimensions')
+plt.legend()
+plt.show()

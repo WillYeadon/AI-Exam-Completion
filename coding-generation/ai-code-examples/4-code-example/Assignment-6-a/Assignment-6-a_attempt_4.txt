@@ -1,0 +1,46 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Monte Carlo integration function to estimate pi
+def mc_pi(n_points):
+    x = np.random.uniform(-1, 1, n_points)
+    y = np.random.uniform(-1, 1, n_points)
+    inside_circle = x**2 + y**2 <= 1
+    return 4 * np.sum(inside_circle) / n_points
+
+# General Monte Carlo integration function for unit ball volume in dim dimensions
+def mc_unit_ball_volume(dim, n_points):
+    points = np.random.uniform(-1, 1, (n_points, dim))
+    inside_ball = np.sum(points**2, axis=1) <= 1
+    return (2 ** dim) * np.sum(inside_ball) / n_points
+
+# Auxiliary function to compute the error of integration
+def compute_error(dim, n_points, n_trials=10):
+    true_volumes = {1: 2, 2: np.pi, 3: 4/3 * np.pi, 4: np.pi**2 / 2}
+    estimates = [mc_unit_ball_volume(dim, n_points) for _ in range(n_trials)]
+    mean_estimate = np.mean(estimates)
+    true_volume = true_volumes[dim]
+    return np.abs(mean_estimate - true_volume)
+
+# Dimensions to test
+dimensions = [2, 3, 4]
+n_points_list = [10**i for i in range(1, 6)]
+
+# Plotting the results
+plt.figure(figsize=(10, 8))
+
+for dim in dimensions:
+    errors = [compute_error(dim, n_points) for n_points in n_points_list]
+    plt.loglog(n_points_list, errors, label=f'{dim} dimensions')
+
+# Plot theoretical 1/sqrt(N) line for comparison
+n_points_theory = np.array(n_points_list)
+error_theory = 1 / np.sqrt(n_points_theory)
+plt.loglog(n_points_theory, error_theory, 'k--', label='1/sqrt(N)')
+
+plt.xlabel('Number of Points (N)')
+plt.ylabel('Integration Error')
+plt.title('Monte Carlo Integration Error Scaling with Number of Points (N)')
+plt.legend()
+plt.grid(True, which="both", ls="--")
+plt.show()

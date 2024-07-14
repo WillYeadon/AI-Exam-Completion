@@ -1,0 +1,32 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Script
+def findPi(n_points):
+    x = np.random.rand(n_points)
+    y = np.random.rand(n_points)
+    inside_circle = (x**2 + y**2) <= 1
+    pi_estimate = 4 * np.sum(inside_circle) / n_points
+    return pi_estimate
+
+def integrate(n_points, dim):
+    points = np.random.uniform(low=-1, high=1, size=(n_points, dim))
+    norm = np.linalg.norm(points, axis=1)
+    inside_ball = norm <= 1
+    volume_estimate = 2**dim * np.sum(inside_ball) / n_points
+    return volume_estimate
+
+# Task
+n_points = 10000
+dimensions = np.arange(2, 12)
+volume_estimates = [integrate(n_points, dim) for dim in dimensions]
+
+# Plotting
+plt.figure(figsize=(10, 6))
+plt.plot(dimensions, volume_estimates, marker='o', label='Monte Carlo Estimate')
+plt.axhline(y=np.pi, color='r', linestyle='--', label='True Value of $\pi$')
+plt.xlabel('Dimensions')
+plt.ylabel('Volume Estimate')
+plt.title('Monte Carlo Volume Estimation of Unit Ball in Various Dimensions')
+plt.legend()
+plt.show()

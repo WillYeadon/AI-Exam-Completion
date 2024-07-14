@@ -1,0 +1,35 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+def integrate(dim, n_points):
+    points = np.random.uniform(-1, 1, (n_points, dim))
+    within_ball = np.sum(np.linalg.norm(points, axis=1) <= 1)
+    volume_unit_cube = 2**dim
+    
+    return within_ball / n_points * volume_unit_cube
+
+dimensions = [2, 4, 8, 16]
+n_points_list = [10, 100, 1000, 10000, 100000, 1000000]
+
+errors = {dim: [] for dim in dimensions}
+
+for dim in dimensions:
+    for n_points in n_points_list:
+        estimate = integrate(dim, n_points)
+        actual_volume = np.pi**(dim/2) / np.math.gamma(dim/2 + 1)
+        error = np.abs(estimate - actual_volume) / actual_volume
+        errors[dim].append(error)
+
+plt.figure(figsize=(10, 6))
+for dim in dimensions:
+    plt.plot(n_points_list, errors[dim], label=f'Dimension {dim}')
+
+plt.xscale('log')
+plt.yscale('log')
+plt.xlabel('Number of Points (N)')
+plt.ylabel('Relative Error')
+plt.title('Monte Carlo Integration Error Scaling with N and Dimension')
+plt.legend()
+plt.grid(True)
+plt.savefig('monte_carlo_integration_error_scaling.png')
+plt.show()

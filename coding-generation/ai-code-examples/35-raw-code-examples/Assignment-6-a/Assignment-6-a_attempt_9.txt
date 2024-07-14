@@ -1,0 +1,35 @@
+import numpy as np
+
+def findPi(n_points):
+    # Generate random points in the unit square
+    points = np.random.rand(n_points, 2)
+    
+    # Count points inside the unit circle
+    inside_circle = 0
+    for point in points:
+        if np.linalg.norm(point) <= 1:
+            inside_circle += 1
+    
+    # Calculate Pi
+    pi_estimate = 4 * inside_circle / n_points
+    return pi_estimate
+
+def integrate(n_points, dim):
+    # Generate random points in the [-1, 1]^dim hypercube
+    points = np.random.uniform(-1, 1, (n_points, dim))
+    
+    # Check if points are inside the unit ball
+    inside_ball = 0
+    for point in points:
+        if np.linalg.norm(point) <= 1:
+            inside_ball += 1
+    
+    # Calculate volume of the unit ball
+    volume_estimate = 2**dim * inside_ball / n_points
+    return volume_estimate
+
+# Test the functions
+pi_estimate = findPi(1000000)
+volume_estimate = integrate(1000000, 10)
+print("Estimated value of Pi:", pi_estimate)
+print("Estimated volume of unit ball in 10 dimensions:", volume_estimate)

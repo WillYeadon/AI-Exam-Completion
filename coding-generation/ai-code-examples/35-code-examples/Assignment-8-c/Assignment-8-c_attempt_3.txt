@@ -1,0 +1,34 @@
+import matplotlib.pyplot as plt
+import numpy as np
+
+# Class for Walker
+class Walker:
+    def __init__(self, num_steps):
+        self.num_steps = num_steps
+        self.rand_pos = np.random.rand(1000, 2)
+    
+    def move(self, step_size=0.05):
+        directions = np.random.rand(1000, 2) - 0.5
+        directions /= np.sqrt((directions ** 2).sum(axis=1))[:, None]
+        self.rand_pos += directions * step_size
+
+# Create an instance of the Walker class
+walker = Walker(500)
+
+# Initial scatter plot for starting positions
+plt.figure(figsize=(15, 5))
+plt.subplot(1, 3, 1)
+plt.scatter(walker.rand_pos[:,0], walker.rand_pos[:,1], color='b', alpha=0.5)
+plt.title("After 10 Steps")
+
+plt.subplot(1, 3, 2)
+walker.move(90)
+plt.scatter(walker.rand_pos[:,0], walker.rand_pos[:,1], color='g', alpha=0.5)
+plt.title("After 100 Steps")
+
+plt.subplot(1, 3, 3)
+walker.move(400)
+plt.scatter(walker.rand_pos[:,0], walker.rand_pos[:,1], color='r', alpha=0.5)
+plt.title("After 500 Steps")
+
+plt.show()

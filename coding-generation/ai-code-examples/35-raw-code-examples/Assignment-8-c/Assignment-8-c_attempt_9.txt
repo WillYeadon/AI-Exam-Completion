@@ -1,0 +1,79 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+class Walker:
+    def __init__(self, ndim=1, step_size=1):
+        self.pos = np.zeros(ndim)
+        if ndim == 1:
+            self.steps = [[+step_size], [-step_size]]
+        elif ndim == 2:
+            self.steps = [[+step_size, 0], [-step_size, 0], [0, +step_size], [0, -step_size]]
+
+    def pickStep(self):
+        return self.steps[np.random.randint(0, len(self.steps))]
+
+    def doSteps(self, n):
+        trajectory = np.zeros((n+1, len(self.pos)))
+        trajectory[0] = self.pos
+        for i in range(1, n+1):
+            step = self.pickStep()
+            self.pos = self.pos + step
+            trajectory[i] = self.pos
+        return trajectory
+
+# Simulation of average position and average squared position
+np.random.seed(0)
+nsteps = 1000
+nwalkers = 100
+ndim_values = [1, 2, 3, 4]
+step_size = 1
+
+avg_positions = []
+avg_squared_positions = []
+
+for ndim in ndim_values:
+    positions = np.zeros((nwalkers, ndim))
+    squared_positions = np.zeros((nwalkers, ndim))
+    for i in range(nwalkers):
+        walker = Walker(ndim=ndim, step_size=step_size)
+        trajectory = walker.doSteps(nsteps)
+        positions[i] = trajectory[-1]
+        squared_positions[i] = np.sum(trajectory**2, axis=0) / len(trajectory)
+    
+    avg_positions.append(np.mean(positions, axis=0))
+    avg_squared_positions.append(np.mean(squared_positions, axis=0))
+
+# Visualization
+fig, axs = plt.subplots(2, 2, figsize=(12, 10))
+for i, ax in enumerate(axs.flat):
+    ax.plot(range(1, ndim_values[i]+1), avg_positions[i], marker='o')
+    ax.set_title(f"Avg position for {ndim_values[i]}D walkers")
+    ax.set_xlabel("Dimension")
+    ax.set_ylabel("Average Position")
+
+plt.tight_layout()
+plt.show()
+
+# Diffusion simulation
+np.random.seed(1)
+nwalkers = 1000
+rand_pos = np.random.rand(nwalkers, 2)
+
+# Initializing walkers at random positions in unit square
+walkers = [Walker(ndim=2, step_size=0.05) for _ in range(nwalkers)]
+
+# Simulating diffusion for different number of steps
+steps_to_plot = [10, 100, 500]
+for step_count in steps_to_plot:
+    positions_at_step = np.zeros((nwalkers, 2))
+    for i, walker in enumerate(walkers):
+        walker.pos = rand_pos[i]
+        trajectory = walker.doSteps(step_count)
+        positions_at_step[i] = trajectory[-1]
+
+    plt.figure()
+    plt.scatter(positions_at_step[:, 0], positions_at_step[:, 1])
+    plt.title(f"Position of Walkers after {step_count} steps")
+    plt.xlabel("X")
+    plt.ylabel("Y")
+    plt.show()

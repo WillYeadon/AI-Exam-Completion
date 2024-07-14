@@ -1,0 +1,40 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+v0 = 125  # initial velocity in m/s
+angle = 45  # launch angle in degrees
+g = 9.81  # acceleration due to gravity in m/s^2
+
+# Function to find the intersection with y=0 using linear interpolation
+def find_zero_linear(x1, x2, y1, y2):
+    return x1 - y1 * (x2 - x1) / (y2 - y1)
+
+# Function to calculate the range of the projectile
+def calculate_range(angle):
+    theta = np.radians(angle)
+    t_total = (2 * v0 * np.sin(theta)) / g
+    x_final = v0 * np.cos(theta) * t_total
+    return x_final
+
+# Given an angle, calculate the trajectory
+def calculate_trajectory(angle):
+    theta = np.radians(angle)
+    t_total = (2 * v0 * np.sin(theta)) / g
+    t = np.linspace(0, t_total, num=1000)
+    x = v0 * np.cos(theta) * t
+    y = v0 * np.sin(theta) * t - 0.5 * g * t**2
+    return x, y
+
+# Plot the trajectories
+angles = [30, 45, 60]
+plt.figure(figsize=(10, 6))
+for angle in angles:
+    x, y = calculate_trajectory(angle)
+    plt.plot(x, y, label=f'Angle = {angle} degrees')
+
+plt.xlabel('Horizontal Distance (m)')
+plt.ylabel('Vertical Distance (m)')
+plt.title('Projectile Motion Trajectories at Different Launch Angles')
+plt.legend()
+plt.grid(True)
+plt.show()

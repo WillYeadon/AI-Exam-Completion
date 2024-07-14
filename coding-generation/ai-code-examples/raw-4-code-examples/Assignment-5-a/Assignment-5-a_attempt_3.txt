@@ -1,0 +1,94 @@
+import numpy as np
+import random
+import matplotlib.pyplot as plt
+
+# Function that tells whether a transition has occurred, based on the transition probability and a random number.
+def do_transition(p):
+    r = random.random()
+    return r < p
+
+# Function that takes the current state and a list of transition rules and implements the transition
+def evolve_state(current_state, transition_rules):
+    new_state = current_state.copy()
+    for transition_rule in transition_rules:
+        src, dst, probability = transition_rule
+        for i in range(current_state[src]):
+            if do_transition(probability):
+                new_state[src] -= 1
+                new_state[dst] += 1
+    return new_state
+
+# Function that takes a list of states and transition them according to the rules passed as argument
+def evolve_multiple_states(states, transition_rules):
+    return [evolve_state(state, transition_rules) for state in states]
+
+# Function that evolves a system with given initial amounts for n_timestep and returns the counts at each step
+def evolve_system(NA, NB, NC, n_timestep, transition_rules_hourly):
+    A = [NA]
+    B = [NB]
+    C = [NC]
+    current_state = [NA, NB, NC]
+    for timestep in range(n_timestep):
+        current_state = evolve_state(current_state, transition_rules_hourly)
+        A.append(current_state[0])
+        B.append(current_state[1])
+        C.append(current_state[2])
+    return A, B, C
+
+# Function to calculate the transition probability at each timestep
+def transition_probability(half_life, timestep_duration):
+    return 1 - 2**(-timestep_duration / half_life)
+
+# Initial conditions
+NA_initial = 0
+NB_initial = 0
+NC_initial = 250
+
+# Time settings
+t_max1 = 100
+t_max2 = 100
+n_timestep1 = 200
+n_timestep2 = 200
+timestep_duration1 = t_max1 / n_timestep1
+timestep_duration2 = t_max2 / n_timestep2
+
+# Half-lives
+half_life_A = 10.1
+half_life_B = 15.7
+half_life_C_to_A = 3.2
+
+# Transition rules with neutron flux on (C -> A included)
+transitions_with_flux = [
+    (0, 1, transition_probability(half_life_A, timestep_duration1)),  # A -> B
+    (1, 2, transition_probability(half_life_B, timestep_duration1)),  # B -> C
+    (2, 0, transition_probability(half_life_C_to_A, timestep_duration1))  # C -> A
+]
+
+# Transition rules with neutron flux off (no C -> A)
+transitions_without_flux = [
+    (0, 1, transition_probability(half_life_A, timestep_duration2)),  # A -> B
+    (1, 2, transition_probability(half_life_B, timestep_duration2))  # B -> C
+]
+
+# Evolve the system for the first 100 hours with neutron flux on
+A1, B1, C1 = evolve_system(NA_initial, NB_initial, NC_initial, n_timestep1, transitions_with_flux)
+
+# Evolve the system for the next 100 hours without neutron flux
+A2, B2, C2 = evolve_system(A1[-1], B1[-1], C1[-1], n_timestep2, transitions_without_flux)
+
+# Combine the results
+A = A1 + A2[1:]
+B = B1 + B2[1:]
+C = C1 + C2[1:]
+
+# Plotting the results
+time = np.linspace(0, t_max1 + t_max2, n_timestep1 + n_timestep2 + 1)
+plt.plot(time, A, label='A')
+plt.plot(time, B, label='B')
+plt.plot(time, C, label='C')
+plt.xlabel('Time (hours)')
+plt.ylabel('Number of nuclei')
+plt.legend()
+plt.title('Number of $A$, $B$, and $C$ nuclei over time')
+plt.grid(True)
+plt.show()

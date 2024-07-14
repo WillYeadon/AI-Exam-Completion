@@ -1,0 +1,82 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Define constants
+g = 9.81  # Acceleration due to gravity (m/s^2)
+rho = 1.225  # Density of air (kg/m^3)
+Cd = 0.47  # Drag coefficient for a sphere
+r = 0.08  # Radius of the cannonball (m)
+iron_density = 7800  # Density of iron (kg/m^3)
+theta = 60  # Launch angle in degrees
+
+# Function to calculate cross-sectional area of a sphere
+def cross_sectional_area(radius):
+    return np.pi * radius**2
+
+# Function to calculate the mass of an iron sphere
+def mass(radius, density):
+    volume = 4/3 * np.pi * radius**3
+    return volume * density
+
+# Calculating area and mass of the cannonball
+A = cross_sectional_area(r)
+m = mass(r, iron_density)
+
+# Function to model cannonball's motion
+def model_motion(v0, with_air_resistance=True):
+    theta_rad = np.deg2rad(theta)
+    vx0 = v0 * np.cos(theta_rad)
+    vy0 = v0 * np.sin(theta_rad)
+    
+    dt = 0.01
+    t = 0
+    x = 0
+    y = 0
+    vx = vx0
+    vy = vy0
+    
+    x_values = [x]
+    y_values = [y]
+    
+    while y >= 0:
+        ax = -0.5 * rho * Cd * A * vx * np.abs(vx) / m if with_air_resistance else 0
+        ay = -g - (0.5 * rho * Cd * A * vy * np.abs(vy) / m) if with_air_resistance else -g
+        
+        vx += ax * dt
+        vy += ay * dt
+        x += vx * dt
+        y += vy * dt
+        
+        x_values.append(x)
+        y_values.append(y)
+        
+    return x_values, y_values
+
+# Function to find the range of the projectile
+def find_range(v0, with_air_resistance=True):
+    x_values, y_values = model_motion(v0, with_air_resistance)
+    return x_values[-1]
+
+# Stores the trajectories for different values of the initial velocity
+results = {}
+velocities = np.linspace(50, 200, 10)
+
+for v0 in velocities:
+    range_without_resistance = find_range(v0, with_air_resistance=False)
+    range_with_resistance = find_range(v0, with_air_resistance=True)
+    results[v0] = {'without_resistance': range_without_resistance, 'with_resistance': range_with_resistance}
+
+# Plotting the results
+v0_values = list(results.keys())
+ranges_without_resistance = [results[v0]['without_resistance'] for v0 in v0_values]
+ranges_with_resistance = [results[v0]['with_resistance'] for v0 in v0_values]
+
+plt.plot(v0_values, ranges_without_resistance, label='Without Air Resistance', linestyle='--')
+plt.plot(v0_values, ranges_with_resistance, label= "With Air Resistance")
+
+plt.xlabel('Initial Velocity (m/s)')
+plt.ylabel('Range (m)')
+plt.title('Effect of Initial Velocity on Projectile Range')
+plt.legend()
+plt.grid(True)
+plt.show()

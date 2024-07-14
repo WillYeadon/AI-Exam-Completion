@@ -1,0 +1,63 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+def findPi(n_points):
+    """
+    Monte Carlo estimate for pi using n_points.
+    """
+    np.random.seed(42)  # For reproducibility
+    x = np.random.uniform(-1, 1, n_points)
+    y = np.random.uniform(-1, 1, n_points)
+    
+    inside_circle = x**2 + y**2 <= 1
+    pi_estimate = 4 * np.sum(inside_circle) / n_points
+    return pi_estimate
+
+def integrate(n_points, dim):
+    """
+    Monte Carlo estimate for the volume of a unit ball in `dim` dimensions.
+    """
+    np.random.seed(42)  # For reproducibility
+    points = np.random.uniform(-1, 1, (n_points, dim))
+    
+    inside_ball = np.sum(points**2, axis=1) <= 1
+    volume_estimate = (2**dim) * np.sum(inside_ball) / n_points
+    return volume_estimate
+
+# Parameters for the task
+n_points_vals = [10**i for i in range(1, 7)]
+dimensions = [2, 3, 4, 5, 6]
+
+# Storage for errors
+errors = {dim: [] for dim in dimensions}
+
+# Calculate true volumes for unit spheres (for error calculation)
+from scipy.special import gamma
+def true_volume(dim):
+    return (np.pi**(dim/2)) / gamma((dim/2) + 1)
+
+true_volumes = {dim: true_volume(dim) for dim in dimensions}
+
+# Calculate the error for each dimension and number of points
+for dim in dimensions:
+    for n_points in n_points_vals:
+        estimated_volume = integrate(n_points, dim)
+        true_vol = true_volumes[dim]
+        error = abs(estimated_volume - true_vol)
+        errors[dim].append(error)
+
+# Plot the errors
+plt.figure(figsize=(10, 6))
+
+for dim in dimensions:
+    error_list = errors[dim]
+    plt.plot(n_points_vals, error_list, label=f'{dim}D')
+
+plt.xscale('log')
+plt.yscale('log')
+plt.xlabel('Number of Points (log scale)')
+plt.ylabel('Absolute Error (log scale)')
+plt.title('Monte Carlo Integration Error Scaling')
+plt.legend(title='Dimensions')
+plt.grid(True)
+plt.show()

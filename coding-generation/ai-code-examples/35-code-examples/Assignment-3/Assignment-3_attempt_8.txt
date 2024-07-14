@@ -1,0 +1,66 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Constants
+half_life_C14 = 5730  # years
+mean_lifetime_C14 = half_life_C14 / np.log(2)
+
+# Function to calculate mean lifetime from half-life
+def mean_lifetime(half_life):
+    return half_life / np.log(2)
+
+# Function for the radioactive decay process
+def decay(t, N0):
+    return N0 * np.exp(-t / mean_lifetime_C14)
+
+# Analytical solution of the decay equation
+def analytical_solution(t, N0):
+    return decay(t, N0)
+
+# Euler's method for solving the ODE
+def solve_euler(N0, dt, steps):
+    N = N0
+    t = 0
+    for _ in range(steps):
+        N = N - dt * N / mean_lifetime_C14
+        t += dt
+    return N
+
+# RK4 method for solving the ODE
+def solve_RK4(N0, dt, steps):
+    N = N0
+    t = 0
+    for _ in range(steps):
+        k1 = -N / mean_lifetime_C14
+        k2 = -(N + 0.5 * dt * k1) / mean_lifetime_C14
+        k3 = -(N + 0.5 * dt * k2) / mean_lifetime_C14
+        k4 = -(N + dt * k3) / mean_lifetime_C14
+        N = N + dt * (k1 + 2*k2 + 2*k3 + k4) / 6
+        t += dt
+    return N
+
+# Calculate the error for different number of steps
+N0 = 1000
+dt_values = np.array([0.1, 0.01, 0.001, 0.0001, 0.00001])
+steps_values = np.array([int(10 / dt) for dt in dt_values])
+
+errors_euler = []
+errors_RK4 = []
+
+for dt, steps in zip(dt_values, steps_values):
+    N_analytical = analytical_solution(10, N0)
+    N_euler = solve_euler(N0, dt, steps)
+    N_RK4 = solve_RK4(N0, dt, steps)
+    
+    errors_euler.append(np.abs(N_euler - N_analytical))
+    errors_RK4.append(np.abs(N_RK4 - N_analytical))
+
+# Plot the error versus the number of steps using log-log scale
+plt.figure(figsize=(10, 6))
+plt.loglog(steps_values, errors_euler, marker='o', label='Euler Method')
+plt.loglog(steps_values, errors_RK4, marker='s', label='RK4 Method')
+plt.xlabel('Number of Steps')
+plt.ylabel('Error')
+plt.title('Error Comparison in Euler and RK4 Methods')
+plt.legend()
+plt.show()

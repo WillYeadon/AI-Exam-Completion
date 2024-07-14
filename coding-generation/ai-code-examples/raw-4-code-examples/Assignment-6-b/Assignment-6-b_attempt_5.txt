@@ -1,0 +1,65 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+def findPi(n_points):
+    points = np.random.uniform(low=0.0, high=1.0, size=(n_points, 2))
+    inside_circle = np.sum(np.sum(points**2, axis=1) <= 1.0)
+    return 4 * inside_circle / n_points
+
+def integrate(dim, n_points):
+    points = np.random.uniform(low=-1.0, high=1.0, size=(n_points, dim))
+    inside_ball = np.sum(np.sum(points**2, axis=1) <= 1.0)
+    volume = (2**dim) * inside_ball / n_points
+    return volume
+
+def error_scaling(dim, n_points):
+    results = []
+    theoretical_error = []
+    for n in n_points:
+        est_volume = integrate(dim, n)
+        results.append(est_volume)
+        theoretical_error.append(1/np.sqrt(n))
+    return np.array(results), np.array(theoretical_error)
+
+def density_function(x):
+    return (1 + 2/(1 + x**2) + np.cos(np.sqrt(3 * x))**2)
+
+def genSample(npts):
+    x_vals = np.linspace(0, 10, 1000)
+    y_vals = density_function(x_vals)
+    normalization = np.trapz(y_vals, x_vals)
+    max_y = np.max(y_vals)
+
+    samples = []
+    while len(samples) < npts:
+        x = np.random.uniform(0, 10)
+        y = np.random.uniform(0, max_y)
+        if y < density_function(x) / normalization:
+            samples.append(x)
+    return np.array(samples)
+
+# Generate plot to show the values are distributed in the right manner
+HERE HERE HERE
+
+
+Now for the plotting task:
+
+
+# Generate the sample points according to the given probability density function
+npts = 10000
+samples = genSample(npts)
+
+# Generate theoretical distribution for comparison
+x_vals = np.linspace(0, 10, 1000)
+y_vals = density_function(x_vals)
+normalization = np.trapz(y_vals, x_vals)
+y_vals /= normalization
+
+# Plot histogram of generated sample and the theoretical distribution
+plt.hist(samples, bins=50, density=True, alpha=0.6, label='Generated Sample')
+plt.plot(x_vals, y_vals, '-', label='Theoretical Distribution', linewidth=2)
+plt.title('Distribution of Generated Sample According to $f(x)$')
+plt.xlabel('$x$')
+plt.ylabel('Probability Density')
+plt.legend()
+plt.show()

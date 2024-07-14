@@ -1,0 +1,42 @@
+import numpy as by
+import matplotlib.pyplot as plt
+from scipy.integrate import simps
+from numpy import cos
+
+# Function f(x) = x^2 * cos(2x)
+def f(x):
+    return x**2 * cos(2*x)
+
+# Analytical integral of f
+def analytical_integral(xmin, xmax):
+    # The analytical integral of f(x) from xmin to xmax
+    F = lambda x: 0.25*x**2 * sin(2*x) + 0.5*x*cos(2*x) + 0.25*sin(2*x)/2
+    return F(xmax) - F(xmin)
+
+# Numerical integration using Simpson's rule
+def numerical_integral(f, xmin, xmax, panels):
+    x = np.linspace(xmin, xmax, panels+1)
+    y = f(x)
+    return simps(y, x)
+
+# Investigating fractional error across varying panel counts
+panel_counts = [4, 8, 16, 32, 64, 128, 256, 512, 1024]
+frac_errors = []
+
+# Analytical result for comparison
+xmin, xmax = 0, 5
+analytical_result = analytical_integral(xmin, xmax)
+
+# Calculate errors for each panel count and store them
+for panels in panel_counts:
+    numerical_result = numerical_integral(f, xmin, xmax, panels)
+    frac_error = abs(numerical_result - analytical_result) / analytical_result
+    frac_errors.append(frac_error)
+
+# Log-log plot of fractional error vs. panel counts
+plt.loglog(panel_counts, frac_errors, marker='o', linestyle='-')
+plt.xlabel('Number of Panels')
+plt.ylabel('Fractional Error')
+plt.title('Fractional Error vs. Number of Panels in Simpson\'s Rule Integration')
+plt.grid(True, which='both', ls='--', lw=0.5)
+plt.show()

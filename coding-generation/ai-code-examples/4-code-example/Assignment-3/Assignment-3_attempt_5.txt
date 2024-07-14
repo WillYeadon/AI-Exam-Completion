@@ -1,0 +1,78 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Given half-life of Carbon-14
+half_life_C14 = 5730 # years
+
+# Define a function to calculate the mean lifetime from the half-life
+def mean_lifetime(half_life):
+    return half_life / np.log(2)
+
+# Mean lifetime of Carbon-14
+tau_C14 = mean_lifetime(half_life_C14)
+
+# Function for the radioactive decay process
+def decay_function(N0, t, tau):
+    return N0 * np.exp(-t / tau)
+
+# Analytical solution of the decay equation
+def analytical_solution(t, N0, tau):
+    return N0 * np.exp(-t / tau)
+
+# Euler's method for solving the ODE
+def solve_euler(N0, tau, t_final, n_steps):
+    dt = t_final / n_steps
+    t_values = np.linspace(0, t_final, n_steps + 1)
+    N_values = np.zeros(n_steps + 1)
+    N = N0
+    for i in range(n_steps):
+        N -= (N/tau) * dt
+        N_values[i+1] = N
+    return t_values, N_values
+
+# RK4 method for solving the ODE
+def solve_RK4(N0, tau, t_final, n_steps):
+    dt = t_final / n_steps
+    t_values = np.linspace(0, t_final, n_steps + 1)
+    N_values = np.zeros(n_steps + 1)
+    N = N0
+    for i in range(n_steps):
+        k1 = -dt * (N / tau)
+        k2 = -dt * ((N + 0.5 * k1) / tau)
+        k3 = -dt * ((N + 0.5 * k2) / tau)
+        k4 = -dt * ((N + k3) / tau)
+        N += (k1 + 2*k2 + 2*k3 + k4) / 6
+        N_values[i+1] = N
+    return t_values, N_values
+
+# Set initial parameters
+N0 = 100  # initial quantity of Carbon-14
+t_final = 20000  # simulation time in years
+
+# Create log-spaced list of n_steps values
+step_counts = np.logspace(1, 4, num=10, dtype=int)
+errors_euler = []
+errors_RK4 = []
+
+# Compute the error for Euler's and RK4's methods for each step count
+for n_steps in step_counts:
+    t_values, N_euler = solve_euler(N0, tau_C14, t_final, n_steps)
+    t_values, N_RK4 = solve_RK4(N0, tau_C14, t_final, n_steps)
+    N_analytical = analytical_solution(t_values, N0, tau_C14)
+    
+    error_euler = np.abs(N_analytical - N_euler)
+    error_RK4 = np.abs(N_analytical - N_RK4)
+    
+    errors_euler.append(np.mean(error_euler))
+    errors_RK4.append(np.mean(error_RK4))
+
+# Plots
+plt.loglog(step_counts, errors_euler, label='Euler Method', marker='o')
+plt.loglog(step_counts, errors_RK4, label='RK4 Method', marker='s')
+
+plt.legend()
+plt.xlabel('Number of steps')
+plt.ylabel('Average Error')
+plt.title('Error Comparison Between Euler and RK4 Methods')
+plt.grid(True, which="both", ls="--")
+plt.show()

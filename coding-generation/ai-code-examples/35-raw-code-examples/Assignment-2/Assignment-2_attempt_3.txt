@@ -1,0 +1,46 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Define the function f(x) = x^2*cos(2x)
+def f(x):
+    return x**2 * np.cos(2*x)
+
+# Analytically derived indefinite integral of f(x)
+# g(x) = (x^2/5)*sin(2x) - (2/5)*x*cos(2x) - (2/25)*sin(2x) + C
+def g(x):
+    return (x**2/5)*np.sin(2*x) - (2/5)*x*np.cos(2*x) - (2/25)*np.sin(2*x)
+
+# Function to calculate definite integral of f(x) over (x_min, x_max) using analytical solution
+def definite_integral_analytical(x_min, x_max):
+    return g(x_max) - g(x_min)
+
+# Function to calculate definite integral of f(x) using Simpson's rule with N panels
+def definite_integral_numerical(x_min, x_max, N):
+    h = (x_max - x_min) / N
+    x = np.linspace(x_min, x_max, N+1)
+    y = f(x)
+    
+    result = h/3 * np.sum(y[0:-1:2] + 4*y[1::2] + y[2::2])
+    
+    return result
+
+# Calculate the fractional error between analytical and numerical results
+x_min = 0
+x_max = 2*np.pi
+N_values = np.array([4, 8, 16, 32, 64, 128, 256, 512, 1024])
+fractional_errors = []
+
+for N in N_values:
+    analytical_result = definite_integral_analytical(x_min, x_max)
+    numerical_result = definite_integral_numerical(x_min, x_max, N)
+    fractional_error = np.abs((analytical_result - numerical_result) / analytical_result)
+    fractional_errors.append(fractional_error)
+
+# Plotting the fractional error vs number of panels
+plt.figure(figsize=(10, 6))
+plt.loglog(N_values, fractional_errors, marker='o', color='b', linestyle='-', linewidth=2)
+plt.title('Fractional Error of Numerical Integration using Simpson\'s Rule')
+plt.xlabel('Number of Panels (N)')
+plt.ylabel('Fractional Error')
+plt.grid(True, which="both", ls="--")
+plt.show()

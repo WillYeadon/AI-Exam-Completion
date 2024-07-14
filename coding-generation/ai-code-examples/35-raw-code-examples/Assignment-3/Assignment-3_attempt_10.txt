@@ -1,0 +1,72 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Script
+
+# Constants
+TAU = 5.0
+
+def f_rad(N, t):
+    return -N / TAU
+
+# Function to calculate the mean lifetime from the half-life
+def calculate_mean_lifetime(half_life):
+    return half_life / np.log(2)
+
+# Mean lifetime for the given half-life of TAU
+mean_lifetime = calculate_mean_lifetime(TAU)
+print("Mean lifetime:", mean_lifetime)
+
+# Implementing the analytic solution
+def analytic(N0, t):
+    return N0 * np.exp(-t / TAU)
+
+# Euler method
+def solve_euler(N0, t0, dt, n_steps):
+    counts = [N0]
+    N = N0
+    t = t0
+    for _ in range(n_steps):
+        N = N + dt * f_rad(N, t)
+        t += dt
+        counts.append(N)
+    return np.array(counts)
+
+# Runge-Kutta 4th order method
+def solve_RK4(N0, t0, dt, n_steps):
+    counts = [N0]
+    N = N0
+    t = t0
+    for _ in range(n_steps):
+        k1 = f_rad(N, t)
+        k2 = f_rad(N + 0.5*dt*k1, t + 0.5*dt)
+        k3 = f_rad(N + 0.5*dt*k2, t + 0.5*dt)
+        k4 = f_rad(N + dt*k3, t + dt)
+
+        N = N + dt/6 * (k1 + 2*k2 + 2*k3 + k4)
+        t += dt
+        counts.append(N)
+    return np.array(counts)
+
+# Plot to compare Euler and RK4 methods
+n0 = 1000
+t0 = 0
+dt = 0.1
+n_steps = 100
+
+steps = np.arange(n_steps+1)
+
+counts_euler = solve_euler(n0, t0, dt, n_steps)
+counts_RK4 = solve_RK4(n0, t0, dt, n_steps)
+counts_analytic = analytic(n0, steps*dt)
+
+plt.figure(figsize=(12, 6))
+plt.plot(steps, counts_euler, label='Euler Method')
+plt.plot(steps, counts_RK4, label='RK4 Method')
+plt.plot(steps, counts_analytic, label='Analytic Solution', linestyle='--')
+plt.xlabel('Number of Steps')
+plt.ylabel('Number of Nuclei')
+plt.title('Comparison of Euler and RK4 Methods')
+plt.legend()
+plt.grid(True)
+plt.show()

@@ -1,0 +1,72 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Function to calculate mean lifetime from half-life
+def mean_lifetime(half_life):
+    return half_life / np.log(2)
+
+half_life_C14 = 5730  # Half-life of Carbon-14 in years
+mean_lifetime_C14 = mean_lifetime(half_life_C14)
+
+# Function for radioactive decay process
+def decay(t, N0, tau):
+    return N0 * np.exp(-t / tau)
+
+# Analytical solution of the decay equation
+def analytical_solution(t, N0, tau):
+    return decay(t, N0, tau)
+
+# Euler's method for solving the ODE
+def solve_euler(N0, tau, dt, steps):
+    N = np.zeros(steps+1)
+    N[0] = N0
+    for i in range(1, steps+1):
+        N[i] = N[i-1] - (N[i-1] / tau) * dt
+    return N
+
+# RK4 method for solving the ODE
+def solve_RK4(N0, tau, dt, steps):
+    N = np.zeros(steps+1)
+    N[0] = N0
+    for i in range(1, steps+1):
+        k1 = -N[i-1] / tau
+        k2 = -(N[i-1] + 0.5*k1*dt) / tau
+        k3 = -(N[i-1] + 0.5*k2*dt) / tau
+        k4 = -(N[i-1] + k3*dt) / tau
+        N[i] = N[i-1] + (k1 + 2*k2 + 2*k3 + k4) * dt / 6
+    return N
+
+# Parameters
+N0 = 1.0  # Initial number of particles
+tau = mean_lifetime_C14  # Mean lifetime of Carbon-14
+t_max = 10 * mean_lifetime_C14  # Maximum time in years
+steps = [10, 50, 100, 500, 1000, 5000]  # Different number of steps
+
+# Calculate analytical solution
+t_analytical = np.linspace(0, t_max, 1000)
+N_analytical = analytical_solution(t_analytical, N0, tau)
+
+# Calculate errors for Euler's method and RK4 method
+errors_euler = []
+errors_RK4 = []
+for step in steps:
+    dt = t_max / step
+    t_values = np.linspace(0, t_max, step+1)
+    
+    N_euler = solve_euler(N0, tau, dt, step)
+    N_RK4 = solve_RK4(N0, tau, dt, step)
+    
+    errors_euler.append(np.abs(N_euler - analytical_solution(t_values, N0, tau)))
+    errors_RK4.append(np.abs(N_RK4 - analytical_solution(t_values, N0, tau)))
+
+# Plotting errors versus number of steps on log-log scale
+plt.figure(figsize=(10, 6))
+for i in range(len(steps)):
+    plt.loglog(t_values, errors_euler[i], label='Euler - {} steps'.format(steps[i]))
+    plt.loglog(t_values, errors_RK4[i], label='RK4 - {} steps'.format(steps[i]))
+
+plt.xlabel('Time')
+plt.ylabel('Error')
+plt.title('Error Comparison of Euler and RK4 Methods')
+plt.legend()
+plt.show()

@@ -1,0 +1,30 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Define the Walker class
+class Walker:
+    def __init__(self):
+        self.position = np.random.rand(2)  # Generate random initial positions for the walker
+
+# Initialize 1000 walkers
+num_walkers = 1000
+walkers = [Walker() for _ in range(num_walkers)]
+
+# Plot the initial positions of the walkers
+plt.figure(figsize=(18, 6))
+plt.subplot(1, 3, 1)
+plt.scatter([walker.position[0] for walker in walkers], [walker.position[1] for walker in walkers], alpha=0.6, label='0 steps')
+plt.title('Walker Positions after 0 Steps')
+
+# Simulate the movement of walkers
+for i in range(1, 501):
+    for walker in walkers:
+        step = 0.05 * np.random.randn(2)  # Generate random steps for the walker
+        walker.position = np.clip(walker.position + step, 0, 1)  # Ensure the walker stays within the unit square
+        
+    if i == 10 or i == 100 or i == 500:
+        plt.subplot(1, 3, [10, 100, 500].index(i)+1)
+        plt.scatter([walker.position[0] for walker in walkers], [walker.position[1] for walker in walkers], alpha=0.6, label=f'{i} steps')
+        plt.title(f'Walker Positions after {i} Steps')
+
+plt.show()

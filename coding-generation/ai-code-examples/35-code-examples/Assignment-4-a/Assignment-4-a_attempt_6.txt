@@ -1,0 +1,70 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Constants
+g = 9.81  # acceleration due to gravity in m/s^2
+rho = 1.225  # air density in kg/m^3
+r = 0.105  # radius of the cannonball in meters
+
+# Function to calculate cross-sectional area of a sphere
+def calculate_cross_sectional_area(radius):
+    return np.pi * radius**2
+
+# Function to calculate the mass of an iron sphere
+def calculate_mass(radius):
+    return (4/3) * np.pi * radius**3 * 7850  # density of iron is 7850 kg/m^3
+
+# Calculating area and mass of the cannonball
+A = calculate_cross_sectional_area(r)
+m = calculate_mass(r)
+
+# Function to model cannonball's motion
+def projectile_motion(t, u):
+    v_x = u[0]
+    v_y = u[1]
+    dv_x = -np.pi * rho * r**2 * v_x * np.sqrt(v_x**2 + v_y**2) / (2 * m)
+    dv_y = -g - np.pi * rho * r**2 * v_y * np.sqrt(v_x**2 + v_y**2) / (2 * m)
+    return np.array([dv_x, dv_y])
+
+# Euler's method for solving the ODE
+def solve_euler(velocity, theta):
+    dt = 0.01
+    x = [0]
+    y = [0]
+    u = np.array([velocity*np.cos(np.deg2rad(theta)), velocity*np.sin(np.deg2rad(theta))])
+
+    while y[-1] >= 0:
+        u = u + dt * projectile_motion(x[-1], u)
+        x.append(x[-1] + dt)
+        y.append(u[1])
+
+    return x, y
+
+# Function to find the x-coordinate where the trajectory crosses y=0
+def find_range(x, y):
+    return x[-1]
+
+# Function to find the range of the projectile
+def find_trajectory(velocity, angles):
+    ranges = []
+
+    for angle in angles:
+        x, y = solve_euler(velocity, angle)
+        range_val = find_range(x, y)
+        ranges.append(range_val)
+        plt.plot(x, y, label=f'{angle} degrees')
+
+    plt.xlabel('Distance (m)')
+    plt.ylabel('Height (m)')
+    plt.title(f'Projectile Motion for Different Launch Angles at v0 = {velocity} m/s')
+    plt.legend()
+    plt.grid(True)
+
+# ::: Task :::
+# Visualize trajectories for various initial angles using projectile motion
+# Plot the trajectories for different values of the initial angle, maintaining a constant velocity of v0 = 125 m/s for all angles
+# Ensure the plot includes axis labels and a descriptive title
+
+find_trajectory(125, [30, 45, 60, 75, 90])
+
+plt.show()

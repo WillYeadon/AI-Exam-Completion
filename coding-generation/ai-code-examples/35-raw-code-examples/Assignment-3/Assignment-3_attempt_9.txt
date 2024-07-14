@@ -1,0 +1,59 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Script
+
+TAU = 5.0 # half-life in years
+
+def f_rad(N, t):
+    return -N / TAU
+
+# Task
+
+def analytic(N0, t):
+    return N0 * np.exp(-t / TAU)
+
+def solve_euler(n0, t0, dt, n_steps):
+    counts = [n0]
+    N = n0
+    for _ in range(n_steps):
+        N += f_rad(N, t0) * dt
+        counts.append(N)
+        t0 += dt
+    return counts
+
+def solve_RK4(n0, t0, dt, n_steps):
+    counts = [n0]
+    N = n0
+    for _ in range(n_steps):
+        k1 = f_rad(N, t0)
+        k2 = f_rad(N + 0.5 * k1 * dt, t0 + 0.5 * dt)
+        k3 = f_rad(N + 0.5 * k2 * dt, t0 + 0.5 * dt)
+        k4 = f_rad(N + k3 * dt, t0 + dt)
+        N += (k1 + 2*k2 + 2*k3 + k4) * dt / 6
+        counts.append(N)
+        t0 += dt
+    return counts
+
+# Create a plot to show that the RK4 method has an error that scales better with the number of steps than the Euler method
+
+n0 = 1000
+t0 = 0
+dt = 0.1
+n_steps = 100
+
+euler_counts = solve_euler(n0, t0, dt, n_steps)
+RK4_counts = solve_RK4(n0, t0, dt, n_steps)
+exact_counts = [analytic(n0, t0 + i * dt) for i in range(n_steps + 1)]
+time = np.linspace(t0, t0 + n_steps * dt, n_steps + 1)
+
+plt.figure(figsize=(10, 6))
+plt.plot(time, euler_counts, label='Euler Method')
+plt.plot(time, RK4_counts, label='RK4 Method')
+plt.plot(time, exact_counts, label='Exact Solution', linestyle='dashed')
+plt.title('Comparison of Euler and RK4 Methods for Radioactive Decay')
+plt.xlabel('Time (years)')
+plt.ylabel('Number of Nuclei')
+plt.legend()
+plt.grid(True)
+plt.show()

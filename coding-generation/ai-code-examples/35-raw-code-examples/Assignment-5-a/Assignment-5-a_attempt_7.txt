@@ -1,0 +1,69 @@
+import numpy as np
+import random
+import matplotlib.pyplot as plt
+
+def prob_transition(prob):
+    r = random.random()
+    if r < prob:
+        return True
+    else:
+        return False
+
+def apply_transition(current_state, rules):
+    new_state = current_state.copy()
+    for rule in rules:
+        if rule[0] == current_state and prob_transition(rule[2]):
+            new_state = rule[1]
+    return new_state
+
+def evolve_system(initial_state, rules, n_timesteps):
+    state_evolution = [initial_state]
+    current_state = initial_state
+    for _ in range(n_timesteps):
+        new_state = apply_transition(current_state, rules)
+        state_evolution.append(new_state)
+        current_state = new_state
+    return state_evolution
+
+# Testing the functions
+initial_state = 'C'
+rules = [('C', 'A', 1/2.**3.2), ('A', 'B', 1/2.**10.1), ('B', 'C', 1/2.**15.7)]
+n_timesteps = 5
+evolution = evolve_system(initial_state, rules, n_timesteps)
+print(evolution)  # Just a test, should print the evolution of the system
+
+# Now let's move to the Task
+
+# Parameters
+initial_state = 'C'
+rules = [('C', 'A', 1/2.**3.2), ('A', 'B', 1/2.**10.1), ('B', 'C', 1/2.**15.7)]
+n_timesteps = 200
+n_timesteps_no_flux = 200
+
+# Evolve the system
+evolution_with_flux = evolve_system(initial_state, rules, n_timesteps)
+
+# Modify the rules to remove the transition from C to A
+rules_no_flux = [('A', 'B', 1/2.**10.1), ('B', 'C', 1/2.**15.7)]
+
+# Evolve the system without flux
+evolution_no_flux = evolve_system(evolution_with_flux[-1], rules_no_flux, n_timesteps_no_flux)
+
+# Create arrays for plotting
+time_steps = np.linspace(0, 100, n_timesteps+1)
+time_steps_no_flux = np.linspace(100, 200, n_timesteps_no_flux+1)
+
+# Plotting
+plt.figure(figsize=(10, 6))
+plt.plot(time_steps, [evolution.count('A') for evolution in evolution_with_flux], label='A nuclei with flux', color='blue')
+plt.plot(time_steps, [evolution.count('B') for evolution in evolution_with_flux], label='B nuclei with flux', color='red')
+plt.plot(time_steps, [evolution.count('C') for evolution in evolution_with_flux], label='C nuclei with flux', color='green')
+plt.plot(time_steps_no_flux, [evolution.count('A') for evolution in evolution_no_flux], linestyle='--', label='A nuclei without flux', color='blue')
+plt.plot(time_steps_no_flux, [evolution.count('B') for evolution in evolution_no_flux], linestyle='--', label='B nuclei without flux', color='red')
+plt.plot(time_steps_no_flux, [evolution.count('C') for evolution in evolution_no_flux], linestyle='--', label='C nuclei without flux', color='green')
+plt.xlabel('Time (hours)')
+plt.ylabel('Number of Nuclei')
+plt.title('Evolution of Nuclei over Time')
+plt.legend()
+plt.grid(True)
+plt.show()

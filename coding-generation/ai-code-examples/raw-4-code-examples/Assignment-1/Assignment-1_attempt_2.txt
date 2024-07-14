@@ -1,0 +1,64 @@
+import the required modules:
+
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+
+Next, let's define the function `f` that is equivalent to \( f(x) = \sin(2x) \):
+
+
+def f(x):
+    return np.sin(2 * x)
+
+
+Now, let's define the analytical derivative of the function `f`. The derivative of \( \sin(2x) \) is \( 2\cos(2x) \):
+
+
+def f_prime_analytic(x):
+    return 2 * np.cos(2 * x)
+
+
+We then implement the forward difference method to numerically calculate the derivative:
+
+
+def forward_difference(f, x, dx):
+    return (f(x + dx) - f(x)) / dx
+
+
+Finally, we will plot the difference between the analytical derivative and the numerical derivative for different values of `dx`:
+
+
+# Define the range of x values
+x_values = np.linspace(0, 2 * np.pi, 400)
+
+# Define different step sizes for dx
+dx_too_large = 0.1
+dx_about_right = 0.01
+dx_too_small = 0.0001
+
+# Calculate the analytical derivatives
+analytic_derivatives = f_prime_analytic(x_values)
+
+# Calculate the numerical derivatives for different dx
+numerical_derivatives_large = forward_difference(f, x_values, dx_too_large)
+numerical_derivatives_right = forward_difference(f, x_values, dx_about_right)
+numerical_derivatives_small = forward_difference(f, x_values, dx_too_small)
+
+# Calculate the differences
+difference_large = np.abs(analytic_derivatives - numerical_derivatives_large)
+difference_right = np.abs(analytic_derivatives - numerical_derivatives_right)
+difference_small = np.abs(analytic_derivatives - numerical_derivatives_small)
+
+# Plot the differences
+plt.figure(figsize=(10, 6))
+plt.plot(x_values, difference_large, label=f'dx too large ({dx_too_large})')
+plt.plot(x_values, difference_right, label=f'dx about right ({dx_about_right})')
+plt.plot(x_values, difference_small, label=f'dx too small ({dx_too_small})')
+
+plt.xlabel('x value')
+plt.ylabel('Difference')
+plt.title('Difference between Analytical and Numerical Derivatives')
+plt.legend()
+plt.grid(True)
+plt.show()

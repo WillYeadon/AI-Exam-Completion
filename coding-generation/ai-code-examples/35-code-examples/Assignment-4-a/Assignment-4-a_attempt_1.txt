@@ -1,0 +1,72 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Constants
+g = 9.81  # acceleration due to gravity in m/s^2
+rho = 1.22  # density of air in kg/m^3
+r = 0.105  # radius of the cannonball in meters
+v0 = 125  # initial velocity in m/s
+
+# Function to calculate cross-sectional area of a sphere
+def cross_area(radius):
+    return np.pi * radius**2
+
+# Function to calculate the mass of an iron sphere
+def sphere_mass(radius):
+    return (4/3) * np.pi * radius**3 * 7850
+
+# Calculate area and mass of the cannonball
+A = cross_area(r)
+M = sphere_mass(r)
+
+# Function to model cannonball's motion
+def projectile_motion(t, y):
+    vy = y[0]
+    ay = -g - (0.5 * rho * A * vy * abs(vy) / M)
+    return np.array([ay])
+
+# Euler's method for solving the ODE
+def solve_euler(func, y0, t):
+    y = np.zeros((len(t), len(y0)))
+    y[0] = y0
+    for i in range(1, len(t)):
+        dt = t[i] - t[i-1]
+        y[i] = y[i-1] + func(t[i-1], y[i-1]) * dt
+    return y
+
+# Function to find the x-coordinate where the trajectory crosses y=0
+def find_range(x, y):
+    for i in range(len(y)):
+        if y[i] < 0:
+            return x[i]
+    return x[-1]
+
+# Function to find the range of the projectile
+def plot_trajectory(theta):
+    theta_rad = np.deg2rad(theta)
+    vx0 = v0 * np.cos(theta_rad)
+    vy0 = v0 * np.sin(theta_rad)
+    
+    total_time = (2 * vy0) / g
+    time = np.linspace(0, total_time, num=1000)
+    
+    y0 = np.array([vy0])
+    solution = solve_euler(projectile_motion, y0, time)
+    
+    x = v0 * np.cos(theta_rad) * time
+    y = solution[:, 0]
+    
+    plt.plot(x, y, label=f'{theta} degrees')
+
+# Plotting trajectories for different initial angles
+plt.figure(figsize=(12, 8))
+angles = [30, 45, 60, 75]
+for angle in angles:
+    plot_trajectory(angle)
+
+plt.title("Projectile Motion Trajectories for Different Initial Angles")
+plt.xlabel("Horizontal Distance (m)")
+plt.ylabel("Vertical Distance (m)")
+plt.legend()
+plt.grid(True)
+plt.show()

@@ -1,0 +1,37 @@
+import math
+
+# Constants
+g = 9.81  # acceleration due to gravity in m/s^2
+v0 = 125  # initial velocity in m/s
+theta = 30  # launch angle in degrees
+
+# Initial conditions
+x = 0
+y = 0
+theta_rad = math.radians(theta)
+vx = v0 * math.cos(theta_rad)
+vy = v0 * math.sin(theta_rad)
+t = 0
+dt = 0.01
+
+# Lists to store the trajectory
+x_values = [x]
+y_values = [y]
+
+# Projectile motion simulation
+while y >= 0:
+    x = x + vx * dt
+    y = y + vy * dt
+    vy = vy - g * dt
+    t = t + dt
+    x_values.append(x)
+    y_values.append(y)
+
+# Range calculation
+range_value = x_values[-2]  # last positive y value before hitting the ground  
+
+print(f"Range of the projectile: {range_value} meters")
+
+
+::: Task :::
+Create a plot to show the trajectories for different values of the initial angle. Use the same velocity $v_0=125\rm{m/s}$ for all angles. The plot should have axis labels and a title

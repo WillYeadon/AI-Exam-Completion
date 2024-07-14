@@ -1,0 +1,5 @@
+The script provided describes a radioactive decay process and asks to solve the differential equation using Euler's method and RK4 method. The goal is to create a plot to show that the RK4 method has an error that scales better with the number of steps than the Euler method.
+
+Let's start by defining a function to calculate the mean lifetime from the half-life and implementing the radioactive decay differential equation using the constant TAU. Next, we will solve the differential equation analytically in the `analytic` function. After that, we will implement the Euler method to numerically solve the differential equation. Finally, we will implement the RK4 method and create a plot to compare the errors of both methods.
+
+Let's start by defining the function to calculate the mean lifetime

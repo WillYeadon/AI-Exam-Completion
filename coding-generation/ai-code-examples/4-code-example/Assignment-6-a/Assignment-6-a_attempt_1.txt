@@ -1,0 +1,51 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+def monte_carlo_pi(n_points):
+    inside_circle = 0
+    for _ in range(n_points):
+        x, y = np.random.uniform(-1, 1, 2)
+        if x**2 + y**2 <= 1:
+            inside_circle += 1
+    return 4 * inside_circle / n_points
+
+def monte_carlo_volume(dim, n_points):
+    inside_ball = 0
+    for _ in range(n_points):
+        point = np.random.uniform(-1, 1, dim)
+        if np.sum(point**2) <= 1:
+            inside_ball += 1
+    return (2**dim) * inside_ball / n_points
+
+def calculate_exact_volume(dim):
+    if dim % 2 == 0:
+        k = dim // 2
+        return (np.pi**k) / np.math.factorial(k)
+    else:
+        k = (dim-1) // 2
+        return (2**dim * (np.pi**k) * np.math.factorial(k)) / np.math.factorial(dim)
+
+# Dimensions to use
+dimensions = [3, 5, 7, 9]
+n_points_list = np.logspace(2, 5, 10).astype(int)
+
+plt.figure(figsize=(10, 8))
+
+for dim in dimensions:
+    errors = []
+    exact_volume = calculate_exact_volume(dim)
+    for n_points in n_points_list:
+        estimated_volume = monte_carlo_volume(dim, n_points)
+        error = abs(estimated_volume - exact_volume)
+        errors.append(error)
+    plt.plot(n_points_list, errors, label=f'Dimension {dim}', marker='o')
+
+# Plot decoration
+plt.xscale('log')
+plt.yscale('log')
+plt.xlabel('Number of Points (N)')
+plt.ylabel('Integration Error')
+plt.title('Integration Error Scaling with Number of Points')
+plt.legend()
+plt.grid(True)
+plt.show()

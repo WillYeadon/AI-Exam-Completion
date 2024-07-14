@@ -1,0 +1,81 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+def f(x):
+    return np.exp(x) - x - 2
+
+def f_prime(x):
+    return np.exp(x) - 1
+
+def NewtonRaphson(f, f_prime, x0, tol=1e-6, max_iter=1000):
+    iterations = 0
+    error = tol + 1
+    x = x0
+    errors = []
+    
+    while error > tol and iterations < max_iter:
+        x_new = x - f(x) / f_prime(x)
+        error = np.abs(x_new - x)
+        errors.append(error)
+        x = x_new
+        iterations += 1
+    
+    return iterations, errors
+
+def secant(f, x0, x1, tol=1e-6, max_iter=1000):
+    iterations = 0
+    error = tol + 1
+    errors = []
+    
+    while error > tol and iterations < max_iter:
+        x_new = x1 - f(x1) * (x1 - x0) / (f(x1) - f(x0))
+        error = np.abs(x_new - x1)
+        errors.append(error)
+        x0 = x1
+        x1 = x_new
+        iterations += 1
+    
+    return iterations, errors
+
+def bisect(f, a, b, tol=1e-6, max_iter=1000):
+    iterations = 0
+    error = tol + 1
+    errors = []
+    
+    if f(a) * f(b) >= 0:
+        return "Error: f(a) and f(b) should have opposite signs"
+    
+    while error > tol and iterations < max_iter:
+        c = (a + b) / 2
+        if f(c) == 0:
+            break
+        elif f(a) * f(c) < 0:
+            b = c
+        else:
+            a = c
+        error = (b - a) / 2
+        errors.append(error)
+        iterations += 1
+    
+    return iterations, errors
+
+# Define the target roots
+root1 = 0.9575040240772687
+root2 = 0
+
+# Initialize iteration counters and errors for each method
+iter_newton, errors_newton = NewtonRaphson(f, f_prime, 1)
+iter_secant, errors_secant = secant(f, 1, 2)
+iter_bisect, errors_bisect = bisect(f, -2, 2)
+
+# Plotting convergence of the three methods
+plt.figure(figsize=(10, 6))
+plt.plot(range(iter_newton), errors_newton, label='Newton-Raphson', color='blue')
+plt.plot(range(iter_secant), errors_secant, label='Secant', color='red')
+plt.plot(range(iter_bisect), errors_bisect, label='Bisection', color='green')
+plt.yscale('log')
+plt.xlabel('Iterations')
+plt.ylabel('Error')
+plt.title('Convergence of Root-Finding Methods')
+plt.legend()
+plt.show()

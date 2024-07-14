@@ -1,0 +1,83 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Function definition
+def f(x):
+    return x - np.tanh(2*x)
+
+# Derivative of the function
+def f_prime(x):
+    return 1 - 2*np.cosh(2*x)**(-2)
+
+# Newton-Raphson method
+def newton_raphson(x0, tol, max_iter):
+    x = x0
+    n_iter = 0
+    while n_iter < max_iter:
+        x_new = x - f(x) / f_prime(x)
+        if abs(x_new - x) < tol:
+            return x_new, n_iter
+        x = x_new
+        n_iter += 1
+    return None, max_iter
+
+# Bisection method
+def bisection(a, b, tol, max_iter):
+    n_iter = 0
+    while n_iter < max_iter:
+        c = (a + b) / 2
+        if f(c) == 0 or (b - a) / 2 < tol:
+            return c, n_iter
+        if np.sign(f(c)) == np.sign(f(a)):
+            a = c
+        else:
+            b = c
+        n_iter += 1
+    return None, max_iter
+
+# Secant method
+def secant(x0, x1, tol, max_iter):
+    n_iter = 0
+    while n_iter < max_iter:
+        x_new = x1 - f(x1) * (x1 - x0) / (f(x1) - f(x0))
+        if abs(x_new - x1) < tol:
+            return x_new, n_iter
+        x0 = x1
+        x1 = x_new
+        n_iter += 1
+    return None, max_iter
+
+# Initial values
+x0 = 0.5
+x1 = 1.0
+a = -1
+b = 1
+tol = 1e-8
+max_iter = 100
+
+# Lists to store iteration values
+newton_iters = []
+secant_iters = []
+bisection_iters = []
+
+# Perform iterations
+for i in range(2, 100):
+    x_root_newton, iter_newton = newton_raphson(i, tol, max_iter)
+    x_root_secant, iter_secant = secant(i-1, i, tol, max_iter)
+    x_root_bisection, iter_bisection = bisection(a, b, tol, max_iter)
+
+    newton_iters.append(iter_newton)
+    secant_iters.append(iter_secant)
+    bisection_iters.append(iter_bisection)
+
+# Plotting the convergence comparison
+plt.figure(figsize=(10, 6))
+plt.plot(newton_iters, label='Newton-Raphson')
+plt.plot(secant_iters, label='Secant')
+plt.plot(bisection_iters, label='Bisection')
+plt.xlabel('Iterations', fontsize=14)
+plt.ylabel('Number of Iterations', fontsize=14)
+plt.title('Convergence of Different Root Finding Methods', fontsize=16)
+plt.legend()
+plt.grid(True)
+plt.show()

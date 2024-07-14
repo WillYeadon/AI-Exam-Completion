@@ -1,0 +1,58 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Define the Rosenbrock's banana function
+def banana(r):
+    x, y = r
+    return (1 - x) ** 2 + 100 * (y - x ** 2) ** 2
+
+# Define the gradient of the banana function
+def banana_grad(r):
+    x, y = r
+    dfdx = -2 * (1 - x) - 400 * x * (y - x**2)
+    dfdy = 200 * (y - x**2)
+    return np.array([dfdx, dfdy])
+
+# Gradient descent algorithm
+def gradient_descent(r0, eta, max_iter=10000, tol=1e-6):
+    r = np.array(r0)
+    path = [r]
+    for _ in range(max_iter):
+        grad = banana_grad(r)
+        new_r = r - eta * grad
+        path.append(new_r)
+        if np.linalg.norm(new_r - r) < tol:
+            break
+        r = new_r
+    return np.array(path)
+
+# Grid parameters
+x = np.linspace(-2, 2, 400)
+y = np.linspace(-1, 3, 400)
+X, Y = np.meshgrid(x, y)
+
+# Compute the values of the banana function on the grid
+Z = banana(np.array([X, Y]))
+
+# Initialize starting point
+r0 = [0.2, 1]
+
+# Different step sizes (etas)
+etas = [0.0005, 0.001, 0.003]
+
+# Plot the banana function and gradient descent paths
+plt.figure(figsize=(10, 8))
+plt.contourf(X, Y, Z, levels=np.logspace(-1, 3, 20), cmap='viridis')
+plt.colorbar()
+
+# Plot gradient descent paths for different step sizes
+for eta in etas:
+    path = gradient_descent(r0, eta)
+    plt.plot(path[:, 0], path[:, 1], marker='o', label=f'eta={eta}')
+
+# Labels and title
+plt.title('Gradient Descent Paths on Rosenbrock\'s Banana Function')
+plt.xlabel('x')
+plt.ylabel('y')
+plt.legend()
+plt.show()

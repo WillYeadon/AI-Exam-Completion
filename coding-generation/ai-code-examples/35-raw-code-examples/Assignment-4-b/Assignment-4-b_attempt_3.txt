@@ -1,0 +1,66 @@
+import numpy as np
+
+# Constants
+g = 9.81  # acceleration due to gravity in m/s^2
+theta = 60  # launch angle in degrees
+theta_rad = np.radians(theta)  # convert angle to radians
+v0 = 125  # initial velocity in m/s
+v0_x = v0 * np.cos(theta_rad)  # initial velocity in x direction
+v0_y = v0 * np.sin(theta_rad)  # initial velocity in y direction
+delta_t = 0.001  # time step for simulation
+
+def find_zero_linear(x1, x2, y1, y2):
+    m = (y2 - y1) / (x2 - x1)
+    x = x1 - y1 / m
+    return x
+
+def projectile_motion_air_resistance(v0, theta, delta_t):
+    x_values = [0]
+    y_values = [0]
+    vx = v0 * np.cos(np.radians(theta))
+    vy = v0 * np.sin(np.radians(theta))
+    
+    while y_values[-1] >= 0:
+        x = x_values[-1] + vx * delta_t
+        y = y_values[-1] + vy * delta_t
+        vx = vx
+        vy = vy - g * delta_t
+        
+        x_values.append(x)
+        y_values.append(y)
+    
+    x_intersect = find_zero_linear(x_values[-2], x_values[-1], y_values[-2], y_values[-1])
+    return x_intersect
+
+def projectile_motion_no_air_resistance(v0, theta):
+    range_no_air = (v0**2 * np.sin(2*np.radians(theta))) / g
+    return range_no_air
+
+
+### Task
+
+
+import matplotlib.pyplot as plt
+
+# Initial velocity values to test
+v0_values = np.linspace(50, 150, 100)
+ranges_air_resistance = []
+ranges_no_air_resistance = []
+
+for v in v0_values:
+    range_air = projectile_motion_air_resistance(v, theta, delta_t)
+    range_no_air = projectile_motion_no_air_resistance(v, theta)
+    
+    ranges_air_resistance.append(range_air)
+    ranges_no_air_resistance.append(range_no_air)
+
+# Plotting
+plt.figure(figsize=(10, 6))
+plt.plot(v0_values, ranges_air_resistance, label='With Air Resistance')
+plt.plot(v0_values, ranges_no_air_resistance, label='No Air Resistance')
+plt.xlabel('Initial Velocity (m/s)')
+plt.ylabel('Range (m)')
+plt.title('Projectile Range with and without Air Resistance')
+plt.legend()
+plt.grid(True)
+plt.show()

@@ -1,0 +1,42 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Define the function f(x) = sin(2x)
+def f(x):
+    return np.sin(2*x)
+
+# Define the analytical derivative of f
+def f_prime(x):
+    return 2*np.cos(2*x)
+
+# Implement the forward difference method for numerical differentiation
+def numerical_derivative(f, x, dx):
+    return (f(x+dx) - f(x)) / dx
+
+# Define the range of x values
+x = np.linspace(0, 2*np.pi, 100)
+
+# Calculate the analytical derivative
+f_prime_analytical = f_prime(x)
+
+# Initialize lists to store numerical derivative results for different dx values
+dx_values = [0.1, 0.01, 0.001]
+f_prime_numerical = []
+
+# Calculate numerical derivatives for different dx values
+for dx in dx_values:
+    f_prime_numerical.append(numerical_derivative(f, x, dx))
+
+# Create the plot
+plt.figure(figsize=(10, 6))
+plt.plot(x, f_prime_analytical, label='Analytical Derivative', color='blue')
+colors = ['red', 'green', 'purple']
+for i in range(len(dx_values)):
+    plt.plot(x, f_prime_numerical[i], label='Numerical Derivative (dx={})'.format(dx_values[i]), color=colors[i], linestyle='--')
+plt.legend()
+plt.xlabel('x')
+plt.ylabel('Derivative')
+plt.title('Analytical vs. Numerical Derivative of f(x) = sin(2x)')
+plt.grid(True)
+
+plt.show()

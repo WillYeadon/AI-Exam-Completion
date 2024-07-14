@@ -1,0 +1,80 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Define transition probabilities
+def decay_probability(t_half):
+    return 1 - np.exp(-np.log(2) / t_half)
+
+p_A_decay = decay_probability(10.1)  # decay probability of A
+p_B_decay = decay_probability(15.7)  # decay probability of B
+p_C_to_A_flux_on = decay_probability(3.2)  # activation probability C to A when neutron flux is on
+p_C_to_A_flux_off = 0.0  # activation probability C to A when neutron flux is off
+
+# Define transition rules with and without neutron flux
+def transition_step(states, p_A, p_B, p_C):
+    new_states = {'A': 0, 'B': 0, 'C': 0}
+    
+    for _ in range(states['A']):
+        if np.random.rand() < p_A:
+            new_states['B'] += 1
+        else:
+            new_states['A'] += 1
+    
+    for _ in range(states['B']):
+        if np.random.rand() < p_B:
+            new_states['C'] += 1
+        else:
+            new_states['B'] += 1
+    
+    for _ in range(states['C']):
+        if np.random.rand() < p_C:
+            new_states['A'] += 1
+        else:
+            new_states['C'] += 1
+    
+    return new_states
+
+def evolve_system(states, p_A, p_B, p_C, n_steps):
+    result = {'A': [], 'B': [], 'C': []}
+    
+    for _ in range(n_steps):
+        states = transition_step(states, p_A, p_B, p_C)
+        for key in states:
+            result[key].append(states[key])
+    
+    return result
+
+def simulation():
+    n_steps = 200  # each step represents 0.5 hours (200 steps for 100 hours)
+    initial_states = {'A': 0, 'B': 0, 'C': 250}
+    
+    # First 100 hours with neutron flux
+    result_flux_on = evolve_system(initial_states, p_A_decay, p_B_decay, p_C_to_A_flux_on, n_steps)
+    
+    # Second 100 hours without neutron flux
+    final_states_flux_on = {'A': result_flux_on['A'][-1], 'B': result_flux_on['B'][-1], 'C': result_flux_on['C'][-1]}
+    result_flux_off = evolve_system(final_states_flux_on, p_A_decay, p_B_decay, p_C_to_A_flux_off, n_steps)
+    
+    for key in result_flux_off:
+        result_flux_on[key].extend(result_flux_off[key])
+    
+    return result_flux_on
+
+# Run the simulation 20 times
+n_simulations = 20
+time_steps = np.arange(400) * 0.5  # 400 steps, each step is 0.5 hours
+all_results_A = []
+
+for _ in range(n_simulations):
+    sim_result = simulation()
+    all_results_A.append(sim_result['A'])
+
+average_A = np.mean(all_results_A, axis=0)
+std_dev_A = np.std(all_results_A, axis=0)
+
+plt.errorbar(time_steps, average_A, std_dev_A, fmt='o', ecolor='r', capsize=5, label='A nuclei')
+plt.xlabel('Time [hours]')
+plt.ylabel('Number of A nuclei')
+plt.title('Average number of A nuclei with uncertainties as a function of time')
+plt.legend()
+plt.show()

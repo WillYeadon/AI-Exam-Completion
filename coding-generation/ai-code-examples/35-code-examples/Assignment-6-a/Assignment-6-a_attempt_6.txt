@@ -1,0 +1,25 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+def integrate(n_points, dim):
+    points = np.random.uniform(-1, 1, size=(n_points, dim))
+    norm = np.linalg.norm(points, axis=1)
+    within = np.sum(norm <= 1)
+    return 2**dim * within / n_points
+
+dimensions = [2, 3, 4, 5, 6, 7, 8, 9, 10]
+n_points = np.logspace(2, 5, num=100, dtype=int)
+errors = np.zeros((len(dimensions), len(n_points)))
+
+for i, dim in enumerate(dimensions):
+    for j, points in enumerate(n_points):
+        errors[i, j] = np.abs(np.pi - integrate(points, dim))
+
+for i, dim in enumerate(dimensions):
+    plt.loglog(n_points, errors[i], label=f'Dimension {dim}')
+
+plt.xlabel('Number of Points')
+plt.ylabel('Absolute Error')
+plt.title('Monte Carlo Integration Error Scaling')
+plt.legend()
+plt.show()

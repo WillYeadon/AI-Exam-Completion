@@ -1,0 +1,35 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+class Walker:
+    def __init__(self, steps):
+        self.steps = steps
+    
+    def generate_walk(self):
+        return np.random.uniform(-1, 1, self.steps)
+
+# Simulate 100 walkers with each taking 1000 steps
+num_walkers = 100
+num_steps = 1000
+
+# Initialize lists to store positions and squared positions
+positions = []
+squared_positions = []
+
+# Generate random walks for each walker and calculate average position and average squared position
+for i in range(num_walkers):
+    walker = Walker(num_steps)
+    walk = walker.generate_walk()
+    positions.append(np.mean(walk))
+    squared_positions.append(np.mean(walk ** 2))
+
+# Plot average position and average squared position
+plt.plot(np.arange(num_walkers), positions, label='Average Position', color='blue')
+plt.plot(np.arange(num_walkers), squared_positions, label='Average Squared Position', color='green')
+
+plt.legend()
+plt.title('Average Position and Average Squared Position of 100 Walkers')
+plt.xlabel('Walker')
+plt.ylabel('Average Position / Average Squared Position')
+
+plt.show()

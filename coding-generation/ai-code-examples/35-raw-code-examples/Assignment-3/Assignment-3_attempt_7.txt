@@ -1,0 +1,62 @@
+**Radioactive Decay Script**
+
+A scientist is studying a sample of radioactive material in the lab. The material has a half-life of 5 years. The scientist is interested in predicting the decay of the radioactive nuclei over time.
+
+Let's first define a function to calculate the mean lifetime from the half-life.
+
+
+def half_life_to_mean_lifetime(half_life):
+    return half_life / np.log(2)
+
+
+Now, let's define the radioactive decay function `f_rad` using the mean lifetime.
+
+
+TAU = half_life_to_mean_lifetime(5)  # mean lifetime
+
+def f_rad(N, t):
+    return -N / TAU
+
+
+Next, we will solve the differential equation analytically using the function `analytic`.
+
+
+def analytic(N0, t):
+    return N0 * np.exp(-t / TAU)
+
+
+We will also implement Euler's method to numerically solve the differential equation.
+
+
+def solve_euler(n0, t0, dt, n_steps):
+    counts = [n0]
+    t = t0
+    N = n0
+    for _ in range(n_steps):
+        N += dt * f_rad(N, t)
+        t += dt
+        counts.append(N)
+    return counts
+
+
+Finally, we will implement the RK4 method in the function `solve_RK4`.
+
+
+def solve_RK4(n0, t0, dt, n_steps):
+    counts = [n0]
+    t = t0
+    N = n0
+    for _ in range(n_steps):
+        k1 = dt * f_rad(N, t)
+        k2 = dt * f_rad(N + 0.5 * k1, t + 0.5 * dt)
+        k3 = dt * f_rad(N + 0.5 * k2, t + 0.5 * dt)
+        k4 = dt * f_rad(N + k3, t + dt)
+        
+        N += (k1 + 2*k2 + 2*k3 + k4) / 6
+        t += dt
+        
+        counts.append(N)
+    return counts
+
+
+This completes the radioactive decay simulation script. Let's now move on to the task of comparing the Euler method and the RK4 method

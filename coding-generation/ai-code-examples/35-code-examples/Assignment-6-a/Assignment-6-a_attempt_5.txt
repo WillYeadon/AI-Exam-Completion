@@ -1,0 +1,30 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+def estimate_pi(n_points):
+    points = np.random.rand(2, n_points) * 2 - 1
+    inside = np.linalg.norm(points, axis=0) < 1
+    return 4 * np.sum(inside) / n_points
+
+def estimate_volume_unit_ball(dim, n_points):
+    points = np.random.rand(dim, n_points) * 2 - 1
+    inside = np.linalg.norm(points, axis=0) < 1
+    return 2**dim * np.sum(inside) / n_points
+
+dimensions = [2, 3, 4, 5, 10, 100]
+n_points = np.logspace(2, 5, 100, dtype=int)
+
+errors = np.zeros((len(dimensions), len(n_points)))
+for i, dim in enumerate(dimensions):
+    for j, n in enumerate(n_points):
+        errors[i, j] = np.abs(estimate_volume_unit_ball(dim, n) - np.pi/2**(dim))
+
+plt.figure(figsize=(10, 6))
+for i, dim in enumerate(dimensions):
+    plt.loglog(n_points, errors[i], label=f'Dimension {dim}')
+
+plt.xlabel('Number of Points (N)')
+plt.ylabel('Absolute Error')
+plt.title('Monte Carlo Integration Error Scaling for Unit Ball Volume Estimation')
+plt.legend()
+plt.show()

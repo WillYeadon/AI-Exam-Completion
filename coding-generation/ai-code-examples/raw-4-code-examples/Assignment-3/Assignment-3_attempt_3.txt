@@ -1,0 +1,81 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Constants
+HALF_LIFE = 5730  # half-life of the substance in years
+TAU = HALF_LIFE / np.log(2)  # mean lifetime
+
+# Define the function to calculate mean lifetime
+def mean_lifetime(half_life):
+    return half_life / np.log(2)
+
+# Define the decay differential equation
+def f_rad(N, t):
+    return -N / TAU
+
+# Analytical solution function
+def analytic(N0, t):
+    return N0 * np.exp(-t / TAU)
+
+# Euler's Method
+def solve_euler(n0, t0, dt, n_steps):
+    t = t0
+    n = n0
+    results = [n]
+    for _ in range(n_steps):
+        n = n + f_rad(n, t) * dt
+        t += dt
+        results.append(n)
+    return np.array(results)
+
+# RK4 Method
+def solve_RK4(n0, t0, dt, n_steps):
+    t = t0
+    n = n0
+    results = [n]
+    for _ in range(n_steps):
+        k1 = dt * f_rad(n, t)
+        k2 = dt * f_rad(n + 0.5 * k1, t + 0.5 * dt)
+        k3 = dt * f_rad(n + 0.5 * k2, t + 0.5 * dt)
+        k4 = dt * f_rad(n + k3, t + dt)
+        n = n + (k1 + 2 * k2 + 2 * k3 + k4) / 6
+        t += dt
+        results.append(n)
+    return np.array(results)
+
+# Parameters
+N0 = 1000  
+t0 = 0     
+dt = 1     
+
+# Analytical solution for comparison
+times = np.linspace(t0, dt*50, 51)
+analytic_solution = analytic(N0, times)
+
+# Solve using Euler and RK4 methods
+euler_solution_10 = solve_euler(N0, t0, dt, 10)
+rk4_solution_10 = solve_RK4(N0, t0, dt, 10)
+
+euler_solution_50 = solve_euler(N0, t0, dt, 50)
+rk4_solution_50 = solve_RK4(N0, t0, dt, 50)
+
+# Plotting the results
+plt.figure(figsize=[10, 6])
+
+# Plot analytic solution
+plt.plot(times, analytic_solution, 'k-', label="Analytic Solution")
+
+# Plot Euler's method solutions
+plt.plot(np.linspace(t0, dt*10, 11), euler_solution_10, 'ro-', label="Euler Method (10 steps)")
+plt.plot(np.linspace(t0, dt*50, 51), euler_solution_50, 'r--', label="Euler Method (50 steps)")
+
+# Plot RK4 method solutions
+plt.plot(np.linspace(t0, dt*10, 11), rk4_solution_10, 'bo-', label="RK4 Method (10 steps)")
+plt.plot(np.linspace(t0, dt*50, 51), rk4_solution_50, 'b--', label="RK4 Method (50 steps)")
+
+plt.xlabel('Time (years)')
+plt.ylabel('Number of Nuclei')
+plt.title('Comparison of Euler and RK4 Methods with Analytical Solution')
+plt.legend()
+plt.grid(True)
+plt.show()

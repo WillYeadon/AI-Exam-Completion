@@ -1,0 +1,83 @@
+import numpy as np
+
+def mean_lifetime(half_life):
+    return half_life / np.log(2)
+
+
+Next, we need to define the function \(f_{rad}\) such that the differential equation can be expressed as \(\frac{dN}{dt} = f_{rad}(N, t)\):
+
+\[
+\frac{dN}{dt} = f_{rad}(N, t) = -\frac{N}{\tau}
+\]
+
+Let's implement this function in python:
+
+
+TAU = mean_lifetime(4.5)  # Assuming a half-life of 4.5 years for the radioactive substance
+
+def f_rad(N, t):
+    return -N / TAU
+
+
+Now, we will solve this first-order, ordinary differential equation analytically and implement the function `analytic`:
+
+
+def analytic(N0, t):
+    return N0 * np.exp(-t / TAU)
+
+
+To solve the differential equation numerically using Euler's method, we will create a function that takes the initial number of atoms, initial time, time step, and number of steps:
+
+
+def solve_euler(n0, t0, dt, n_steps):
+    counts = [n0]
+    N = n0
+    
+    for _ in range(n_steps):
+        N += dt * f_rad(N, t0)
+        t0 += dt
+        counts.append(N)
+        
+    return counts
+
+
+Next, we will implement the RK4 method in the `solve_RK4` function:
+
+
+def solve_RK4(n0, t0, dt, n_steps):
+    counts = [n0]
+    N = n0
+    
+    for _ in range(n_steps):
+        k1 = dt * f_rad(N, t0)
+        k2 = dt * f_rad(N + 0.5*k1, t0 + 0.5*dt)
+        k3 = dt * f_rad(N + 0.5*k2, t0 + 0.5*dt)
+        k4 = dt * f_rad(N + k3, t0 + dt)
+        
+        N += (k1 + 2*k2 + 2*k3 + k4) / 6
+        t0 += dt
+        counts.append(N)
+        
+    return counts
+
+
+Finally, we will create a plot to show that the RK4 method has an error that scales better with the number of steps than the Euler method.
+
+
+import matplotlib.pyplot as plt
+
+n0 = 1000
+t0 = 0
+dt = 0.1
+n_steps = 100
+
+euler_counts = solve_euler(n0, t0, dt, n_steps)
+RK4_counts = solve_RK4(n0, t0, dt, n_steps)
+
+plt.figure()
+plt.plot(np.arange(n_steps+1), euler_counts, label='Euler Method')
+plt.plot(np.arange(n_steps+1), RK4_counts, label='RK4 Method')
+plt.xlabel('Number of Steps')
+plt.ylabel('Nuclei Count')
+plt.legend()
+plt.show()

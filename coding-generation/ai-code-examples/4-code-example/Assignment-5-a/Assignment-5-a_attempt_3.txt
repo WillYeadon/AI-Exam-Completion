@@ -1,0 +1,71 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Constants
+initial_C = 250
+half_life_A = 10.1  # hours
+half_life_B = 15.7  # hours
+half_life_C_to_A = 3.2  # effective hours during neutron flux
+
+# Transition probabilities
+def transition_probability(half_life, dt):
+    return 1 - np.exp(-dt / half_life)
+
+# Transition function
+def evolve_state(state, dt, flux_on):
+    A, B, C = state
+    p_A = transition_probability(half_life_A, dt)
+    p_B = transition_probability(half_life_B, dt)
+    if flux_on:
+        p_C_to_A = transition_probability(half_life_C_to_A, dt)
+    else:
+        p_C_to_A = 0
+    
+    dA = (C * p_C_to_A) - (A * p_A)
+    dB = (A * p_A) - (B * p_B)
+    dC = -C * p_C_to_A
+
+    A += dA
+    B += dB
+    C += dC
+    
+    return A, B, C
+
+# Evolution function
+def evolve_system(A, B, C, n_steps, dt, flux_on):
+    A_hist, B_hist, C_hist = [], [], []
+    for _ in range(n_steps):
+        A, B, C = evolve_state([A, B, C], dt, flux_on)
+        A_hist.append(A)
+        B_hist.append(B)
+        C_hist.append(C)
+    return A_hist, B_hist, C_hist
+
+# Initialize
+A, B, C = 0, 0, initial_C
+hours_with_flux = 100
+hours_without_flux = 100
+steps = 200
+dt = (hours_with_flux / steps)
+
+# Simulate with neutron flux on
+A_hist, B_hist, C_hist = evolve_system(A, B, C, steps, dt, flux_on=True)
+
+# Simulate without neutron flux
+A_hist2, B_hist2, C_hist2 = evolve_system(A_hist[-1], B_hist[-1], C_hist[-1], steps, dt, flux_on=False)
+
+# Combine results
+A_hist.extend(A_hist2)
+B_hist.extend(B_hist2)
+C_hist.extend(C_hist2)
+
+# Plotting
+time = np.linspace(0, hours_with_flux + hours_without_flux, 2 * steps)
+
+plt.plot(time, A_hist, label='A')
+plt.plot(time, B_hist, label='B')
+plt.plot(time, C_hist, label='C')
+plt.xlabel('Time (hours)')
+plt.ylabel('Number of nuclei')
+plt.legend()
+plt.show()

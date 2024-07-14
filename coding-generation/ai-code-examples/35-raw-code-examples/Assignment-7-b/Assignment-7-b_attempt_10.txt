@@ -1,0 +1,34 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Define the Banana function
+def banana(r):
+    x, y = r
+    return (1 - x)**2 + 100*(y - x**2)**2
+
+# Define the analytical gradient of the Banana function
+def banana_grad(r):
+    x, y = r
+    dx = -2*(1 - x) - 400*x*(y - x**2)
+    dy = 200*(y - x**2)
+    return np.array([dx, dy])
+
+# Initialize parameters for the banana function plot
+x = np.linspace(-2, 2, 100)
+y = np.linspace(-1, 3, 100)
+X, Y = np.meshgrid(x, y)
+data = np.zeros_like(X)
+
+# Implement the banana function on data
+for i in range(100):
+    for j in range(100):
+        data[i, j] = banana([X[i, j], Y[i, j]])
+
+# Plot starter code
+plt.figure(figsize=(10, 7))
+plt.contourf(X, Y, data, levels=100, cmap='viridis')
+plt.colorbar()
+plt.title("Rosenbrock's Banana Function")
+plt.xlabel("x")
+plt.ylabel("y")
+plt.show()

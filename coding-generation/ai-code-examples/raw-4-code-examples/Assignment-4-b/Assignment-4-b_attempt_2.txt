@@ -1,0 +1,71 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Constants
+g = 9.81  # acceleration due to gravity, m/s^2
+theta = 60  # launch angle in degrees
+theta_rad = np.radians(theta)  # launch angle in radians
+dt = 0.01  # time step, s
+C = 0.47  # drag coefficient
+rho = 1.225  # air density, kg/m^3
+A = 0.045  # cross-sectional area of the projectile, m^2
+m = 0.145  # mass of the projectile, kg
+
+# Function to find zero crossing
+def find_zero_linear(x1, x2, y1, y2):
+    return x1 - y1 * (x2 - x1) / (y2 - y1)
+
+def simulate(v0, include_air_resistance=True):
+    vx0 = v0 * np.cos(theta_rad)
+    vy0 = v0 * np.sin(theta_rad)
+    
+    x, y = 0, 0
+    vx, vy = vx0, vy0
+    trajectory = []
+    
+    while y >= 0:
+        trajectory.append((x, y))
+        if include_air_resistance:
+            v = np.sqrt(vx**2 + vy**2)
+            drag_force = 0.5 * C * rho * A * v**2
+            drag_x = drag_force * (vx / v)
+            drag_y = drag_force * (vy / v)
+        else:
+            drag_x = 0
+            drag_y = 0
+        
+        ax = -drag_x / m
+        ay = -g - drag_y / m
+        
+        x += vx * dt
+        y += vy * dt
+        vx += ax * dt
+        vy += ay * dt
+        
+    x1, y1 = trajectory[-2]
+    x2, y2 = trajectory[-1]
+    range_ = find_zero_linear(x1, x2, y1, y2)
+    return range_
+
+# Initial conditions
+initial_velocities = np.linspace(50, 200, 100)  # Initial velocities from 50 to 200 m/s
+
+ranges_no_air_resistance = []
+ranges_with_air_resistance = []
+
+for v0 in initial_velocities:
+    range_no_air = simulate(v0, include_air_resistance=False)
+    range_air = simulate(v0)
+    ranges_no_air_resistance.append(range_no_air)
+    ranges_with_air_resistance.append(range_air)
+
+# Plot results
+plt.figure(figsize=(10, 6))
+plt.plot(initial_velocities, ranges_no_air_resistance, label='No Air Resistance')
+plt.plot(initial_velocities, ranges_with_air_resistance, label='With Air Resistance')
+plt.xlabel('Initial Velocity (m/s)')
+plt.ylabel('Range (m)')
+plt.title('Range of Projectile for Different Initial Velocities')
+plt.legend()
+plt.grid(True)
+plt.show()

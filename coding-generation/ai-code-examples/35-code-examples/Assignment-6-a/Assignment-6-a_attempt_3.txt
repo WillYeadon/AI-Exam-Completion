@@ -1,0 +1,41 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+def pi_estimate(n_points):
+    x = np.random.rand(n_points)
+    y = np.random.rand(n_points)
+    inside_circle = (x**2 + y**2) <= 1
+    pi_estimate = 4 * np.sum(inside_circle) / n_points
+    return pi_estimate
+
+def ball_volume_estimate(n_points, dim):
+    random_numbers = np.random.rand(n_points, dim) * 2 - 1
+    inside_ball = np.linalg.norm(random_numbers, axis=1) <= 1
+    volume_estimate = 2**dim * np.sum(inside_ball) / n_points
+    return volume_estimate
+
+def integrate(n_points, dim):
+    pi_error = np.abs(np.pi - pi_estimate(n_points))
+    ball_error = np.abs((np.pi**(dim/2) / np.math.factorial(dim/2)) - ball_volume_estimate(n_points, dim))
+    return pi_error, ball_error
+
+dimensions = [2, 3, 4, 5, 6, 7, 8, 9, 10]
+n_points = 1000
+
+pi_errors = []
+ball_errors = []
+
+for dim in dimensions:
+    pi_error, ball_error = integrate(n_points, dim)
+    pi_errors.append(pi_error)
+    ball_errors.append(ball_error)
+
+plt.figure(figsize=(10, 6))
+plt.plot(dimensions, pi_errors, label='Pi Estimation Error', marker='o', color='b')
+plt.plot(dimensions, ball_errors, label='Ball Volume Estimation Error', marker='s', color='r')
+plt.yscale('log')
+plt.xlabel('Dimension')
+plt.ylabel('Error')
+plt.title('Monte Carlo Integration Error Scaling')
+plt.legend()
+plt.show()

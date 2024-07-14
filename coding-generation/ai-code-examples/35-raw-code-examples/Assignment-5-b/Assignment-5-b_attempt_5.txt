@@ -1,0 +1,86 @@
+import numpy as np
+import random
+import matplotlib.pyplot as plt
+
+# Define function to check if a transition occurs
+def check_transition(probability):
+    r = random.random()
+    if r < probability:
+        return True
+    else:
+        return False
+
+# Define function to implement a transition based on transition rules
+def implement_transition(current_state, rules):
+    new_state = current_state
+    for rule in rules:
+        if rule[0] == current_state:
+            if check_transition(rule[1]):
+                new_state = rule[2]
+                break
+    return new_state
+
+# Define function to evolve the system based on transition rules
+def evolve_system(states, rules):
+    new_states = [s for s in states]
+    for i in range(len(states)):
+        new_states[i] = implement_transition(states[i], rules)
+    return new_states
+
+# Define function to evolve the system for a certain number of time steps
+def evolve_system_over_time(NA, NB, NC, rules, n_timesteps, t_max):
+    states_A = [NA]
+    states_B = [NB]
+    states_C = [NC]
+    
+    for i in range(n_timesteps):
+        states = [NA, NB, NC]
+        new_states = evolve_system(states, rules)
+        
+        NA, NB, NC = new_states
+        
+        states_A.append(NA)
+        states_B.append(NB)
+        states_C.append(NC)
+    
+    return states_A, states_B, states_C
+
+# Transition probabilities
+p_A_to_B = 1 - 2**(-1/10.1)
+p_B_to_C = 1 - 2**(-1/15.7)
+p_C_to_A = 1 - 2**(-1/3.2)
+
+# Transition rules with neutron flux
+rules_flux_on = [
+    ('A', p_A_to_B, 'B'),
+    ('B', p_B_to_C, 'C'),
+    ('C', p_C_to_A, 'A')
+]
+
+# Transition rules without neutron flux
+rules_flux_off = [
+    ('A', p_A_to_B, 'B'),
+    ('B', p_B_to_C, 'C')
+]
+
+# Run the simulation 20 times
+n_simulations = 20
+results_A = []
+
+for _ in range(n_simulations):
+    NA, NB, NC = 0, 0, 250
+    states_A, _, _ = evolve_system_over_time(NA, NB, NC, rules_flux_on, 200, 100)
+    _, _, states_C = evolve_system_over_time(NA, NB, NC, rules_flux_off, 200, 100)
+    total_states = states_A + states_C
+    results_A.append(total_states)
+
+# Calculate average and uncertainty of number of A atoms
+average_A = np.mean(results_A, axis=0)
+uncertainty_A = np.std(results_A, axis=0)
+
+# Plot results
+plt.errorbar(range(len(average_A)), average_A, yerr=uncertainty_A, fmt='o')
+plt.xlabel('Time Steps')
+plt.ylabel('Number of A Atoms')
+plt.title('Average Number of A Atoms Over Time with Uncertainty')
+plt.show()

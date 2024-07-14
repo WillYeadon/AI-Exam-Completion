@@ -1,0 +1,27 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+def range_no_air(v0, theta):
+    return v0**2 * np.sin(2*np.radians(theta)) / g
+
+def range_with_air(v0, theta):
+    return (v0**2 / g) * np.sin(np.radians(2*theta)) * (1 + np.sqrt(1 + (k * g * m) / v0**2) / np.arctan(np.sqrt(1 + (k * g * m) / v0**2)))
+
+v0 = 125
+theta = 60
+g = 9.81
+k = 0.5
+m = 0.1
+
+velocities = np.arange(100, 201, 10)
+ranges_no_air = [range_no_air(v, theta) for v in velocities]
+ranges_with_air = [range_with_air(v, theta) for v in velocities]
+
+plt.plot(velocities, ranges_no_air, label='No Air Resistance')
+plt.plot(velocities, ranges_with_air, label='With Air Resistance')
+plt.xlabel('Initial Velocity (m/s)')
+plt.ylabel('Range (m)')
+plt.title('Range of Projectile for Different Initial Velocities and Air Resistances')
+plt.legend()
+plt.grid()
+plt.show()

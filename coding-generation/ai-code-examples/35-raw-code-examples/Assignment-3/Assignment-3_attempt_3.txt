@@ -1,0 +1,76 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Constants
+TAU = 4.5e9  # Half life of the radioactive substance in years
+
+# Function to calculate mean lifetime from half-life
+def mean_lifetime(half_life):
+    return half_life / np.log(2)
+
+# Implement the function to describe the radioactive decay process
+def f_rad(N, t):
+    return -N / TAU
+
+# Analytical solution for radioactive decay
+def analytic(N0, t):
+    return N0 * np.exp(-t / TAU)
+
+# Euler's method to solve numerically
+def solve_euler(n0, t0, dt, n_steps):
+    counts = [n0]
+    t = t0
+
+    for _ in range(n_steps):
+        N_new = counts[-1] + f_rad(counts[-1], t) * dt
+        counts.append(N_new)
+        t += dt
+
+    return counts
+
+# RK4 method to solve numerically
+def solve_RK4(n0, t0, dt, n_steps):
+    counts = [n0]
+    t = t0
+
+    for _ in range(n_steps):
+        k1 = f_rad(counts[-1], t)
+        k2 = f_rad(counts[-1] + 0.5*k1*dt, t + 0.5*dt)
+        k3 = f_rad(counts[-1] + 0.5*k2*dt, t + 0.5*dt)
+        k4 = f_rad(counts[-1] + k3*dt, t + dt)
+
+        N_new = counts[-1] + (k1 + 2*k2 + 2*k3 + k4) * dt / 6
+        counts.append(N_new)
+        t += dt
+
+    return counts
+
+# Testing the RK4 method with error scaling
+n0 = 1000
+t0 = 0
+total_time = 10
+n_steps_list = [10, 50, 100, 500, 1000]
+
+errors_euler = []
+errors_rk4 = []
+
+for n_steps in n_steps_list:
+    dt = total_time / n_steps
+
+    euler_counts = solve_euler(n0, t0, dt, n_steps)
+    rk4_counts = solve_RK4(n0, t0, dt, n_steps)
+    true_counts = analytic(n0, total_time)
+
+    errors_euler.append(np.abs(euler_counts[-1] - true_counts))
+    errors_rk4.append(np.abs(rk4_counts[-1] - true_counts))
+
+plt.figure()
+plt.plot(n_steps_list, errors_euler, label="Euler Method")
+plt.plot(n_steps_list, errors_rk4, label="RK4 Method")
+plt.yscale('log')
+plt.xscale('log')
+plt.xlabel("Number of Steps")
+plt.ylabel("Error")
+plt.title("Error Comparison: Euler Method vs RK4 Method")
+plt.legend()
+plt.show()

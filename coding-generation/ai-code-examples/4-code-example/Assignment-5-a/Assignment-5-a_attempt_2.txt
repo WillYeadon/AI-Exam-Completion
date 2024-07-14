@@ -1,0 +1,64 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Constants
+half_life_A = 10.1  # hours
+half_life_B = 15.7  # hours
+half_life_C_to_A = 3.2  # hours (effective while neutron flux is on)
+initial_C = 250
+n_steps = 200
+time_total_flux_on = 100  # hours
+time_total_flux_off = 100  # hours
+
+# Derived constants
+decay_constant_A = np.log(2) / half_life_A
+decay_constant_B = np.log(2) / half_life_B
+activation_constant_C_to_A = np.log(2) / half_life_C_to_A
+time_step = time_total_flux_on / n_steps
+
+def evolve_system(n_A, n_B, n_C, activation_on, dt):
+    decays_to_B = np.random.binomial(n_A, decay_constant_A * dt)
+    decays_to_C = np.random.binomial(n_B, decay_constant_B * dt)
+    activations = np.random.binomial(n_C, activation_constant_C_to_A * dt if activation_on else 0)
+    
+    n_A_new = n_A - decays_to_B + activations
+    n_B_new = n_B - decays_to_C + decays_to_B
+    n_C_new = n_C - activations + decays_to_C
+    
+    return n_A_new, n_B_new, n_C_new
+
+def evolve_system_over_time(initial_C, time_total, n_steps, activation_on):
+    n_A, n_B, n_C = 0, 0, initial_C
+    dt = time_total / n_steps
+    
+    A_array, B_array, C_array = [n_A], [n_B], [n_C]
+    
+    for _ in range(n_steps):
+        n_A, n_B, n_C = evolve_system(n_A, n_B, n_C, activation_on, dt)
+        A_array.append(n_A)
+        B_array.append(n_B)
+        C_array.append(n_C)
+    
+    return A_array, B_array, C_array
+
+# Evolve system 100 hours with neutron flux on
+A_flux_on, B_flux_on, C_flux_on = evolve_system_over_time(initial_C, time_total_flux_on, n_steps, activation_on=True)
+
+# Continue evolving system 100 hours with neutron flux off
+A_flux_off, B_flux_off, C_flux_off = evolve_system_over_time(A_flux_on[-1], time_total_flux_off, n_steps, activation_on=False)
+A_final = A_flux_on + A_flux_off[1:]
+B_final = B_flux_on + B_flux_off[1:]
+C_final = C_flux_on + C_flux_off[1:]
+
+# Plotting
+time = np.linspace(0, 2 * time_total_flux_on, 2 * n_steps + 1)
+
+plt.plot(time, A_final, label='A nuclei')
+plt.plot(time, B_final, label='B nuclei')
+plt.plot(time, C_final, label='C nuclei')
+
+plt.xlabel('Time (hours)')
+plt.ylabel('Number of Nuclei')
+plt.legend()
+plt.grid()
+plt.show()

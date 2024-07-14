@@ -1,0 +1,66 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.optimize import brentq
+
+# Constants
+g = 9.81  # acceleration due to gravity (m/s^2)
+rho_air = 1.225  # air density (kg/m^3)
+drag_coefficient = 0.47  # assumed drag coefficient for a smooth sphere
+r = 0.1  # radius of the cannonball (m)
+density_iron = 7870  # density of iron (kg/m^3)
+v0 = 125  # initial velocity (m/s)
+
+# Functions to calculate properties of the cannonball
+def cross_sectional_area(r):
+    return np.pi * r**2
+
+def mass_of_sphere(r, density):
+    volume = 4/3 * np.pi * r**3
+    return density * volume
+
+# Calculate area and mass
+A = cross_sectional_area(r)
+m = mass_of_sphere(r, density_iron)
+
+# Drag force
+def drag_force(v):
+    return 0.5 * rho_air * A * drag_coefficient * v**2
+
+# Equations of motion using Euler's method
+def euler_method(theta, delta_t=0.01, t_max=30):
+    theta_rad = np.radians(theta)
+    vx = v0 * np.cos(theta_rad)
+    vy = v0 * np.sin(theta_rad)
+
+    x, y = [0], [0]
+    t = 0
+
+    while y[-1] >= 0 and t < t_max:
+        v = np.sqrt(vx**2 + vy**2)
+        ax = -drag_force(v) * vx / m
+        ay = -g - drag_force(v) * vy / m
+
+        vx += ax * delta_t
+        vy += ay * delta_t
+        x.append(x[-1] + vx * delta_t)
+        y.append(y[-1] + vy * delta_t)
+
+        t += delta_t
+
+    return np.array(x), np.array(y)
+
+# Plotting the trajectories for different angles
+angles = [15, 30, 45, 60, 75]  # various initial angles
+plt.figure(figsize=(10, 6))
+
+for angle in angles:
+    x, y = euler_method(angle)
+    plt.plot(x, y, label=f'{angle}°')
+
+# Labels, title, and legend
+plt.xlabel('Distance (m)')
+plt.ylabel('Height (m)')
+plt.title('Trajectories of a Cannonball at Different Initial Angles')
+plt.legend()
+plt.grid(True)
+plt.show()

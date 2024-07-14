@@ -1,0 +1,48 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Define the banana function
+def banana(r):
+    x, y = r
+    return (1 - x)**2 + 100 * (y - x**2)**2
+
+# Define the gradient of the banana function
+def banana_grad(r):
+    x, y = r
+    df_dx = -2 * (1 - x) - 400 * x * (y - x**2)
+    df_dy = 200 * (y - x**2)
+    return np.array([df_dx, df_dy])
+
+# Initialize function backdrop
+X = np.linspace(-2, 2, 100)
+Y = np.linspace(-1, 3, 100)
+data = np.zeros((100, 100))
+for i in range(100):
+    for j in range(100):
+        data[i, j] = banana([X[i], Y[j]])
+
+r0 = np.array([0.2, 1])  # Initial starting point
+etas = [0.001, 0.005, 0.01]  # Different step sizes
+
+# Plot the backdrop and GD trajectories
+plt.figure(figsize=(12, 8))
+plt.contourf(X, Y, data.T, levels=50, cmap='viridis')
+plt.colorbar()
+plt.xlabel('x')
+plt.ylabel('y')
+
+for eta in etas:
+    r = r0.copy()
+    trajectory = [r0.copy()]
+    for _ in range(10000):  # Perform up to 10,000 iterations
+        grad = banana_grad(r)
+        r -= eta * grad
+        trajectory.append(r.copy())
+        if np.linalg.norm(grad) < 1e-3:  # Stop if gradient is small
+            break
+    trajectory = np.array(trajectory)
+    plt.plot(trajectory[:, 0], trajectory[:, 1], label=f'eta={eta}')
+
+plt.title("Gradient Descent Trajectories on Rosenbrock's Banana Function")
+plt.legend()
+plt.show()

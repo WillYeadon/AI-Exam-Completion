@@ -1,0 +1,29 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Constants
+v0 = 125  # m/s
+g = 9.81  # m/s^2
+angles = [30, 45, 60]  # degrees
+
+# Function to calculate projectile motion
+def projectile_motion(angle):
+    theta = np.radians(angle)
+    t_total = 2 * v0 * np.sin(theta) / g
+    t = np.linspace(0, t_total, num=100)
+    x = v0 * np.cos(theta) * t
+    y = v0 * np.sin(theta) * t - 0.5 * g * t**2
+    return x, y
+
+# Simulation
+plt.figure(figsize=(10, 6))
+for angle in angles:
+    x, y = projectile_motion(angle)
+    plt.plot(x, y, label=f'{angle} degrees')
+
+plt.legend()
+plt.xlabel('Horizontal Distance (m)')
+plt.ylabel('Vertical Distance (m)')
+plt.title('Projectile Motion at Different Launch Angles')
+plt.grid(True)
+plt.show()

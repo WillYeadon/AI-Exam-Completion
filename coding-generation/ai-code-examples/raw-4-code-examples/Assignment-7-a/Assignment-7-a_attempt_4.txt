@@ -1,0 +1,93 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.optimize import newton
+
+# Define the function f(x) = x - tanh(2x)
+def f(x):
+    return x - np.tanh(2 * x)
+
+# Derivative of the function f(x)
+def df(x):
+    return 1 - 2 * (1 / np.cosh(2 * x))**2
+
+# Newton-Raphson method
+def newton_raphson_method(f, df, x0, tol=1e-6, max_iter=100):
+    x = x0
+    iter_count = 0
+    x_values = [x]
+    
+    for i in range(max_iter):
+        x_new = x - f(x) / df(x)
+        x_values.append(x_new)
+        iter_count += 1
+        if abs(x_new - x) < tol:
+            break
+        x = x_new
+    
+    return x_values, iter_count
+
+# Bisection method
+def bisection_method(f, a, b, tol=1e-6, max_iter=100):
+    iter_count = 0
+    x_values = []
+
+    while (b - a) / 2 > tol and iter_count < max_iter:
+        c = (a + b) / 2
+        x_values.append(c)
+        iter_count += 1
+        if f(c) == 0:
+            break
+        elif f(a) * f(c) < 0:
+            b = c
+        else:
+            a = c
+    
+    return x_values, iter_count
+
+# Secant method
+def secant_method(f, x0, x1, tol=1e-6, max_iter=100):
+    iter_count = 0
+    x_values = [x0, x1]
+    
+    for i in range(max_iter):
+        if abs(f(x1) - f(x0)) < tol:
+            break
+        x_new = x1 - f(x1) * (x1 - x0) / (f(x1) - f(x0))
+        x_values.append(x_new)
+        iter_count += 1
+        if abs(x_new - x1) < tol:
+            break
+        x0 = x1
+        x1 = x_new
+    
+    return x_values, iter_count
+
+# Initial guesses and intervals
+x0_newton = 0.5
+x0_bisection, x1_bisection = 0.0, 1.0
+x0_secant, x1_secant = 0.0, 0.5
+
+# Apply methods
+nr_values, nr_iter = newton_raphson_method(f, df, x0_newton)
+secant_values, secant_iter = secant_method(f, x0_secant, x1_secant)
+bisection_values, bisection_iter = bisection_method(f, x0_bisection, x1_bisection)
+
+# Convergence plot
+plt.figure(figsize=(10, 6))
+
+# Newton-Raphson method plot
+plt.plot(range(len(nr_values)), nr_values, label="Newton-Raphson method", marker='o')
+
+# Secant method plot
+plt.plot(range(len(secant_values)), secant_values, label="Secant method", marker='s')
+
+# Bisection method plot
+plt.plot(range(len(bisection_values)), bisection_values, label="Bisection method", marker='^')
+
+# Add labels and legends
+plt.xlabel('Iteration number')
+plt.ylabel('Value of x')
+plt.title('Convergence Comparison of Root-Finding Methods')
+plt.legend()
+plt.grid()
+plt.show()

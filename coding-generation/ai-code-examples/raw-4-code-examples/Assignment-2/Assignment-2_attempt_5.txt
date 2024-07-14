@@ -1,0 +1,61 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.integrate import quad
+
+# Define the function f
+def f(x):
+    return x**2 * np.cos(2 * x)
+
+# Analytical integral g with the constant set such that g(0) = 0
+def g(x):
+    return (1/2) * (np.cos(2*x) + 2*x*np.sin(2*x))
+
+# function to calculate the definite integral using the analytical solution
+def analytical_integral(x_min, x_max):        
+    return g(x_max) - g(x_min)
+
+# Function to perform numerical integration using Simpson's rule
+def simpsons_rule(f, x_min, x_max, N):
+    if N % 2 != 0:
+        raise ValueError("N must be even for Simpson's rule integration")
+        
+    h = (x_max - x_min) / N
+    x = np.linspace(x_min, x_max, N + 1)
+    y = f(x)
+    
+    integral = y[0] + y[-1]
+    for i in range(1, N, 2):
+        integral += 4 * y[i]
+    for i in range(2, N-1, 2):
+        integral += 2 * y[i]
+        
+    integral *= h / 3
+    return integral
+
+# Set the interval for integration
+x_min = 0
+x_max = np.pi
+
+# Calculate the true value of the integral analytically
+true_integral = analytical_integral(x_min, x_max)
+
+# Number of points to be used for simpson's rule
+N_points = np.array([2**n for n in range(1, 10)])
+
+# Calculate integrals and errors
+errors = []
+
+for N in N_points:
+    simpson_integral = simpsons_rule(f, x_min, x_max, N)
+    fractional_error = abs((simpson_integral - true_integral) / true_integral)
+    errors.append(fractional_error)
+
+# Plotting the results
+plt.figure()
+plt.loglog(N_points, errors, 'o-', label="Fractional Error")
+plt.xlabel("Number of Panels (N)")
+plt.ylabel("Fractional Error")
+plt.title("Fractional Error vs Number of Panels in Simpson's Rule Integration")
+plt.legend()
+plt.grid(True)
+plt.show()

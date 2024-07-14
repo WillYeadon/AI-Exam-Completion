@@ -1,0 +1,55 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+class Walker:
+    def __init__(self, ndim=1, step_size=1):
+        self.ndim = ndim
+        self.step_size = step_size
+        if self.ndim == 1:
+            self.steps = [[+self.step_size], [-self.step_size]]
+        elif self.ndim == 2:
+            self.steps = [[+self.step_size, 0], [-self.step_size, 0], [0, +self.step_size], [0, -self.step_size]]
+        self.pos = np.zeros(self.ndim)
+
+    def pickStep(self):
+        return self.steps[np.random.choice(len(self.steps))]
+
+    def doSteps(self, n):
+        trajectory = np.zeros((n+1, self.ndim))
+        for i in range(n+1):
+            trajectory[i] = self.pos
+            step = self.pickStep()
+            self.pos = np.add(self.pos, step)
+        return trajectory
+
+def simulate_walkers(steps, n_walkers, dimensions):
+    avg_position = np.zeros(steps+1)
+    avg_squared_position = np.zeros(steps+1)
+    for dim in dimensions:
+        for i in range(n_walkers):
+            walker = Walker(ndim=dim)
+            trajectory = walker.doSteps(steps)
+            avg_position += trajectory[:,0]
+            avg_squared_position += np.sum(trajectory**2, axis=1)
+
+    avg_position /= (n_walkers * len(dimensions))
+    avg_squared_position /= (n_walkers * len(dimensions))
+    return avg_position, avg_squared_position
+
+# Simulation parameters
+steps = 100
+n_walkers = 400
+dimensions = [1, 2, 3, 4]
+
+# Perform simulation
+avg_position, avg_squared_position = simulate_walkers(steps, n_walkers, dimensions)
+
+# Plot results
+plt.figure(figsize=(10, 6))
+for dim in dimensions:
+    plt.plot(avg_squared_position, label=f'Dimension {dim}')
+plt.title('Average Squared Distance of Walkers in Different Dimensions')
+plt.xlabel('Number of Steps')
+plt.ylabel('Average Squared Distance')
+plt.legend()
+plt.show()

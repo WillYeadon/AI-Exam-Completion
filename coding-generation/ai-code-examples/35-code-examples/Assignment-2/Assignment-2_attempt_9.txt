@@ -1,0 +1,41 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Define the function f(x) = x^2 * cos(2x)
+def f(x):
+    return x**2 * np.cos(2*x)
+
+# Define the analytical integral of f
+def analytical_integral(x):
+    return (x**2 * np.sin(2*x) / 4) - (x * np.cos(2*x) / 2) + (np.sin(2*x) / 4)
+
+# Function to calculate the analytical integral from xmin to xmax
+def calculate_analytical_integral(xmin, xmax):
+    return analytical_integral(xmax) - analytical_integral(xmin)
+
+# Function to calculate the numerical integral using Simpson's rule
+def simpsons_rule(f, a, b, n):
+    h = (b - a) / n
+    x = np.linspace(a, b, n+1)
+    y = f(x)
+    return h/3 * np.sum(y[0:-1:2] + 4*y[1::2] + y[2::2])
+
+# Initialize panel counts
+panel_counts = [4, 8, 16, 32, 64, 128, 256, 512, 1024]
+
+# Calculate errors for each panel count
+errors = []
+for n in panel_counts:
+    numerical_integral = simpsons_rule(f, 0, np.pi, n)
+    true_integral = calculate_analytical_integral(0, np.pi)
+    error = np.abs(numerical_integral - true_integral) / true_integral
+    errors.append(error)
+
+# Create log-log plot showing fractional error vs number of panels
+plt.figure(figsize=(10,6))
+plt.loglog(panel_counts, errors, marker='o', color='b', linestyle='-', linewidth=2, markersize=8)
+plt.title('Fractional Error in Numerical Integration vs Number of Panels')
+plt.xlabel('Number of Panels')
+plt.ylabel('Fractional Error')
+plt.grid(True)
+plt.show()

@@ -1,0 +1,101 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+class Walker:
+    def __init__(self, ndim=1, step_size=1):
+        self.ndim = ndim
+        self.step_size = step_size
+        if self.ndim == 1:
+            self.steps = [[self.step_size], [-self.step_size]]
+        elif self.ndim == 2:
+            self.steps = [[self.step_size, 0], [-self.step_size, 0], [0, self.step_size], [0, -self.step_size]]
+        self.pos = np.zeros(self.ndim)
+    
+    def pickStep(self):
+        return self.steps[np.random.choice(len(self.steps))]
+    
+    def doSteps(self, n):
+        trajectory = [self.pos]
+        for _ in range(n):
+            step = self.pickStep()
+            self.pos = self.pos + np.array(step)
+            trajectory.append(self.pos)
+        return np.array(trajectory)
+
+
+# Simulation of average position and average squared position of 100 1D walkers using 1000 steps
+ndim = 1
+n_walkers = 100
+n_steps = 1000
+positions = np.zeros((n_walkers, n_steps+1))
+squared_positions = np.zeros((n_walkers, n_steps+1))
+
+for i in range(n_walkers):
+    walker = Walker(ndim=ndim)
+    trajectory = walker.doSteps(n_steps)
+    positions[i] = trajectory[:, 0]
+    squared_positions[i] = trajectory[:, 0]**2
+
+avg_position = np.mean(positions, axis=0)
+avg_squared_position = np.mean(squared_positions, axis=0)
+
+plt.figure(figsize=(12, 6))
+plt.subplot(2, 1, 1)
+plt.plot(range(n_steps+1), avg_position)
+plt.title('Average Position of 100 1D walkers over 1000 steps')
+plt.xlabel('Steps')
+plt.ylabel('Position')
+plt.grid(True)
+
+plt.subplot(2, 1, 2)
+plt.plot(range(n_steps+1), avg_squared_position)
+plt.title('Average Squared Position of 100 1D walkers over 1000 steps')
+plt.xlabel('Steps')
+plt.ylabel('Squared Position')
+plt.grid(True)
+
+plt.tight_layout()
+plt.show()
+
+# Simulation showing that the average squared distance scaling is independent of the dimension
+n_walkers = 100
+n_steps = 100
+dimensions = [1, 2, 3, 4]
+step_size = 1
+avg_squared_distances = []
+
+for ndim in dimensions:
+    squared_distances = np.zeros((n_walkers, n_steps+1))
+    for i in range(n_walkers):
+        walker = Walker(ndim=ndim, step_size=step_size)
+        trajectory = walker.doSteps(n_steps)
+        squared_distances[i] = np.sum(trajectory**2, axis=1)
+    avg_squared_distance = np.mean(squared_distances, axis=0)[-1]
+    avg_squared_distances.append(avg_squared_distance)
+
+plt.figure()
+plt.plot(dimensions, avg_squared_distances, marker='o')
+plt.title('Average Squared Distance after 100 steps for different dimensions')
+plt.xlabel('Dimensions (D)')
+plt.ylabel('Average Squared Distance')
+plt.grid(True)
+plt.show()
+
+# Diffusion simulation of 1000 walkers in 2D with step size 0.05 after 10, 100, and 500 steps
+n_walkers = 1000
+rand_pos = np.random.rand(n_walkers, 2)
+n_steps_list = [10, 100, 500]
+step_size = 0.05
+
+for n_steps in n_steps_list:
+    plt.figure()
+    plt.scatter(rand_pos[:, 0], rand_pos[:, 1], label='Start', color='blue')
+    for i in range(n_walkers):
+        walker = Walker(ndim=2, step_size=step_size)
+        new_pos = walker.doSteps(n_steps)[-1]
+        plt.scatter(new_pos[0], new_pos[1], color='red', alpha=0.1)
+    plt.title(f'Positions of walkers after {n_steps} steps')
+    plt.xlabel('X')
+    plt.ylabel('Y')
+    plt.legend()
+    plt.show()

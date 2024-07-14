@@ -1,0 +1,57 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+def calculate_transition_probability(half_life, time_step):
+    return 1 - 2**(-time_step / half_life)
+
+def evolve_state(state, transition_probability):
+    if np.random.uniform(0, 1) < transition_probability:
+        return 'A'
+    else:
+        return state
+
+def evolve_system(states, transition_probs):
+    new_states = []
+    for state, prob in zip(states, transition_probs):
+        new_states.append(evolve_state(state, prob))
+    return new_states
+
+def simulation(n_steps, n_trials):
+    results = []
+    time_steps = np.linspace(0, 200, n_steps)
+    
+    for _ in range(n_trials):
+        state = ['C'] * 250
+        results_temp = []
+        
+        transition_probs_flux = [calculate_transition_probability(3.2, 1)] * 250
+        transition_probs_no_flux = [calculate_transition_probability(10.1, 1),
+                                    calculate_transition_probability(15.7, 1),
+                                    0]
+        
+        for time_step in time_steps:
+            if time_step < 100:
+                state = evolve_system(state, transition_probs_flux)
+            else:
+                state = evolve_system(state, transition_probs_no_flux)
+            
+            results_temp.append(state.count('A'))
+        
+        results.append(results_temp)
+    
+    return np.array(results)
+
+n_trials = 20
+n_steps = 200
+
+results = simulation(n_steps, n_trials)
+
+average_A_atoms = np.mean(results, axis=0)
+uncertainty_A_atoms = np.std(results, axis=0)
+
+time_steps = np.linspace(0, 200, n_steps)
+plt.errorbar(time_steps, average_A_atoms, yerr=uncertainty_A_atoms, fmt='-o')
+plt.xlabel('Time (hours)')
+plt.ylabel('Number of A nuclei')
+plt.title('Average Number of A Nuclei Over Time')
+plt.show()

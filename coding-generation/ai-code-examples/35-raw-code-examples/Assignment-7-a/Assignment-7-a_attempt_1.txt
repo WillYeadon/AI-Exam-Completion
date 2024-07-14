@@ -1,0 +1,76 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Define the function f(x) = x - tanh(2x)
+def f(x):
+    return x - np.tanh(2*x)
+
+# Derivative of the function f(x)
+def df(x):
+    return 1 - 2*np.cosh(2*x)**(-2)
+
+# Implement the Newton-Raphson method
+def newton_raphson(f, df, x0, tol, max_iter):
+    x = x0
+    for i in range(max_iter):
+        x = x - f(x)/df(x)
+        if abs(f(x)) < tol:
+            return x, i
+    return x, max_iter
+
+# Implement the bisection method
+def bisection(f, a, b, tol, max_iter):
+    if f(a)*f(b) > 0:
+        return None, max_iter
+    for i in range(max_iter):
+        c = (a + b) / 2
+        if f(c) == 0 or (b - a) / 2 < tol:
+            return c, i
+        if f(a)*f(c) < 0:
+            b = c
+        else:
+            a = c
+    return c, max_iter
+
+# Implement the secant method
+def secant(f, x0, x1, tol, max_iter):
+    for i in range(max_iter):
+        x2 = x1 - f(x1)*(x1 - x0)/(f(x1) - f(x0))
+        x0, x1 = x1, x2
+        if abs(f(x2)) < tol:
+            return x2, i
+    return x2, max_iter
+
+# Initialize parameters
+x0 = -1
+x1 = 1
+a = -2
+b = 2
+tol = 1e-8
+max_iter = 100
+
+# Initialize arrays to store the number of iterations
+iterations_newton = []
+iterations_bisection = []
+iterations_secant = []
+
+# Perform iterations for different initial points
+for x0 in np.linspace(-2, 2, 100):
+    root_newton, iter_newton = newton_raphson(f, df, x0, tol, max_iter)
+    root_bisection, iter_bisection = bisection(f, a, b, tol, max_iter)
+    root_secant, iter_secant = secant(f, x0, x1, tol, max_iter)
+    iterations_newton.append(iter_newton)
+    iterations_bisection.append(iter_bisection)
+    iterations_secant.append(iter_secant)
+
+# Plotting the convergence behavior
+plt.figure(figsize=(10, 7))
+plt.plot(np.linspace(-2, 2, 100), iterations_newton, label='Newton-Raphson')
+plt.plot(np.linspace(-2, 2, 100), iterations_bisection, label='Bisection')
+plt.plot(np.linspace(-2, 2, 100), iterations_secant, label='Secant')
+plt.xlabel('Initial guess')
+plt.ylabel('Iterations to Convergence')
+plt.title('Convergence of Different Root Finding Methods')
+plt.legend()
+plt.grid(True)
+plt.show()

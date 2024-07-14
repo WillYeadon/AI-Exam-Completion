@@ -1,0 +1,32 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+def integrate(n_points, dim):
+    inside_points = 0
+    for _ in range(n_points):
+        point = np.random.uniform(-1, 1, dim)
+        if np.linalg.norm(point) <= 1:
+            inside_points += 1
+    return (2**dim) * inside_points / n_points
+
+np.random.seed(42)
+
+# Define the dimensions to test
+dimensions = [2, 3, 4, 5, 6]
+
+# Number of points for testing
+n_points = np.logspace(1, 5, num=50, dtype=int)
+
+# Perform Monte Carlo integration for each dimension and different number of points
+results = {dim: [abs(np.pi - integrate(n, dim)) for n in n_points] for dim in dimensions}
+
+# Generate the plot
+plt.figure(figsize=(10, 6))
+for dim in dimensions:
+    plt.loglog(n_points, results[dim], label=f'Dimensions: {dim}')
+
+plt.xlabel('Number of Points (log scale)')
+plt.ylabel('Error')
+plt.title('Monte Carlo Integration Error Scaling with Dimension')
+plt.legend()
+plt.show()

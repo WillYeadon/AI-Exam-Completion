@@ -1,0 +1,47 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+def findPi(n_points):
+    inside_circle = 0
+    for _ in range(n_points):
+        x, y = np.random.rand(2)  # Generate two random numbers (x, y) in the range [0, 1)
+        if x**2 + y**2 <= 1:
+            inside_circle += 1
+    return (inside_circle / n_points) * 4
+
+def integrate(n_points, dim):
+    inside_ball = 0
+    for _ in range(n_points):
+        point = np.random.uniform(-1, 1, dim)  # Generate a `dim`-dimensional point in the range [-1, 1)
+        if np.sum(point**2) <= 1:
+            inside_ball += 1
+    volume_cube = (2 ** dim)
+    return (inside_ball / n_points) * volume_cube
+
+# Function to calculate errors and generate plot
+def plot_integration_errors():
+    n_points_list = [10**i for i in range(1, 6)]
+    dimensions = [2, 3, 4, 5]
+    
+    plt.figure(figsize=(10, 6))
+
+    for dim in dimensions:
+        errors = []
+        for n_points in n_points_list:
+            estimates = [integrate(n_points, dim) for _ in range(20)]  # Multiple estimates for averaging
+            mean_estimate = np.mean(estimates)
+            std_estimate = np.std(estimates)
+            errors.append(std_estimate / np.sqrt(20))  # Error estimation using standard deviation
+        plt.loglog(n_points_list, errors, label=f'Dimension {dim}')
+
+    # Ideal 1/sqrt(N) scaling line
+    n_points_theoretical = np.array(n_points_list)
+    theoretical_errors = 1 / np.sqrt(n_points_theoretical)
+    plt.loglog(n_points_theoretical, theoretical_errors, 'k--', label='1/sqrt(N) scaling')
+
+    plt.xlabel('Number of points (N)')
+    plt.ylabel('Integration error')
+    plt.title('Integration error scaling with Monte Carlo method')
+    plt.legend()
+    plt.grid(True, which="both", ls="--")
+    plt.show()

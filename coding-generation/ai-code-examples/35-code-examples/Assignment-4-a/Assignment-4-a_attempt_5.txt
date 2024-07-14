@@ -1,0 +1,79 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Constants
+g = 9.81  # acceleration due to gravity in m/s^2
+rho = 1.22  # density of air in kg/m^3
+Cd = 0.47  # drag coefficient
+r = 0.105  # radius of the cannonball in meters
+
+# Function to calculate cross-sectional area of a sphere
+def cross_area(radius):
+    return np.pi * radius**2
+
+# Function to calculate the mass of an iron sphere
+def sphere_mass(radius):
+    return (4/3) * np.pi * radius**3 * 7870  # density of iron: 7870 kg/m^3
+
+# Calculating area and mass of the cannonball
+A = cross_area(r)
+m = sphere_mass(r)
+
+# Function to model cannonball's motion
+def cannonball_motion(v0, theta):
+    vx = v0 * np.cos(theta)
+    vy = v0 * np.sin(theta)
+
+    # Function defining the differential equations for cannonball motion
+    def f(u):
+        x = u[0]
+        y = u[1]
+        dx_dt = vx
+        dy_dt = vy
+        dvx_dt = -np.sign(vx) * 0.5 * rho * Cd * A * vx**2 / m
+        dvy_dt = -g - np.sign(vy) * 0.5 * rho * Cd * A * vy**2 / m
+        return np.array([dx_dt, dy_dt, dvx_dt, dvy_dt])
+
+    return f
+
+# Euler's method for solving the ODE
+def euler(f, u0, dt, T):
+    num_steps = int(T / dt)
+    u = np.zeros((num_steps, 4))
+    u[0] = u0
+    for i in range(1, num_steps):
+        u[i] = u[i-1] + dt * f(u[i-1])
+    return u
+
+# Function to find the x-coordinate where the trajectory crosses y=0
+def find_range(u):
+    idx = np.where(u[:, 1] < 0)[0][0]
+    return u[idx, 0]
+
+# Function to find the range of the projectile
+def projectile_range(v0, theta):
+    u0 = np.array([0, 0, v0 * np.cos(theta), v0 * np.sin(theta)])
+    dt = 0.01
+    T = 30
+    f = cannonball_motion(v0, theta)
+    u = euler(f, u0, dt, T)
+    return find_range(u)
+
+# Visualization of different trajectories for various initial angles
+angles = [np.radians(a) for a in range(5, 90, 10)]
+vel0 = 125
+
+for angle in angles:
+    u0 = np.array([0, 0, vel0 * np.cos(angle), vel0 * np.sin(angle)])
+    dt = 0.01
+    T = 30
+    f = cannonball_motion(vel0, angle)
+    u = euler(f, u0, dt, T)
+
+    plt.plot(u[:, 0], u[:, 1], label=f'{np.degrees(angle):.0f} degrees')
+
+plt.xlabel('Horizontal Distance (m)')
+plt.ylabel('Vertical Distance (m)')
+plt.title('Projectile Motion Trajectories for Various Initial Angles')
+plt.legend()
+plt.show()

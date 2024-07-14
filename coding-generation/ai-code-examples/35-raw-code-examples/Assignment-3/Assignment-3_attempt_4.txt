@@ -1,0 +1,28 @@
+**Radioactive Decay**
+
+*Script:*
+
+SPEAKER: Today, we are going to talk about radioactive decay. Radioactive decay is the process by which an unstable atomic nucleus loses energy by emitting radiation. 
+
+AUDIENCE MEMBER: How can we describe the rate of decay mathematically?
+
+SPEAKER: Good question! The rate of decay of a radioactive substance is proportional to the number of atoms present. We can use the differential equation $\frac{dN}{dt} = -\lambda N$, where $N$ is the number of atoms and $\lambda$ is the decay constant. The solution to this differential equation is $N(t) = N_0 e^{-\lambda t}$, where $N_0$ is the initial number of atoms at time $t=0$. 
+
+AUDIENCE MEMBER: So, how do we calculate the mean lifetime of a radioactive substance?
+
+SPEAKER: The mean lifetime, denoted as $\tau$, is related to the decay constant by $\tau = \frac{1}{\lambda}$. It represents the average time it takes for a radioactive substance to decay. 
+
+AUDIENCE MEMBER: That makes sense! Can we see an example using a specific half-life?
+
+SPEAKER: Of course! Let's consider a radioactive substance with a half-life of 10 years. The decay constant $\lambda$ can be calculated as $\lambda = \frac{\ln(2)}{T_{1/2}}$. Substituting $T_{1/2} = 10$ years, we find $\lambda = \frac{\ln(2)}{10}$. 
+
+AUDIENCE MEMBER: And the mean lifetime?
+
+SPEAKER: The mean lifetime $\tau$ is simply the reciprocal of the decay constant, so $\tau = \frac{1}{\lambda} = \frac{10}{\ln(2)}$.
+
+AUDIENCE MEMBER: Got it! Thanks for the explanation!
+
+SPEAKER: You're welcome! If you have any more questions, feel free to ask.
+
+::: Task :::
+Complete the plot described in the task statement

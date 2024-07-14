@@ -1,0 +1,65 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Define transition probabilities
+def transition_probability(current_state, next_state, dt, neutron_flux):
+    if neutron_flux:
+        if (current_state == 'C' and next_state == 'A'):
+            return (1 - np.exp(-dt/3.2))
+        elif (current_state == 'A' and next_state == 'B'):
+            return (1 - np.exp(-dt/10.1))
+        elif (current_state == 'B' and next_state == 'C'):
+            return (1 - np.exp(-dt/15.7))
+        else:
+            return 0
+    else:
+        if (current_state == 'A' and next_state == 'B'):
+            return (1 - np.exp(-dt/10.1))
+        elif (current_state == 'B' and next_state == 'C'):
+            return (1 - np.exp(-dt/15.7))
+        else:
+            return 0
+
+# Define transition rules with and without neutron flux
+def transition_rules(current_state, dt, neutron_flux):
+    possible_states = ['A', 'B', 'C']
+    transition_probs = [transition_probability(current_state, state, dt, neutron_flux) for state in possible_states]
+    next_state = np.random.choice(possible_states, p=transition_probs)
+    return next_state
+
+# Simulation function
+def simulation(n_steps, neutron_flux):
+    state_counts = {'A': [], 'B': [], 'C': []}
+    state = 'C'
+    for i in range(n_steps):
+        dt = 100 / n_steps
+        state_counts[state].append(state)
+        state = transition_rules(state, dt, neutron_flux)
+    return state_counts
+
+# Run simulation 20 times
+n_simulations = 20
+n_steps = 200
+neutron_flux = [True, False]
+all_results = []
+
+for _ in range(n_simulations):
+    results = []
+    for flux in neutron_flux:
+        state_counts = simulation(n_steps, flux)
+        results.append(state_counts['A'])
+
+    all_results.append(results)
+
+# Calculate average and uncertainty
+average_A_counts = np.average(all_results, axis=0)
+uncertainty_A_counts = np.std(all_results, axis=0)
+
+# Plotting
+plt.errorbar(range(n_steps), average_A_counts[0], yerr=uncertainty_A_counts[0], label='With Neutron Flux')
+plt.errorbar(range(n_steps), average_A_counts[1], yerr=uncertainty_A_counts[1], label='Without Neutron Flux')
+plt.xlabel('Time Steps')
+plt.ylabel('Number of A Nuclei')
+plt.title('Average Number of A Nuclei as a Function of Time')
+plt.legend()
+plt.show()

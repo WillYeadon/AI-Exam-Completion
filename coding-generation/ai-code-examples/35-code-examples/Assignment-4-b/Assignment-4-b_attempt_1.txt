@@ -1,0 +1,49 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Constants
+g = 9.81  # acceleration due to gravity in m/s^2
+density_iron = 7870  # density of iron in kg/m^3
+R = 0.02  # radius of the cannonball in meters
+
+# Function to calculate cross-sectional area of a sphere
+def cross_sectional_area(radius):
+    return np.pi * radius**2
+
+# Function to calculate the mass of an iron sphere
+def sphere_mass(radius):
+    return (4/3) * np.pi * radius**3 * density_iron
+
+# Calculating area and mass of the cannonball
+A = cross_sectional_area(R)
+m = sphere_mass(R)
+
+# Function to model cannonball's motion
+def cannonball_motion(v0, theta, x0, y0, dt, air_resistance=False):
+    ...
+
+# Euler's method for solving the ODE
+def solve_euler(v0, theta, x0, y0, dt, air_resistance=False):
+    ...
+
+# Function to find the x-coordinate where the trajectory crosses y=0
+def find_crossing(v0, theta, x0, y0, dt, air_resistance=False):
+    ...
+
+# Function to find the range of the projectile
+def find_range(v0, theta, x0, y0, dt, air_resistance=False):
+    ...
+
+# Stores the trajectories for different values of the initial angle
+# Using the same velocity v0=125 m/s for all angles
+results = {}  # Dictionary to store the results
+
+# ::: Task :::
+# Analyze the effect of initial velocity on the range of a projectile,
+# both with and without air resistance.
+
+# Plot the range for different initial velocities using a constant angle of theta=60 degrees
+# Generate two curves for each velocity: one considering air resistance and the other without air resistance
+# Include axis labels, a descriptive title, and a legend to distinguish between the curves
+
+# HERE HERE HER

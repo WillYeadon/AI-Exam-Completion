@@ -1,0 +1,85 @@
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Define the function and its derivative
+def f(x):
+    return x - np.tanh(2 * x)
+
+def df(x):
+    return 1 - 2 / (np.cosh(2 * x) ** 2)
+
+# Newton-Raphson method
+def newton_raphson(x0, tol=1e-6, max_iter=100):
+    x = x0
+    history = [x]
+    for i in range(max_iter):
+        fx = f(x)
+        dfx = df(x)
+        if dfx == 0:
+            break
+        x_new = x - fx / dfx
+        history.append(x_new)
+        if abs(x_new - x) < tol:
+            break
+        x = x_new
+    return history
+
+# Bisection method
+def bisection(a, b, tol=1e-6, max_iter=100):
+    history = []
+    if f(a) * f(b) >= 0:
+        raise ValueError("The function must have different signs at the endpoints a and b")
+    for i in range(max_iter):
+        c = (a + b) / 2.0
+        history.append(c)
+        if f(c) == 0 or (b - a) / 2.0 < tol:
+            break
+        if f(c) * f(a) < 0:
+            b = c
+        else:
+            a = c
+    return history
+
+# Secant method
+def secant(x0, x1, tol=1e-6, max_iter=100):
+    history = [x0, x1]
+    for i in range(max_iter):
+        f_x0 = f(x0)
+        f_x1 = f(x1)
+        if f_x0 == f_x1:
+            break
+        x_new = x1 - f_x1 * (x1 - x0) / (f_x1 - f_x0)
+        history.append(x_new)
+        if abs(x_new - x1) < tol:
+            break
+        x0, x1 = x1, x_new
+    return history
+
+# Initial guesses and intervals
+x0_newton = 1.0 # Initial guess for Newton-Raphson
+x0_secant = 0.0 # First initial guess for Secant
+x1_secant = 1.0 # Second initial guess for Secant
+a_bisec = 0.0   # Left endpoint for Bisection
+b_bisec = 2.0   # Right endpoint for Bisection
+
+# Run the methods
+history_newton = newton_raphson(x0_newton)
+history_bisection = bisection(a_bisec, b_bisec)
+history_secant = secant(x0_secant, x1_secant)
+
+# Create convergence plot
+plt.figure(figsize=(10, 6))
+plt.plot(history_newton, 'o-', label="Newton-Raphson")
+plt.plot(history_bisection, 's-', label="Bisection")
+plt.plot(history_secant, 'x-', label="Secant")
+plt.yscale('log')
+plt.xlabel("Iteration")
+plt.ylabel("Root estimate (log scale)")
+plt.title("Convergence of Root-Finding Methods")
+plt.legend()
+plt.grid(True)
+sns.despine()
+
+# Show the plot
+plt.show()

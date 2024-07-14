@@ -1,0 +1,51 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Define the function f(x) = x^2 * cos(2x)
+def f(x):
+    return x**2 * np.cos(2*x)
+
+# Define the indefinite integral of f(x)
+def g(x):
+    return (x**2/2) * np.cos(2*x) + (1/2) * np.sin(2*x)
+
+# Define a function to calculate the definite integral of f(x) over the interval (x_min, x_max)
+def definite_integral_f(x_min, x_max):
+    return g(x_max) - g(x_min)
+
+# Define a function to calculate the definite integral of f(x) over the interval (x_min, x_max) using Simpson's rule with N panels
+def definite_integral_simpson(x_min, x_max, N):
+    panels = np.linspace(x_min, x_max, N+1)
+    h = (x_max - x_min) / N
+    integral = f(x_min) + f(x_max)
+    
+    for i in range(1, N):
+        if i % 2 == 0:
+            integral += 2 * f(panels[i])
+        else:
+            integral += 4 * f(panels[i])
+    
+    return (h/3) * integral
+
+# Calculate the analytical definite integral over the interval (0, 1)
+analytical_result = definite_integral_f(0, 1)
+
+# Initialize lists to store data for the plot
+N_values = []
+errors = []
+
+# Iterate through different number of panels N to calculate the numerical integral and compare with the analytical result
+for N in range(2, 100):
+    numerical_result = definite_integral_simpson(0, 1, N)
+    relative_error = np.abs(numerical_result - analytical_result) / np.abs(analytical_result)
+    
+    N_values.append(N)
+    errors.append(relative_error)
+
+# Create a log-log plot of the error vs number of panels
+plt.figure()
+plt.loglog(N_values, errors)
+plt.xlabel('Number of Panels (N)')
+plt.ylabel('Fractional Error')
+plt.title('Fractional Error of Numerical Integration using Simpson\'s Rule')
+plt.show()

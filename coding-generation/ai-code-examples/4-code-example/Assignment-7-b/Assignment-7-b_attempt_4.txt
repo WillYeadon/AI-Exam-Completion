@@ -1,0 +1,50 @@
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.cm
+
+def banana(r):
+    x, y = r
+    return (1 - x)**2 + 100 * (y - x**2)**2
+
+def banana_grad(r):
+    x, y = r
+    df_dx = -2 * (1 - x) - 400 * x * (y - x**2)
+    df_dy = 200 * (y - x**2)
+    return np.array([df_dx, df_dy])
+
+def gradientDescent(df, r0, eta, n_steps):
+    trajectory = [r0]
+    r = r0
+    for _ in range(n_steps):
+        r = r - eta * df(r)
+        trajectory.append(r)
+    return np.array(trajectory)
+
+# Setting the plot range and step size
+x = np.linspace(-1.5, 1.5, 400)
+y = np.linspace(-0.5, 3, 400)
+X, Y = np.meshgrid(x, y)
+Z = banana([X, Y])
+
+# Plotting the contours of the banana function
+plt.figure(figsize=(10, 8))
+im = plt.imshow(Z, extent=[-1.5, 1.5, -0.5, 3], origin='lower', cmap=matplotlib.cm.gray, alpha=0.5)
+plt.colorbar(im, label='Banana function value')
+
+# Initial point
+r_0 = np.array([0.2, 1.0])
+etas = [0.0005, 0.001, 0.002]
+n_steps = 10000
+
+# Gradient Descent trajectories
+for eta in etas:
+    trajectory = gradientDescent(banana_grad, r_0, eta, n_steps)
+    plt.plot(trajectory[:, 0], trajectory[:, 1], label=f'eta={eta}')
+
+# Setting the labels and title
+plt.xlabel('x')
+plt.ylabel('y')
+plt.title('Gradient Descent Trajectories on the Banana Function')
+plt.legend()
+
+plt.show()

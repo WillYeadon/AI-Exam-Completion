@@ -1,0 +1,58 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+class RandomWalker:
+    def __init__(self, ndim, s=1):
+        self.ndim = ndim
+        self.s = s
+        self.possible_steps = self.generate_steps()
+        self.pos = np.zeros(ndim)
+    
+    def generate_steps(self):
+        steps = []
+        for i in range(self.ndim):
+            step_vector = np.zeros(self.ndim)
+            step_vector[i] = self.s
+            steps.append(step_vector.copy())
+            step_vector[i] = -self.s
+            steps.append(step_vector.copy())
+        return steps
+    
+    def pick_step(self):
+        return self.possible_steps[np.random.randint(0, len(self.possible_steps))]
+    
+    def do_steps(self, n):
+        trajectory = np.zeros((n + 1, self.ndim))
+        for i in range(1, n + 1):
+            step = self.pick_step()
+            self.pos += step
+            trajectory[i] = self.pos
+        return trajectory
+
+n_walkers = 400
+steps = 100
+dimensions = [1, 2, 3, 4]
+avg_squared_distances = []
+
+for ndim in dimensions:
+    all_distances = []
+    for _ in range(n_walkers):
+        walker = RandomWalker(ndim)
+        trajectory = walker.do_steps(steps)
+        squared_distances = np.sum(trajectory**2, axis=1)
+        all_distances.append(squared_distances)
+    avg_squared_distance = np.mean(all_distances, axis=0)
+    avg_squared_distances.append(avg_squared_distance)
+
+steps_array = np.arange(steps + 1)
+
+plt.figure(figsize=(12, 8))
+for i, ndim in enumerate(dimensions):
+    plt.plot(steps_array, avg_squared_distances[i], label=f'{ndim}D')
+
+plt.xlabel('Number of Steps')
+plt.ylabel('Average Squared Distance')
+plt.title('Average Squared Distance vs. Number of Steps for Different Dimensions')
+plt.legend()
+plt.grid()
+plt.show()

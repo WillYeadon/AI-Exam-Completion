@@ -1,0 +1,80 @@
+import numpy as np
+import matplotlib.pyplot as plt
+import random
+
+def has_transition_occurred(probability):
+    r = random.random()
+    if r < probability:
+        return True
+    else:
+        return False
+
+def evolve_system(current_state, transition_rules):
+    new_state = current_state.copy()
+    for i, rule in enumerate(transition_rules):
+        current_amount = new_state[i]
+        for _ in range(current_amount):
+            if has_transition_occurred(rule[1]):
+                new_state[i] -= 1
+                new_state[rule[0]] += 1
+    return new_state
+
+def simulate_evolution(initial_state, transition_rules, n_timesteps):
+    state = initial_state
+    state_history = [state]
+    for _ in range(n_timesteps):
+        state = evolve_system(state, transition_rules)
+        state_history.append(state)
+    return state_history
+
+# Initial amounts of A, B, and C nuclei
+NA = 0
+NB = 0
+NC = 250
+initial_state = [NA, NB, NC]
+
+# Transition rules: [to_state, probability]
+transition_rules = [
+    [2, 1 - np.exp(-0.693 / 10.1)],  # A decay
+    [0, 1 - np.exp(-0.693 / 15.7)],  # B decay
+    [1, 1 - np.exp(-0.693 / 3.2)]    # C activation to A
+]
+
+# Simulation parameters
+n_timesteps = 200
+
+# Simulate the evolution of the system
+state_history_flux_on = simulate_evolution(initial_state, transition_rules, n_timesteps)
+
+# Turn off neutron flux for further simulation
+transition_rules_no_flux = transition_rules.copy()
+transition_rules_no_flux.pop()
+
+# Simulate the evolution without neutron flux
+state_history_flux_off = simulate_evolution(state_history_flux_on[-1], transition_rules_no_flux, n_timesteps)
+
+# Extract the number of nuclei at each time step
+A_flux_on = [state[0] for state in state_history_flux_on]
+B_flux_on = [state[1] for state in state_history_flux_on]
+C_flux_on = [state[2] for state in state_history_flux_on]
+
+A_flux_off = [state[0] for state in state_history_flux_off]
+B_flux_off = [state[1] for state in state_history_flux_off]
+C_flux_off = [state[2] for state in state_history_flux_off]
+
+# Plotting
+time_steps = np.linspace(0, n_timesteps, n_timesteps+1)
+plt.figure(figsize=(12, 6))
+plt.plot(time_steps, A_flux_on, label='A with flux on', color='blue')
+plt.plot(time_steps, B_flux_on, label='B with flux on', color='green')
+plt.plot(time_steps, C_flux_on, label='C with flux on', color='red')
+plt.plot(time_steps, A_flux_off, label='A with flux off', linestyle='--', color='blue')
+plt.plot(time_steps, B_flux_off, label='B with flux off', linestyle='--', color='green')
+plt.plot(time_steps, C_flux_off, label='C with flux off', linestyle='--', color='red')
+
+plt.title('Radioactive Decay Simulation')
+plt.xlabel('Time Steps')
+plt.ylabel('Number of Nuclei')
+plt.legend()
+plt.grid(True)
+plt.show()

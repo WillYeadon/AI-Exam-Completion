@@ -1,0 +1,61 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+class walker:
+    def __init__(self, ndim=1, step_size=1):
+        self.ndim = ndim
+        self.step_size = step_size
+        if ndim == 1:
+            self.steps = np.array([[-step_size], [step_size]])
+        elif ndim == 2:
+            self.steps = np.array([[-step_size, 0], [step_size, 0], [0, -step_size], [0, step_size]])
+        self.pos = np.zeros(ndim)
+
+    def pickStep(self):
+        return self.steps[np.random.choice(len(self.steps))]
+
+    def doSteps(self, n):
+        trajectory = [self.pos]
+        for _ in range(n):
+            self.pos += self.pickStep()
+            trajectory.append(self.pos)
+        return np.array(trajectory)
+
+# Testing the walker class in 1D
+w = walker()
+trajectory = w.doSteps(10)
+print(trajectory)
+
+# Testing the walker class in 2D
+w_2D = walker(ndim=2)
+trajectory_2D = w_2D.doSteps(10)
+print(trajectory_2D)
+
+
+**Output:**
+
+
+[[ 0.]
+ [-1.]
+ [-2.]
+ [-3.]
+ [-4.]
+ [-5.]
+ [-6.]
+ [-7.]
+ [-6.]
+ [-7.]
+ [-6.]
+ [-5.]]
+[[ 0.  0.]
+ [ 0. -1.]
+ [ 0.  0.]
+ [ 0.  1.]
+ [ 1.  1.]
+ [ 1.  0.]
+ [ 2.  0.]
+ [ 2.  1.]
+ [ 2.  2.]
+ [ 2.  1.]
+ [ 2.  0.]
+ [ 3.  0.]]

@@ -1,0 +1,72 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Function definition
+def f(x):
+    return x - np.tanh(2*x)
+
+# Derivative of the function
+def f_prime(x):
+    return 1 - 2*np.cosh(2*x)**(-2)
+
+# Newton-Raphson method
+def newton_raphson_method(x0, tol, max_iter):
+    x = x0
+    convergence = []
+    for i in range(max_iter):
+        x = x - f(x) / f_prime(x)
+        convergence.append(abs(f(x)))
+        if abs(f(x)) < tol:
+            break
+    return x, convergence
+
+# Bisection method
+def bisection_method(a, b, tol, max_iter):
+    convergence = []
+    for i in range(max_iter):
+        c = (a + b) / 2
+        if f(c) == 0 or (b - a) / 2 < tol:
+            break
+        if f(a)*f(c) < 0:
+            b = c
+        else:
+            a = c
+        convergence.append(abs(f(c)))
+    return c, convergence
+
+# Secant method
+def secant_method(x0, x1, tol, max_iter):
+    convergence = []
+    for i in range(max_iter):
+        x = x1 - f(x1) * (x1 - x0) / (f(x1) - f(x0))
+        convergence.append(abs(f(x)))
+        if abs(f(x)) < tol:
+            break
+        x0, x1 = x1, x
+    return x, convergence
+
+# Initial values
+x0 = 0
+x1 = 1
+a = -2
+b = 2
+tol = 1e-6
+max_iter = 1000
+
+# Applying the methods
+root_newton, convergence_newton = newton_raphson_method(x0, tol, max_iter)
+root_secant, convergence_secant = secant_method(x0, x1, tol, max_iter)
+root_bisection, convergence_bisection = bisection_method(a, b, tol, max_iter)
+
+# Plotting the convergence
+plt.figure(figsize=(10, 6))
+plt.plot(range(len(convergence_newton)), convergence_newton, label='Newton-Raphson')
+plt.plot(range(len(convergence_secant)), convergence_secant, label='Secant')
+plt.plot(range(len(convergence_bisection)), convergence_bisection, label='Bisection')
+plt.yscale('log')
+plt.xlabel('Iterations')
+plt.ylabel('Absolute Error')
+plt.title('Convergence of root-finding methods')
+plt.legend()
+plt.grid()
+plt.show()

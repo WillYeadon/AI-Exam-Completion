@@ -1,0 +1,88 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Define the function and its derivative
+def f(x):
+    return x**3 - 2*x - 5
+
+def df(x):
+    return 3*x**2 - 2
+
+# Implementing the Newton-Raphson method
+def NewtonRaphson(f, df, x0, tol, max_iter):
+    x = x0
+    error = np.abs(f(x))
+    errors = []
+    iterations = 0
+    
+    while error > tol and iterations < max_iter:
+        x = x - f(x)/df(x)
+        error = np.abs(f(x))
+        errors.append(error)
+        iterations += 1
+        
+    return errors
+
+# Implementing the bisection method
+def bisect(f, a, b, tol, max_iter):
+    errors = []
+    
+    if f(a) * f(b) >= 0:
+        return errors
+    
+    for i in range(max_iter):
+        c = (a + b) / 2
+        if f(c) == 0:
+            break
+        if f(c) * f(a) < 0:
+            b = c
+        else:
+            a = c
+        errors.append(np.abs(b - a))
+        if np.abs(b - a) < tol:
+            break
+    
+    return errors
+
+# Implementing the secant method
+def secant(f, x0, x1, tol, max_iter):
+    errors = []
+    
+    errors.append(np.abs(x1 - x0))
+    
+    for i in range(max_iter):
+        x2 = x1 - f(x1) * ((x1 - x0) / (f(x1) - f(x0)))
+        
+        errors.append(np.abs(x2 - x1))
+        
+        if np.abs(x2 - x1) < tol:
+            break
+        
+        x0 = x1
+        x1 = x2
+    
+    return errors
+
+# Initialize parameters for the root-finding methods
+x0 = 1.5
+x1 = 1.0
+tol = 1e-10
+max_iter = 100
+
+# Calculate errors for each method
+errors_newton = NewtonRaphson(f, df, x0, tol, max_iter)
+errors_bisect = bisect(f, 1, 2, tol, max_iter)
+errors_secant = secant(f, x0, x1, tol, max_iter)
+
+# Plotting the errors for each method
+plt.figure(figsize=(10, 6))
+plt.plot(errors_newton, label='Newton-Raphson', color='blue')
+plt.plot(errors_bisect, label='Bisection', color='red')
+plt.plot(errors_secant, label='Secant', color='green')
+
+plt.yscale('log')
+plt.xlabel('Iterations')
+plt.ylabel('Absolute Error')
+plt.title('Convergence of Root-Finding Methods')
+plt.legend()
+plt.show()

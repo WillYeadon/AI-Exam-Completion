@@ -1,0 +1,35 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+def f(x):
+    return x**2 * np.cos(2*x)
+
+def analytical_integral(xmin, xmax):
+    return (-1/2) * (xmin**2 * np.sin(2*xmin) + 1/2 * np.cos(2*xmin) - xmax**2 * np.sin(2*xmax) - 1/2 * np.cos(2*xmax))
+
+def numerical_integral(xmin, xmax, N):
+    h = (xmax - xmin) / N
+    x = np.linspace(xmin, xmax, N+1)
+    y = f(x)
+    integral = h/3 * (y[0] + y[N] + 4*np.sum(y[1:N:2]) + 2*np.sum(y[2:N:2]))
+    return integral
+
+xmin = 0
+xmax = 2*np.pi
+
+panel_counts = [4, 8, 16, 32, 64, 128, 256, 512, 1024]
+errors = []
+
+for N in panel_counts:
+    numerical_result = numerical_integral(xmin, xmax, N)
+    analytical_result = analytical_integral(xmin, xmax)
+    error = np.abs(numerical_result - analytical_result) / np.abs(analytical_result)
+    errors.append(error)
+
+plt.figure(figsize=(10, 6))
+plt.loglog(panel_counts, errors, marker='o', color='b', linestyle='-', linewidth=2, markersize=8)
+plt.title('Fractional Error in Numerical Integration using Simpson\'s Rule')
+plt.xlabel('Number of Panels')
+plt.ylabel('Fractional Error')
+plt.grid(True, which="both", ls="--")
+plt.show()

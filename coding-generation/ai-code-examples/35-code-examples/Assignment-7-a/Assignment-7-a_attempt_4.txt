@@ -1,0 +1,77 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Function and its derivative
+def f(x):
+    return np.sin(np.pi * x) + x
+
+def df(x):
+    return np.pi * np.cos(np.pi * x) + 1
+
+# Newton-Raphson method
+def NewtonRaphson(f, df, x0, tol, max_iter):
+    x = x0
+    errors = []
+    for i in range(max_iter):
+        x_new = x - f(x) / df(x)
+        error = np.abs(x_new - x)
+        errors.append(error)
+        if error < tol:
+            break
+        x = x_new
+    return errors
+
+# Bisection method
+def bisect(f, a, b, tol, max_iter):
+    errors = []
+    if f(a) * f(b) >= 0:
+        raise ValueError("The function values at the interval endpoints must differ in sign")
+    
+    for i in range(max_iter):
+        c = (a + b) / 2
+        if f(c) == 0 or (b - a) / 2 < tol:
+            break
+        
+        if f(a) * f(c) < 0:
+            b = c
+        else:
+            a = c
+        
+        errors.append(abs(b - a))
+    
+    return errors
+
+# Secant method
+def secant(f, x0, x1, tol, max_iter):
+    errors = []
+    for i in range(max_iter):
+        x_new = x1 - f(x1) * (x1 - x0) / (f(x1) - f(x0))
+        error = np.abs(x_new - x1)
+        errors.append(error)
+        if error < tol:
+            break
+        x0, x1 = x1, x_new
+    return errors
+
+# Calculate errors for each method
+x0 = 1.5
+tol = 1e-8
+max_iter = 100
+
+newton_errors = NewtonRaphson(f, df, x0, tol, max_iter)
+bisect_errors = bisect(f, 0, 2, tol, max_iter)
+secant_errors = secant(f, 1.0, 1.5, tol, max_iter)
+
+# Plotting
+plt.figure(figsize=(12, 6))
+plt.plot(range(len(newton_errors)), newton_errors, label='Newton-Raphson', color='blue')
+plt.plot(range(len(bisect_errors)), bisect_errors, label='Bisection', color='red')
+plt.plot(range(len(secant_errors)), secant_errors, label='Secant', color='green')
+
+plt.yscale('log')
+plt.xlabel('Iterations')
+plt.ylabel('Error')
+plt.title('Convergence of Root Finding Methods')
+plt.legend()
+
+plt.show()

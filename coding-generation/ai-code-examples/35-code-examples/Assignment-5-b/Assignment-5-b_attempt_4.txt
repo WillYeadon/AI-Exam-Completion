@@ -1,0 +1,73 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+def transition_probabilities(delta_t, lambda_A, lambda_B, lambda_C):
+    p_A = 1 - np.exp(-lambda_A * delta_t)
+    p_B = 1 - np.exp(-lambda_B * delta_t)
+    p_C_flux = 1 - np.exp(-lambda_C * delta_t)
+    p_C_no_flux = 0
+    
+    return p_A, p_B, p_C_flux, p_C_no_flux
+
+def transition_rules(state, p_A, p_B, p_C):
+    rand_num = np.random.random()
+    
+    if state == 'A':
+        if rand_num < p_A:
+            return 'B'
+    elif state == 'B':
+        if rand_num < p_B:
+            return 'C'
+    elif state == 'C':
+        if rand_num < p_C:
+            return 'A'
+    
+    return state
+
+def evolve_state(state, p_A, p_B, p_C):
+    new_state = transition_rules(state, p_A, p_B, p_C)
+    return new_state
+
+def evolve_system(states, p_A, p_B, p_C):
+    new_states = [evolve_state(state, p_A, p_B, p_C) for state in states]
+    return new_states
+
+def simulation(n_steps, delta_t, lambda_A, lambda_B, lambda_C_flux, lambda_C_no_flux, neutron_flux=True):
+    states = ['C'] * 250
+    n_A = []
+    
+    for i in range(n_steps):
+        p_A, p_B, p_C_flux, p_C_no_flux = transition_probabilities(delta_t, lambda_A, lambda_B, lambda_C_flux if neutron_flux else lambda_C_no_flux)
+        states = evolve_system(states, p_A, p_B, p_C_flux if neutron_flux else p_C_no_flux)
+        n_A.append(states.count('A'))
+    
+    return n_A
+
+def average_and_uncertainty(data):
+    avg = np.average(data)
+    uncertainty = np.std(data)
+    return avg, uncertainty
+
+n_simulations = 20
+n_steps = 200
+n_points = 200
+delta_t = 100 / n_steps
+lambda_A = np.log(2) / 10.1
+lambda_B = np.log(2) / 15.7
+lambda_C_flux = np.log(2) / 3.2
+lambda_C_no_flux = 0
+
+results = []
+
+for _ in range(n_simulations):
+    n_A = simulation(n_steps, delta_t, lambda_A, lambda_B, lambda_C_flux, lambda_C_no_flux, True)
+    avg, uncertainty = average_and_uncertainty(n_A)
+    results.append((avg, uncertainty))
+
+avg_results, uncertainties = zip(*results)
+
+plt.errorbar(np.linspace(0, 100, n_points), avg_results, yerr=uncertainties, fmt='o', color='b')
+plt.xlabel('Time (hours)')
+plt.ylabel('Average Number of A Nuclei')
+plt.title('Average Number of A Nuclei as a Function of Time')
+plt.show()

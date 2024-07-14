@@ -1,0 +1,39 @@
+import numpy as np
+
+def findPi(n_points):
+    points = np.random.rand(n_points, 2)  # Generate n_points random 2D points in the unit square
+    inside_circle = points[:, 0]**2 + points[:, 1]**2 <= 1  # Check if points are inside the unit circle
+    
+    pi_estimate = 4 * np.sum(inside_circle) / n_points
+    return pi_estimate
+
+    
+def integrate(dim, n_points):
+    points = np.random.rand(n_points, dim) * 2 - 1  # Generate n_points random d-dimensional points in the cube [-1, 1]^d
+    inside_ball = np.linalg.norm(points, axis=1) <= 1  # Check if points are inside the unit ball
+    
+    volume_estimate = 2**dim * np.sum(inside_ball) / n_points
+    return volume_estimate
+
+
+# Testing the functions
+n_points = 10000
+dimensions = [2, 3, 4, 5, 10, 50]  # Test with different dimensions
+
+pi_estimates = [findPi(n_points) for _ in range(10)]  # Estimate Pi multiple times for error analysis
+volume_estimates = [[integrate(dim, n_points) for _ in range(10)] for dim in dimensions]  # Estimate volume for each dimension
+
+# Error analysis
+pi_errors = [abs(pi_estimate - np.pi) for pi_estimate in pi_estimates]  # Calculate errors for Pi estimation
+volume_errors = [[abs(volume_estimate - (np.pi)**(dim/2)) for volume_estimate in dim_estimates] for dim, dim_estimates in zip(dimensions, volume_estimates)]  # Calculate errors for volume estimation
+
+# Check error scaling
+pi_mean_error = np.mean(pi_errors)
+volume_mean_errors = [np.mean(errors) for errors in volume_errors]
+
+# Print mean errors
+print("Mean Error in estimating Pi:", pi_mean_error)
+print("Mean Errors in estimating volume for different dimensions:", volume_mean_errors)
+
+
+This code snippet defines the `findPi` function to estimate $\pi$ using the Monte Carlo method and the `integrate` function to estimate the volume of a unit ball in higher dimensions. It then tests these functions for error analysis and checks how the errors scale with the number of points and dimensions

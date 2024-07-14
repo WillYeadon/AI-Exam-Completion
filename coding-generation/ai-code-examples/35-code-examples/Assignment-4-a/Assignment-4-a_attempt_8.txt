@@ -1,0 +1,68 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Given constants
+g = 9.81  # acceleration due to gravity in m/s^2
+rho = 7850  # density of iron in kg/m^3
+
+# Function to calculate cross-sectional area of a sphere
+def cross_sectional_area(radius):
+    return np.pi * radius**2
+
+# Function to calculate the mass of an iron sphere
+def sphere_mass(radius):
+    return (4/3) * np.pi * radius**3 * rho
+
+# Calculating area and mass of the cannonball
+radius = 0.2  # in meters
+area = cross_sectional_area(radius)  # in m^2
+mass = sphere_mass(radius)  # in kg
+
+# Function to model cannonball's motion
+def projectile_motion(v0, theta):
+    x0, y0 = 0, 0
+    vx0 = v0 * np.cos(np.deg2rad(theta))
+    vy0 = v0 * np.sin(np.deg2rad(theta))
+    return x0, y0, vx0, vy0
+
+# Euler's method for solving the ODE
+def solve_euler(dt, x0, y0, vx0, vy0):
+    x, y, vx, vy = x0, y0, vx0, vy0
+    x_vals, y_vals = [x], [y]
+    while y >= 0:
+        ax = 0
+        ay = -g
+        x += vx * dt
+        y += vy * dt
+        vx += ax * dt
+        vy += ay * dt
+        x_vals.append(x)
+        y_vals.append(y)
+    return x_vals, y_vals
+
+# Function to find the x-coordinate where the trajectory crosses y=0
+def find_crossing(x_vals, y_vals):
+    return x_vals[-1]
+
+# Function to find the range of the projectile
+def find_range(x_vals):
+    return x_vals[-1]
+
+# ::: Task :::
+# Visualize trajectories for various initial angles using projectile motion
+
+# Constants
+v0 = 125  # initial velocity in m/s
+angles = [30, 45, 60, 75, 80]  # initial angles in degrees
+
+# Plotting trajectories for different angles
+for angle in angles:
+    x0, y0, vx0, vy0 = projectile_motion(v0, angle)
+    x_vals, y_vals = solve_euler(0.01, x0, y0, vx0, vy0)
+    plt.plot(x_vals, y_vals, label=f'Angle = {angle} degrees')
+
+plt.title('Projectile Motion Trajectories at Different Initial Angles')
+plt.xlabel('Horizontal Distance (m)')
+plt.ylabel('Vertical Distance (m)')
+plt.legend()
+plt.show()

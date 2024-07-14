@@ -1,0 +1,67 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Constants
+HALF_LIFE = 1.0  # Example half-life in years
+TAU = HALF_LIFE / np.log(2)
+
+# Function to calculate the rate of decay
+def f_rad(N, t):
+    return -N / TAU
+
+# Analytical solution for radioactive decay
+def analytic(N0, t):
+    return N0 * np.exp(-t / TAU)
+
+# Function to solve using Euler's method
+def solve_euler(N0, t0, dt, n_steps):
+    times = np.arange(t0, t0 + dt * (n_steps + 1), dt)
+    N = np.zeros(n_steps + 1)
+    N[0] = N0
+    for i in range(1, n_steps + 1):
+        N[i] = N[i - 1] + dt * f_rad(N[i - 1], times[i - 1])
+    return times, N
+
+# Function to solve using RK4 method
+def solve_RK4(N0, t0, dt, n_steps):
+    times = np.arange(t0, t0 + dt * (n_steps + 1), dt)
+    N = np.zeros(n_steps + 1)
+    N[0] = N0
+    for i in range(1, n_steps + 1):
+        k1 = dt * f_rad(N[i - 1], times[i - 1])
+        k2 = dt * f_rad(N[i - 1] + k1 / 2, times[i - 1] + dt / 2)
+        k3 = dt * f_rad(N[i - 1] + k2 / 2, times[i - 1] + dt / 2)
+        k4 = dt * f_rad(N[i - 1] + k3, times[i - 1] + dt)
+        N[i] = N[i - 1] + (k1 + 2 * k2 + 2 * k3 + k4) / 6
+    return times, N
+
+# Plotting error scaling comparison for RK4 vs Euler
+n0 = 1000  # Initial number of nuclei
+t0 = 0  # Initial time
+total_time = 10 * HALF_LIFE  # Total time for decay
+
+step_sizes = [2**(-i) for i in range(1, 11)]
+euler_errors = []
+rk4_errors = []
+
+for dt in step_sizes:
+    n_steps = int(total_time / dt)
+    times_euler, N_euler = solve_euler(n0, t0, dt, n_steps)
+    times_rk4, N_rk4 = solve_RK4(n0, t0, dt, n_steps)
+    analytic_solution = analytic(n0, times_euler)
+    
+    euler_error = np.max(np.abs(N_euler - analytic_solution))
+    rk4_error = np.max(np.abs(N_rk4 - analytic_solution))
+    
+    euler_errors.append(euler_error)
+    rk4_errors.append(rk4_error)
+
+plt.figure(figsize=(10,6))
+plt.loglog(step_sizes, euler_errors, 'o-', label='Euler method')
+plt.loglog(step_sizes, rk4_errors, 's-', label='RK4 method')
+plt.xlabel('Step size (years)')
+plt.ylabel('Maximum error in N')
+plt.legend()
+plt.title('Error Scaling: Euler vs RK4 Methods')
+plt.grid(True, which='both', linestyle='--')
+plt.show()

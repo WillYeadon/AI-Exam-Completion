@@ -1,0 +1,23 @@
+Sure, I can help with that. Let's start by reading the script and understanding the scenario.
+
+---
+
+**Script:**
+A projectile is launched at an angle $\theta$ with initial velocity $v_0$. The equations of motion for the projectile are:
+
+
+
+
+Given $v_0 = 125 \, \text{m/s}$, $g = 9.81 \, \text{m/s}^2$, and $\theta = \{30^\circ, 45^\circ, 60^\circ, 75^\circ\}$, where $\theta$ is measured in radians. 
+
+---
+
+::: Task ::::
+
+Based on the information provided in the script, we need to calculate the following two variables:
+1. Range of the projectile
+2. Maximum height reached by the projectile
+
+Let's start by defining the necessary constants for the simulation, and then we can calculate the range and the maximum height.
+
+--

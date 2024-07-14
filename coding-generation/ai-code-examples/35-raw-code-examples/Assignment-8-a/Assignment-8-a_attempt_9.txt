@@ -1,0 +1,55 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+class Walker:
+    def __init__(self, ndim=1, step_size=1):
+        self.ndim = ndim
+        self.step_size = step_size
+        self.possible_steps = []
+        for _ in range(ndim):
+            step = [0] * ndim
+            for i in range(ndim):
+                step[i] = self.step_size
+                self.possible_steps.append(step.copy())
+                step[i] = -self.step_size
+                self.possible_steps.append(step.copy())
+                step[i] = 0
+
+        self.pos = np.zeros(ndim)
+
+    def pickStep(self):
+        return self.possible_steps[np.random.randint(0, len(self.possible_steps))]
+
+    def doSteps(self, n):
+        trajectory = np.zeros((n + 1, self.ndim))
+        trajectory[0] = self.pos
+        for i in range(1, n + 1):
+            step = self.pickStep()
+            self.pos = self.pos + step
+            trajectory[i] = self.pos
+        return trajectory
+
+# Plot average position and average squared position of 100 1D walkers using 1000 steps
+n_walkers = 100
+n_steps = 1000
+positions = np.zeros((n_walkers, n_steps + 1))
+squared_positions = np.zeros((n_walkers, n_steps + 1))
+
+for i in range(n_walkers):
+    walker = Walker()
+    trajectory = walker.doSteps(n_steps)
+    positions[i] = np.mean(trajectory, axis=1)
+    squared_positions[i] = np.mean(trajectory ** 2, axis=1)
+
+average_positions = np.mean(positions, axis=0)
+average_squared_positions = np.mean(squared_positions, axis=0)
+
+plt.figure(figsize=(12, 6))
+plt.plot(np.arange(n_steps + 1), average_positions, label='Average Position')
+plt.plot(np.arange(n_steps + 1), average_squared_positions, label='Average Squared Position')
+plt.xlabel('Number of Steps')
+plt.ylabel('Value')
+plt.title('Average Position and Average Squared Position of 100 1D Walkers over 1000 steps')
+plt.legend()
+plt.grid(True)
+plt.show()

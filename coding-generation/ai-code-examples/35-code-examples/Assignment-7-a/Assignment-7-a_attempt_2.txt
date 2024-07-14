@@ -1,0 +1,71 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+def f(x):
+    return x**3 - 2*x - 5
+
+def df(x):
+    return 3*x**2 - 2
+
+def NewtonRaphson(x0, tol, max_iter):
+    errors = []
+    iterations = 0
+    while iterations < max_iter:
+        x1 = x0 - f(x0) / df(x0)
+        error = abs(x1 - x0)
+        errors.append(error)
+        if error < tol:
+            break
+        x0 = x1
+        iterations += 1
+    return errors
+
+def secant(x0, x1, tol, max_iter):
+    errors = []
+    iterations = 0
+    while iterations < max_iter:
+        x2 = x1 - f(x1) * ((x1 - x0) / (f(x1) - f(x0)))
+        error = abs(x2 - x1)
+        errors.append(error)
+        if error < tol:
+            break
+        x0 = x1
+        x1 = x2
+        iterations += 1
+    return errors
+
+def bisect(a, b, tol, max_iter):
+    errors = []
+    iterations = 0
+    while iterations < max_iter:
+        c = (a + b) / 2
+        if f(c) == 0 or (b - a) / 2 < tol:
+            break
+        if f(a) * f(c) < 0:
+            b = c
+        else:
+            a = c
+        error = abs(b - a)
+        errors.append(error)
+        iterations += 1
+    return errors
+
+x0 = 1.5          
+x1 = 3.0
+tol = 1e-6        
+max_iter = 100
+
+errors_newton = NewtonRaphson(x0, tol, max_iter)
+errors_secant = secant(x0, x1, tol, max_iter)
+errors_bisect = bisect(0, 2, tol, max_iter)
+
+plt.figure(figsize=(10, 6))
+plt.plot(range(len(errors_newton)), errors_newton, color='blue', label='Newton-Raphson')
+plt.plot(range(len(errors_secant)), errors_secant, color='red', label='Secant')
+plt.plot(range(len(errors_bisect)), errors_bisect, color='green', label='Bisection')
+plt.yscale('log')
+plt.xlabel('Iterations')
+plt.ylabel('Error')
+plt.title('Convergence of Root-Finding Methods')
+plt.legend()
+plt.show()

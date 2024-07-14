@@ -1,0 +1,10 @@
+The script provided is an example of a simulation of the decay of three types of nuclei: $A$, $B$, and $C$. The simulation tracks the evolution of these nuclei over time considering their decay rates and possible transitions between them based on given transition probabilities. The script defines functions for calculating whether a transition has occurred, implementing transitions based on transition rules, evolving the system over multiple time steps, and finally, visualizing the results in a plot.
+
+::: Task :::
+
+To complete the task, we need to implement the functions described in the script and then create a plot showing the evolution of the system with the given parameters:
+
+1. Implement functions for checking transition, implementing transitions based on rules, and evolving the system.
+2. Create a plot that shows the number of $A$, $B$, and $C$ nuclei over time for a total of 200 time steps (100 hours) with neutron flux on and another 200 time steps (100 hours) with neutron flux off.
+
+Let's proceed with the implementation and plotting

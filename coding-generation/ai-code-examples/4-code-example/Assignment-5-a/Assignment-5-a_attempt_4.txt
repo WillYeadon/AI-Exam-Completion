@@ -1,0 +1,89 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Constants
+half_life_A = 10.1  # hours
+half_life_B = 15.7  # hours
+half_life_C_to_A_flux_on = 3.2  # hours
+decay_const_A = np.log(2) / half_life_A
+decay_const_B = np.log(2) / half_life_B
+activation_const_C_to_A_flux_on = np.log(2) / half_life_C_to_A_flux_on
+
+# Function to determine if a transition occurs
+def transition(prob):
+    return np.random.random() < prob
+
+# Function to evolve a single state according to transition rules
+def evolve_state(A, B, C, dt, neutron_flux):
+    if neutron_flux:
+        activated_C = 0
+        for _ in range(C):
+            if transition(activation_const_C_to_A_flux_on * dt):
+                activated_C += 1
+        A += activated_C
+        C -= activated_C
+    
+    decayed_A = 0
+    for _ in range(A):
+        if transition(decay_const_A * dt):
+            decayed_A += 1
+    B += decayed_A
+    A -= decayed_A
+    
+    decayed_B = 0
+    for _ in range(B):
+        if transition(decay_const_B * dt):
+            decayed_B += 1
+    B -= decayed_B
+    
+    return A, B, C
+
+# Function to evolve the entire system
+def evolve_system(A, B, C, n_steps, dt, neutron_flux):
+    A_count = [A]
+    B_count = [B]
+    C_count = [C]
+
+    for step in range(n_steps):
+        A, B, C = evolve_state(A, B, C, dt, neutron_flux)
+        A_count.append(A)
+        B_count.append(B)
+        C_count.append(C)
+
+    return A_count, B_count, C_count
+
+# Initial conditions
+initial_C = 250
+initial_A = 0
+initial_B = 0
+
+# Time evolution settings
+total_time = 200  # hours
+n_steps_per_phase = 200
+dt = total_time / (2 * n_steps_per_phase)
+
+# Phase 1: with neutron flux
+A_count, B_count, C_count = evolve_system(initial_A, initial_B, initial_C, n_steps_per_phase, dt, neutron_flux=True)
+
+# Phase 2: without neutron flux
+A_count_phase_2, B_count_phase_2, C_count_phase_2 = evolve_system(A_count[-1], B_count[-1], C_count[-1], n_steps_per_phase, dt, neutron_flux=False)
+
+# Combine the results of both phases
+A_count.extend(A_count_phase_2)
+B_count.extend(B_count_phase_2)
+C_count.extend(C_count_phase_2)
+
+# Generate time vector for plotting
+time_vector = np.linspace(0, total_time, len(A_count))
+
+# Plotting the results
+plt.figure(figsize=(10, 6))
+plt.plot(time_vector, A_count, label='A nuclei')
+plt.plot(time_vector, B_count, label='B nuclei')
+plt.plot(time_vector, C_count, label='C nuclei')
+plt.xlabel('Time (hours)')
+plt.ylabel('Number of Nuclei')
+plt.title('Nuclei Decay and Activation over Time')
+plt.legend()
+plt.grid(True)
+plt.show()

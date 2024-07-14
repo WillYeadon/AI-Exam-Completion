@@ -1,0 +1,44 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Define the function f(x) = x - tanh(2x)
+def f(x):
+    return x - np.tanh(2*x)
+
+# Newton-Raphson method
+def newton_raphson(f, x0, tol, max_iter):
+    # Implementation of the Newton-Raphson method
+    HERE HERE HERE
+
+# Secant method
+def secant(f, x0, x1, tol, max_iter):
+    # Implementation of the Secant method
+    HERE HERE HERE
+
+# Bisection method
+def bisection(f, a, b, tol, max_iter):
+    # Implementation of the Bisection method
+    HERE HERE HERE
+
+# Compare the convergence of the three methods
+x0 = 0.5
+x1 = 1.0
+tol = 1e-8
+max_iter = 1000
+
+root_newton = newton_raphson(f, x0, tol, max_iter)
+root_secant = secant(f, x0, x1, tol, max_iter)
+root_bisection = bisection(f, -1, 1, tol, max_iter)
+
+# Plotting the convergence of the three methods
+plt.figure(figsize=(10, 6))
+plt.plot(np.abs(root_newton), label='Newton-Raphson', color='blue')
+plt.plot(np.abs(root_secant), label='Secant', color='red')
+plt.plot(np.abs(root_bisection), label='Bisection', color='green')
+plt.yscale('log')
+plt.xlabel('Iteration')
+plt.ylabel('Absolute Error')
+plt.title('Convergence of Root Finding Methods')
+plt.legend()
+plt.grid(True)
+plt.show()

@@ -1,0 +1,108 @@
+import numpy as np
+
+def g(x):
+    return (x**2 / 2) * np.sin(2*x) + x * np.cos(2*x) - (1 / 2) * np.sin(2*x)
+
+
+### Step 4: Define the function to calculate the definite integral using \( g(x) \)
+
+
+def definite_integral_analytical(x_min, x_max):
+    return g(x_max) - g(x_min)
+
+
+### Step 5: Implement Simpson's Rule to numerically integrate \( f(x) \)
+
+
+def definite_integral_simpson(f, x_min, x_max, N):
+    if N % 2 == 1:  # N must be even for Simpson's rule
+        N += 1
+    h = (x_max - x_min) / N
+    x = np.linspace(x_min, x_max, N+1)
+    y = f(x)
+    S = y[0] + y[-1] + 4 * np.sum(y[1:-1:2]) + 2 * np.sum(y[2:-2:2])
+    return (h / 3) * S
+
+
+### Step 6: Produce a log-log plot of the fractional error
+
+
+import matplotlib.pyplot as plt
+
+x_min = 0
+x_max = np.pi   # Choose some interval for demonstration
+
+# Analytical result
+analytical_result = definite_integral_analytical(x_min, x_max)
+
+# Arrays to store values
+Ns = np.logspace(1, 4, 20, dtype=int)  # Various values for N from 10 to 10,000
+errors = []
+
+# Iterating over the number of panels N
+for N in Ns:
+    numerical_result = definite_integral_simpson(f, x_min, x_max, N)
+    fractional_error = np.abs((numerical_result - analytical_result) / analytical_result)
+    errors.append(fractional_error)
+
+# Generating the log-log plot
+plt.loglog(Ns, errors, marker='o')
+plt.xlabel('Number of panels (N)')
+plt.ylabel('Fractional Error')
+plt.title('Fractional Error of Simpson\'s Rule vs Analytical Result')
+plt.grid(True)
+plt.show()
+
+
+### Final Script
+
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Define f(x)
+def f(x):
+    return x**2 * np.cos(2*x)
+
+# Define g(x) based on the derived formula
+def g(x):
+    return (x**2 / 2) * np.sin(2*x) + x * np.cos(2*x) - (1 / 2) * np.sin(2*x)
+
+# Function to calculate the definite integral using the analytical result
+def definite_integral_analytical(x_min, x_max):
+    return g(x_max) - g(x_min)
+
+# Function to calculate the definite integral using Simpson's rule
+def definite_integral_simpson(f, x_min, x_max, N):
+    if N % 2 == 1:  # N must be even for Simpson's rule
+        N += 1
+    h = (x_max - x_min) / N
+    x = np.linspace(x_min, x_max, N+1)
+    y = f(x)
+    S = y[0] + y[-1] + 4 * np.sum(y[1:-1:2]) + 2 * np.sum(y[2:-2:2])
+    return (h / 3) * S
+
+# Main plot generation for fractional error
+x_min = 0
+x_max = np.pi  # Choose an interval for demonstration
+
+# Analytical result
+analytical_result = definite_integral_analytical(x_min, x_max)
+
+# Arrays to store values
+Ns = np.logspace(1, 4, 20, dtype=int)  # Various values for N from 10 to 10,000
+errors = []
+
+# Iterating over the number of panels N
+for N in Ns:
+    numerical_result = definite_integral_simpson(f, x_min, x_max, N)
+    fractional_error = np.abs((numerical_result - analytical_result) / analytical_result)
+    errors.append(fractional_error)
+
+# Generating the log-log plot
+plt.loglog(Ns, errors, marker='o')
+plt.xlabel('Number of panels (N)')
+plt.ylabel('Fractional Error')
+plt.title('Fractional Error of Simpson\'s Rule vs Analytical Result')
+plt.grid(True)
+plt.show()

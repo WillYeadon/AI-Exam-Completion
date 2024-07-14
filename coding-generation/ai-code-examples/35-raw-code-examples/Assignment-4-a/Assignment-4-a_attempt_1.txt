@@ -1,0 +1,59 @@
+import matplotlib.pyplot as plt
+import numpy as np
+
+# Constants
+v0 = 125  # m/s
+g = 9.81  # m/s^2
+y0 = 0    # m
+dt = 0.01 # s
+
+# Function to find zero using linear interpolation
+def find_zero_linear(x1, x2, y1, y2):
+    if y1 * y2 > 0:
+        return None
+    return x1 - y1 * (x2 - x1) / (y2 - y1)
+
+# Trajectory function
+def calculate_trajectory(angle):
+    angle_rad = np.deg2rad(angle)
+    vx = v0 * np.cos(angle_rad)
+    vy = v0 * np.sin(angle_rad)
+    
+    x_values = []
+    y_values = []
+    
+    x = 0
+    y = y0
+    
+    while y >= 0:
+        x_values.append(x)
+        y_values.append(y)
+        
+        x = x + vx * dt
+        y = y + vy * dt
+        vy = vy - g * dt
+        
+    # Linear interpolation to find zero
+    x_final = find_zero_linear(x - vx * dt, x, y - vy * dt, y)
+    
+    if x_final is not None:
+        x_values.append(x_final)
+        y_values.append(0)
+    
+    return x_values, y_values
+
+# Plotting trajectories for different angles
+angles = [30, 45, 60, 75]
+
+plt.figure(figsize=(10, 6))
+plt.title("Projectile Motion at Different Angles")
+plt.xlabel("Distance (m)")
+plt.ylabel("Height (m)")
+
+for angle in angles:
+    x, y = calculate_trajectory(angle)
+    plt.plot(x, y, label=f"{angle} degrees")
+
+plt.legend()
+plt.grid()
+plt.show()

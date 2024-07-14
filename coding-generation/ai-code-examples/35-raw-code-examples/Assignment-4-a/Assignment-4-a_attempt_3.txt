@@ -1,0 +1,18 @@
+**Projectile Motion Simulation**
+
+*Script:*
+A projectile is launched with an initial velocity of 125 m/s at an angle of 30 degrees above the horizontal. We will simulate the trajectory of the projectile considering air resistance. 
+
+*Constants:*
+- Initial velocity, \( v_0 = 125 \, \text{m/s} \)
+- Launch angle, \( \theta = 30^{\circ} \)
+- Acceleration due to gravity, \( g = 9.81 \, \text{m/s}^2 \)
+- Air resistance constant, \( k = 0.1 \)
+
+*Simulation:*
+1. Calculate the horizontal and vertical components of the initial velocity.
+2. Update the position and velocity of the projectile at each time step using the equations of motion with air resistance.
+3. Repeat until the projectile hits the ground (i.e., \( y < 0 \)).
+
+::: Task :::
+Create a plot to show the trajectories for different values of the initial angle. Use the same velocity \( v_0=125\rm{m/s} \) for all angles. The plot should have axis labels and a title. [4 marks

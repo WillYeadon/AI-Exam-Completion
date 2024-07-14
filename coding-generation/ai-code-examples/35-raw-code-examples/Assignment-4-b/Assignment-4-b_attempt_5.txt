@@ -1,0 +1,18 @@
+The script provided is for a basic projectile motion simulation considering air resistance. The constants and formulas for the simulation are already defined. We need to complete the plot described in the task, showing the range for different values of the initial velocity.
+
+Let's start by defining the constants and necessary functions required for the simulation:
+
+- Gravity: $g = 9.81 \, \text{m/s}^2$
+- Air resistance force coefficient: $k = 0.01 \, \text{N/s}$
+- Initial angle: $\theta = 60^\circ$
+- Initial height: $y_0 = 0 \, \text{m}$
+- Initial velocity: $v_0$
+- Time step: $\Delta t = 0.01 \, \text{s}$
+
+We will calculate the following two variables:
+1. Theoretical range without air resistance: $R = \frac{v_0^2 \sin(2\theta)}{g}$
+2. Theoretical range with air resistance: $R_{\text{air}} = \frac{v_0^2}{g} \left( \sin(2\theta) + \frac{k}{m} \cos^2(\theta) \right)$
+
+Now, we implement the function `find_zero_linear` and use it to calculate the range. Lastly, we create a plot for different values of initial velocity.
+
+Let's proceed with implementing the missing parts of the script to complete the task

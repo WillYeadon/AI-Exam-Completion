@@ -1,0 +1,45 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Constants
+theta = np.radians(60)  # Launch angle in radians
+g = 9.81  # Acceleration due to gravity (m/s^2)
+
+# Function to calculate range without air resistance
+def range_without_air_resistance(v0, theta):
+    return (v0**2 * np.sin(2 * theta)) / g
+
+# Function to calculate range with air resistance
+# Placeholder function; you should replace it with the actual implementation
+def range_with_air_resistance(v0, theta, k, m):
+    # This should include your actual implementation for range with air resistance
+    pass
+
+# List of initial velocities
+initial_velocities = np.linspace(50, 150, 100)  # From 50 m/s to 150 m/s
+
+# Arrays to hold ranges
+ranges_no_air_resistance = []
+ranges_with_air_resistance = []
+
+# Assuming constants for air resistance
+k = 0.1  # Drag coefficient (placeholder value)
+m = 1.0  # Mass of the projectile (placeholder value)
+
+# Compute ranges for each initial velocity
+for v0 in initial_velocities:
+    ranges_no_air_resistance.append(range_without_air_resistance(v0, theta))
+    ranges_with_air_resistance.append(range_with_air_resistance(v0, theta, k, m))
+
+# Plot the results
+plt.figure(figsize=(10, 6))
+plt.plot(initial_velocities, ranges_no_air_resistance, label='Without Air Resistance')
+plt.plot(initial_velocities, ranges_with_air_resistance, label='With Air Resistance', linestyle='--')
+
+# Add labels, title, and legend
+plt.xlabel('Initial Velocity (m/s)', fontsize=14)
+plt.ylabel('Range (m)', fontsize=14)
+plt.title('Range of Projectile for Different Initial Velocities', fontsize=16)
+plt.legend(fontsize=14)
+plt.grid(True)
+plt.show()

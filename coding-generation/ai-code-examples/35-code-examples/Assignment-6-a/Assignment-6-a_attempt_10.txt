@@ -1,0 +1,26 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+def integrate(n_points, dim):
+    points = np.random.uniform(-1, 1, (n_points, dim))
+    in_hypersphere = np.sum(points ** 2, axis=1) <= 1
+    return 2 ** dim * np.sum(in_hypersphere) / n_points
+
+dimensions = [2, 3, 4, 5, 6, 7, 8, 9, 10]
+n_points = 10000
+
+errors = []
+for dim in dimensions:
+    estimated_volume = integrate(n_points, dim)
+    true_volume = np.pi ** (dim/2) / np.math.gamma(dim/2 + 1)
+    errors.append(np.abs(estimated_volume - true_volume))
+
+plt.figure(figsize=(10, 6))
+plt.plot(dimensions, errors, marker='o', color='b', label='Error vs Dimension')
+plt.yscale('log')
+plt.xscale('linear')
+plt.xlabel('Dimension')
+plt.ylabel('Error')
+plt.title('Integration Error Scaling with Dimension')
+plt.legend()
+plt.show()

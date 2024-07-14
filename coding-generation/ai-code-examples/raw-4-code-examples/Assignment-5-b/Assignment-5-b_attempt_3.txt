@@ -1,0 +1,105 @@
+import numpy as np
+import random
+
+def will_transition(transition_prob):
+    r = random.random()
+    return r < transition_prob
+
+def apply_transition(current_state, transition_rules):
+    new_state = current_state.copy()
+    for rule in transition_rules:
+        from_state, to_state, transition_prob = rule
+        if new_state[from_state] > 0 and will_transition(transition_prob):
+            new_state[from_state] -= 1
+            new_state[to_state] += 1
+    return new_state
+
+def transition_states(states, transition_rules):
+    new_states = [apply_transition(state, transition_rules) for state in states]
+    return new_states
+
+
+**2. System Evolution Function:**
+We need a function that evolves the system over the given number of timesteps and returns the history of each type of atom.
+
+
+def evolve_system(NA, NB, NC, transition_rules, n_timestep):
+    states_A = [NA]
+    states_B = [NB]
+    states_C = [NC]
+    
+    current_state = [NA, NB, NC]
+    
+    for _ in range(n_timestep):
+        current_state = apply_transition(current_state, transition_rules)
+        states_A.append(current_state[0])
+        states_B.append(current_state[1])
+        states_C.append(current_state[2])
+    
+    return np.array(states_A), np.array(states_B), np.array(states_C)
+
+
+**3. Transition Probabilities and Rules:**
+Define transition probabilities based on given half-lives and construct transition rules.
+
+
+def calculate_transition_probability(half_life, timestep):
+    return 1 - np.exp(-np.log(2) * timestep / half_life)
+
+# Half-lives (in hours)
+half_life_A = 10.1
+half_life_B = 15.7
+half_life_C_to_A = 3.2
+
+# Event probabilities per timestep (assuming 200 steps per 100 hours)
+timestep = 100 / 200  # 0.5 hours per step
+
+prob_A_to_B = calculate_transition_probability(half_life_A, timestep)
+prob_B_to_C = calculate_transition_probability(half_life_B, timestep)
+prob_C_to_A_flux_on = calculate_transition_probability(half_life_C_to_A, timestep)
+prob_C_to_A_flux_off = 0.0
+
+# Transition rules with and without neutron flux
+transition_rules_flux_on = [('A', 'B', prob_A_to_B), ('B', 'C', prob_B_to_C), ('C', 'A', prob_C_to_A_flux_on)]
+transition_rules_flux_off = [('A', 'B', prob_A_to_B), ('B', 'C', prob_B_to_C), ('C', 'A', prob_C_to_A_flux_off)]
+
+
+**4. Simulation and Averaging Over Multiple Runs:**
+Run the simulation 20 times, log the results, and compute averages and standard deviations.
+
+
+import matplotlib.pyplot as plt
+
+# Initial counts
+initial_NA, initial_NB, initial_NC = 0, 0, 250
+n_steps = 200
+
+num_simulations = 20
+simulations_A_flux_on = []
+simulations_A_flux_off = []
+
+for _ in range(num_simulations):
+    states_A, _, _ = evolve_system(initial_NA, initial_NB, initial_NC, transition_rules_flux_on, n_steps)
+    simulations_A_flux_on.append(states_A)
+    states_A, _, _ = evolve_system(states_A[-1], states_B[-1], states_C[-1], transition_rules_flux_off, n_steps)
+    simulations_A_flux_off.append(states_A)
+
+# Convert results to numpy arrays for easy averaging
+simulations_A_flux_on = np.array(simulations_A_flux_on)
+simulations_A_flux_off = np.array(simulations_A_flux_off)
+
+# Combine and calculate average and uncertainty
+combined_A = np.concatenate((simulations_A_flux_on, simulations_A_flux_off), axis=1)
+average_A = np.mean(combined_A, axis=0)
+std_A = np.std(combined_A, axis=0)
+
+# Plotting time axis
+time = np.linspace(0, 200, combined_A.shape[1])
+
+# Plotting the results
+plt.errorbar(time, average_A, yerr=std_A, label='A Nuclei', fmt='-o')
+plt.xlabel('Time (hours)')
+plt.ylabel('Number of $A$ Nuclei')
+plt.title('Evolution of $A$ Nuclei Over Time With and Without Neutron Flux')
+plt.legend()
+plt.show()

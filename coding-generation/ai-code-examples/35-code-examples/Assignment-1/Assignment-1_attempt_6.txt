@@ -1,0 +1,37 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Define the function f(x) = sin(2x)
+def f(x):
+    return np.sin(2*x)
+
+# Define the analytical derivative of f
+def f_prime_analytical(x):
+    return 2 * np.cos(2*x)
+
+# Implementing the forward difference method for numerical differentiation
+def forward_difference(f, x, dx):
+    return (f(x + dx) - f(x)) / dx
+
+# Define the range of x values
+x = np.linspace(0, 2*np.pi, 100)
+
+# Calculate the analytical derivative values
+f_prime_analytical_values = f_prime_analytical(x)
+
+# Initialize the dx values to compare
+dx_values = [0.1, 0.01, 0.001]
+
+# Create the plot for the differences between analytical and numerical derivatives
+plt.figure(figsize=(10, 6))
+
+for dx in dx_values:
+    f_prime_numerical_values = [forward_difference(f, x_val, dx) for x_val in x]
+    difference = f_prime_analytical_values - f_prime_numerical_values
+    plt.plot(x, difference, label=f'dx = {dx}')
+
+plt.xlabel('x')
+plt.ylabel('Difference')
+plt.title('Difference between Analytical and Numerical Derivatives')
+plt.legend()
+plt.show()

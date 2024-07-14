@@ -1,0 +1,80 @@
+import random
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Define transition probabilities
+def transition_probability(t_half):
+    return 1 - 0.5**(1/float(t_half))
+
+# Neutron flux on transition probability
+pa_c = transition_probability(3.2)
+pb_b = transition_probability(15.7)
+pc_a = transition_probability(10.1)
+
+# Neutron flux on transition rules
+def check_transition_nf(state, r):
+    if state == 'C' and r < pa_c:
+        return 'A'
+    return state
+
+# Neutron flux off transition rules
+def check_transition_no_nf(state, r):
+    return state
+
+# Perform the transition based on transition rules
+def perform_transition(current_state, transition_rules, r):
+    for rule in transition_rules:
+        current_state = rule(current_state, r)
+    return current_state
+
+# Evolve the system based on transition rules
+def evolve_system(states, transition_rules):
+    new_states = []
+    for state in states:
+        r = random.random()
+        new_state = perform_transition(state, transition_rules, r)
+        new_states.append(new_state)
+    return new_states
+
+# Evolve system for a given number of time steps
+def evolve_system_over_time(NA, NB, NC, n_timesteps, t_max, neutron_flux):
+    states = ['A'] * NA + ['B'] * NB + ['C'] * NC
+    states_over_time = [list(states)]
+    
+    for _ in range(n_timesteps):
+        transition_rules = [check_transition_nf] if neutron_flux else [check_transition_no_nf]
+        states = evolve_system(states, transition_rules)
+        states_over_time.append(list(states))
+    
+    return np.array(states_over_time)
+
+# Run the simulation 20 times and calculate average and uncertainty for number of 'A' atoms
+n_simulations = 20
+n_timesteps = 200
+t_max = 100
+NA_initial = 0
+NB_initial = 0
+NC_initial = 250
+
+results = []
+
+for _ in range(n_simulations):
+    states_over_time_nf = evolve_system_over_time(NA_initial, NB_initial, NC_initial, n_timesteps, t_max, neutron_flux=True)
+    states_over_time_no_nf = evolve_system_over_time(states_over_time_nf[-1].count('A'), 
+                                                      states_over_time_nf[-1].count('B'), 
+                                                      states_over_time_nf[-1].count('C'), 
+                                                      n_timesteps, t_max, neutron_flux=False)
+    all_states_over_time = np.concatenate((states_over_time_nf, states_over_time_no_nf[1:]))
+    results.append(all_states_over_time[:, :].tolist())
+
+results = np.array(results)
+average_A = np.mean(results[:,:,0], axis=0)
+uncertainty_A = np.std(results[:,:,0], axis=0)
+
+# Plot the results
+plt.errorbar(range(len(average_A)), average_A, yerr=uncertainty_A, fmt='o', label='A nuclei')
+plt.xlabel('Time Steps')
+plt.ylabel('Number of Nuclei')
+plt.title('Average Number of A Nuclei with Uncertainty Over Time')
+plt.legend()
+plt.show()

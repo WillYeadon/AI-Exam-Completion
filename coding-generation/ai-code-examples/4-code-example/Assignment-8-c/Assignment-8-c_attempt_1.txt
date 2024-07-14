@@ -1,0 +1,49 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Random initial positions
+np.random.seed(0)  # For reproducibility
+rand_pos = np.random.rand(1000, 2)
+
+# Define the step size
+step_size = 0.05
+
+# Function to perform random walk
+def random_walk(steps):
+    positions = rand_pos.copy()
+    for _ in range(steps):
+        angles = np.random.rand(1000) * 2 * np.pi
+        positions[:, 0] += step_size * np.cos(angles)
+        positions[:, 1] += step_size * np.sin(angles)
+        positions = np.mod(positions, 1)  # Maintain in unit square
+    return positions
+
+# Perform random walks
+positions_10 = random_walk(10)
+positions_100 = random_walk(100)
+positions_500 = random_walk(500)
+
+# Create the subplot
+fig, axes = plt.subplots(1, 3, figsize=(15, 5))
+
+# Plot for 10 steps
+axes[0].scatter(positions_10[:, 0], positions_10[:, 1], alpha=0.6, color='blue')
+axes[0].set_title('10 Steps')
+axes[0].set_xlabel('x position')
+axes[0].set_ylabel('y position')
+
+# Plot for 100 steps
+axes[1].scatter(positions_100[:, 0], positions_100[:, 1], alpha=0.6, color='green')
+axes[1].set_title('100 Steps')
+axes[1].set_xlabel('x position')
+axes[1].set_ylabel('y position')
+
+# Plot for 500 steps
+axes[2].scatter(positions_500[:, 0], positions_500[:, 1], alpha=0.6, color='red')
+axes[2].set_title('500 Steps')
+axes[2].set_xlabel('x position')
+axes[2].set_ylabel('y position')
+
+# Show plot
+plt.tight_layout()
+plt.show()

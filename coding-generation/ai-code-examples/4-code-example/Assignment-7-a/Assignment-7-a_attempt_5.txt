@@ -1,0 +1,71 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+def f(x):
+    return np.exp(x) - 2
+
+def df(x):
+    return np.exp(x)
+
+def newton_raphson(x0, tol=1e-10, max_iter=100):
+    x = x0
+    errors = []
+    for i in range(max_iter):
+        x_new = x - f(x)/df(x)
+        error = abs(x_new - x)
+        errors.append(error)
+        if error < tol:
+            break
+        x = x_new
+    return errors
+
+def secant(x0, x1, tol=1e-10, max_iter=100):
+    errors = []
+    for i in range(max_iter):
+        x_new = x1 - f(x1) * (x1 - x0) / (f(x1) - f(x0))
+        error = abs(x_new - x1)
+        errors.append(error)
+        if error < tol:
+            break
+        x0, x1 = x1, x_new
+    return errors
+
+def bisection(a, b, tol=1e-10, max_iter=100):
+    errors = []
+    for i in range(max_iter):
+        c = (a + b) / 2.0
+        error = abs(b - a) / 2.0
+        errors.append(error)
+        if error < tol:
+            break
+        if f(c) * f(a) < 0:
+            b = c
+        else:
+            a = c
+    return errors
+
+x0_nr = 1.0
+x0_secant = 0.5
+x1_secant = 1.5
+a_bisect = 0.0
+b_bisect = 2.0
+
+errors_nr = newton_raphson(x0_nr)
+errors_secant = secant(x0_secant, x1_secant)
+errors_bisect = bisection(a_bisect, b_bisect)
+
+plt.figure()
+iterations_nr = np.arange(len(errors_nr))
+iterations_secant = np.arange(len(errors_secant))
+iterations_bisect = np.arange(len(errors_bisect))
+
+plt.plot(iterations_nr, np.log10(errors_nr), label='Newton-Raphson', color='r')
+plt.plot(iterations_secant, np.log10(errors_secant), label='Secant', color='g')
+plt.plot(iterations_bisect, np.log10(errors_bisect), label='Bisection', color='b')
+
+plt.xlabel('Iteration')
+plt.ylabel('Log10(Error)')
+plt.title('Convergence of Root-Finding Methods for f(x) = exp(x) - 2')
+plt.legend()
+plt.grid(True)
+plt.show()

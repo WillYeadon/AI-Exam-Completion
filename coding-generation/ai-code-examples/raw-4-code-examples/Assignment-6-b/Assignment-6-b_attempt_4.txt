@@ -1,0 +1,67 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Function to estimate pi using Monte Carlo integration
+def findPi(n_points):
+    inside_circle = 0
+    for _ in range(n_points):
+        x, y = np.random.uniform(-1, 1, 2)
+        if x**2 + y**2 <= 1:
+            inside_circle += 1
+    return (inside_circle / n_points) * 4
+
+# Function to estimate the volume of a unit ball in 'dim' dimensions using Monte Carlo integration
+def integrate(n_points, dim):
+    inside_sphere = 0
+    for _ in range(n_points):
+        point = np.random.uniform(-1, 1, dim)
+        if np.sum(point**2) <= 1:
+            inside_sphere += 1
+    volume = (inside_sphere / n_points) * (2**dim)
+    return volume
+
+# Function to simulate integration error scaling
+def error_scaling(n_points, max_dim):
+    results = np.zeros((max_dim + 1, n_points))
+    for dim in range(1, max_dim + 1):
+        vols = [integrate(n, dim) for n in range(1, n_points + 1)]
+        errors = abs(vols - (np.pi**(dim/2) / np.math.gamma(dim/2 + 1)))  # Compare with true volume
+        results[dim-1, :] = errors
+
+    # Theoretical error scaling
+    results[max_dim, :] = 1 / np.sqrt(np.arange(1, n_points + 1))
+    
+    return results
+
+# Define the function f(x) for the given probability density function
+def f(x):
+    return (1 + 2/(1 + x**2) + np.cos(np.sqrt(3 * x))**2)
+
+# Function to generate values of x distributed according to f(x)
+def genSample(npts):
+    x_range = np.linspace(0, 10, 1000)
+    y_values = f(x_range)
+    max_y = np.max(y_values)
+    
+    samples = []
+    while len(samples) < npts:
+        x = np.random.uniform(0, 10)
+        y = np.random.uniform(0, max_y)
+        if y <= f(x):
+            samples.append(x)
+    return np.array(samples)
+
+# Plotting the distribution of the generated values to show it's correct
+generated_samples = genSample(10000)
+plt.hist(generated_samples, bins=50, density=True, alpha=0.6, color='g', label='Generated samples')
+
+x_range = np.linspace(0, 10, 1000)
+y_values = f(x_range)
+normalization_constant = np.trapz(y_values, x_range)  # Calculate normalization constant
+plt.plot(x_range, y_values / normalization_constant, label='Target Distribution', color='r')
+
+plt.title('Distribution of Generated Samples')
+plt.xlabel('x')
+plt.ylabel('Probability Density')
+plt.legend()
+plt.show()

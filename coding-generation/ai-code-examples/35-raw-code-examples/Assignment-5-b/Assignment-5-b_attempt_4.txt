@@ -1,0 +1,74 @@
+import random
+import numpy as np
+
+def has_transition_occurred(transition_prob):
+    r = random.random()
+    if r < transition_prob:
+        return True
+    else:
+        return False
+
+def update_state(current_state, transition_rules):
+    new_state = current_state.copy()
+    for rule in transition_rules:
+        if has_transition_occurred(rule['probability']):
+            new_state[rule['from']] -= 1
+            new_state[rule['to']] += 1
+    return new_state
+
+def evolve_system(states, transition_rules, n_timesteps):
+    evolved_states = [states]
+    current_state = states
+    for _ in range(n_timesteps):
+        new_state = update_state(current_state, transition_rules)
+        evolved_states.append(new_state)
+        current_state = new_state
+    return evolved_states
+
+def evolve_system_multiple_times(NA, NB, NC, n_timesteps, transition_rules_with_flux, transition_rules_without_flux, n_simulations):
+    all_results = []
+    for _ in range(n_simulations):
+        states = {'A': NA, 'B': NB, 'C': NC}
+        states_with_flux = evolve_system([NA, NB, NC], transition_rules_with_flux, n_timesteps)
+        states_without_flux = evolve_system(states_with_flux[-1], transition_rules_without_flux, n_timesteps)
+        all_results.append([state['A'] for state in states_with_flux] + [state['A'] for state in states_without_flux][1:])
+    return all_results
+
+# Define transition probabilities
+p_AB = 1 - 2 ** (-1 / 10.1)
+p_BC_with_flux = 1 - 2 ** (-1 / 3.2)
+p_BC_without_flux = 0
+p_BA = 1 - 2 ** (-1 / 15.7)
+
+# Define transition rules
+transition_rules_with_flux = [
+    {'from': 'A', 'to': 'B', 'probability': p_AB},
+    {'from': 'B', 'to': 'C', 'probability': p_BC_with_flux}
+]
+
+transition_rules_without_flux = [
+    {'from': 'A', 'to': 'B', 'probability': p_AB},
+    {'from': 'B', 'to': 'C', 'probability': p_BC_without_flux}
+]
+
+# Run the simulation 20 times
+NA = 0
+NB = 0
+NC = 250
+n_timesteps = 200
+n_simulations = 20
+
+results = evolve_system_multiple_times(NA, NB, NC, n_timesteps, transition_rules_with_flux, transition_rules_without_flux, n_simulations)
+
+# Calculate average and uncertainty on the number of 'A' atoms
+average_A = np.mean(results, axis=0)
+uncertainty_A = np.std(results, axis=0)
+
+# Plot the results
+import matplotlib.pyplot as plt
+
+plt.errorbar(range(len(average_A)), average_A, yerr=uncertainty_A, fmt='o', color='b')
+plt.xlabel('Time Steps')
+plt.ylabel('Number of A atoms')
+plt.title('Average Number of A Atoms Over Time with Uncertainty')
+plt.show()

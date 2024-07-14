@@ -1,0 +1,35 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+def findPi(n_points):
+    x = np.random.uniform(0, 1, n_points)
+    y = np.random.uniform(0, 1, n_points)
+    inside_circle = (x**2 + y**2) <= 1
+    pi_estimate = 4 * np.sum(inside_circle) / n_points
+    return pi_estimate
+
+def integrate(n_points, dim):
+    points = np.random.uniform(-1, 1, size=(n_points, dim))
+    norm = np.linalg.norm(points, axis=1)
+    inside = norm <= 1
+    volume_estimate = 2**dim * np.sum(inside) / n_points
+    return volume_estimate
+
+def genSample(npts):
+    x = np.linspace(0, 10, npts)
+    f_x = 1 + 2/(1+x**2) + np.cos(np.sqrt(3*x))**2
+    f_x /= np.trapz(f_x, x)
+    sample = np.random.choice(x, npts, p=f_x)
+    return sample
+
+# Test genSample function
+npts = 10000
+sample = genSample(npts)
+
+# Plot for checking the distribution of generated values
+plt.figure(figsize=(8, 6))
+plt.hist(sample, bins=50, density=True, color='skyblue', alpha=0.7)
+plt.title("Distribution of Generated Values")
+plt.xlabel("x")
+plt.ylabel("Density")
+plt.show()

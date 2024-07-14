@@ -1,0 +1,73 @@
+import random
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Define transition probabilities
+def transition_probability(half_life, time_step):
+    return 1 - 0.5 ** (time_step / half_life)
+
+# Transition rules with neutron flux
+def transition_with_flux(current_state, rules):
+    new_state = current_state.copy()
+    for rule in rules:
+        if random.random() < rule['probability']:
+            new_state[rule['from']] -= 1
+            new_state[rule['to']] += 1
+    return new_state
+
+# Transition rules without neutron flux
+def transition_without_flux(current_state, rules):
+    new_state = current_state.copy()
+    for rule in rules:
+        if rule['from'] != 'C' or not rule['neutron_flux']:
+            if random.random() < rule['probability']:
+                new_state[rule['from']] -= 1
+                new_state[rule['to']] += 1
+    return new_state
+
+# Evolve the system for a given number of time steps
+def evolve_system(initial_state, rules, n_timesteps, neutron_flux=True):
+    state = initial_state
+    states = [state]
+    for _ in range(n_timesteps):
+        if neutron_flux:
+            state = transition_with_flux(state, rules)
+        else:
+            state = transition_without_flux(state, rules)
+        states.append(state)
+    return np.array(states)
+
+# Simulation parameters
+NA, NB, NC = 0, 0, 250  # Initial number of nuclei
+t_max = 100  # Maximum time
+n_timesteps = 200
+time_grid = np.linspace(0, t_max, n_timesteps + 1)
+
+# Define transition rules with and without neutron flux
+rules_with_flux = [
+    {'from': 'C', 'to': 'A', 'probability': transition_probability(3.2, t_max/n_timesteps)}
+]
+
+rules_without_flux = [
+    {'from': 'A', 'to': 'C', 'probability': transition_probability(10.1, t_max/n_timesteps), 'neutron_flux': False},
+    {'from': 'B', 'to': 'C', 'probability': transition_probability(15.7, t_max/n_timesteps), 'neutron_flux': False}
+]
+
+# Perform the simulation with neutron flux
+results = []
+for _ in range(20):
+    states_with_flux = evolve_system([NA, NB, NC], rules_with_flux, n_timesteps)
+    results.append(states_with_flux[:, 0])  # Record number of A atoms
+
+# Calculate average and uncertainty of A atoms over time
+average_A = np.average(results, axis=0)
+uncertainty_A = np.std(results, axis=0)
+
+# Plot the results
+plt.errorbar(time_grid, average_A, yerr=uncertainty_A, fmt='o-', label='A Nuclei')
+plt.xlabel('Time (hours)')
+plt.ylabel('Number of A Nuclei')
+plt.title('Average number of A Nuclei over time with uncertainty')
+plt.legend()
+plt.grid(True)
+plt.show()

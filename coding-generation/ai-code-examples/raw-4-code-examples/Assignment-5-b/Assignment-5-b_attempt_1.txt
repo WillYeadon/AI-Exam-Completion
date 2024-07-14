@@ -1,0 +1,93 @@
+import numpy as np
+import random
+import matplotlib.pyplot as plt
+
+# Function to determine if a transition occurs based on the transition probability
+def transition_occurs(probability):
+    return random.random() < probability
+
+# Function to determine the next state based on the current state and transition rules
+def next_state(current_state, transition_rules):
+    new_state = current_state[:]
+    for i, (probability, change) in enumerate(transition_rules):
+        if transition_occurs(probability):
+            new_state[i] += change
+    return new_state
+
+# Function to transition all states according to transition rules
+def transition_all(states, transition_rules):
+    new_states = []
+    for state in states:
+        new_states.append(next_state(state, transition_rules))
+    return new_states
+
+# Function to evolve the system over the specified time steps
+def evolve_system(NA, NB, NC, n_timesteps, transition_rules):
+    states_A = [NA]
+    states_B = [NB]
+    states_C = [NC]
+    
+    current_state = [NA, NB, NC]
+    
+    for t in range(n_timesteps):
+        current_state = next_state(current_state, transition_rules)
+        states_A.append(current_state[0])
+        states_B.append(current_state[1])
+        states_C.append(current_state[2])
+    
+    return states_A, states_B, states_C
+
+# Define transition probabilities and rules with and without neutron flux
+def get_transition_rules(with_flux):
+    half_life_A = 10.1
+    half_life_B = 15.7
+    half_life_C_to_A = 3.2 if with_flux else float('inf')
+    
+    prob_A_to_B = 1 - np.exp(-np.log(2) / half_life_A)
+    prob_B_to_C = 1 - np.exp(-np.log(2) / half_life_B)
+    prob_C_to_A = 1 - np.exp(-np.log(2) / half_life_C_to_A)
+    
+    transition_rules = [
+        (prob_A_to_B, -1),  # A -> B
+        (prob_B_to_C, -1),  # B -> C
+        (prob_C_to_A, -1 if with_flux else 0)  # C -> A
+    ]
+    
+    return transition_rules
+
+# Running the simulation 20 times and plotting the error bars
+n_simulations = 20
+n_timesteps = 200
+initial_NA, initial_NB, initial_NC = 0, 0, 250
+total_time = 100  # in hours
+
+time_steps = np.linspace(0, total_time, n_timesteps + 1)
+
+results_A = []
+for _ in range(n_simulations):
+    transition_rules_with_flux = get_transition_rules(with_flux=True)
+    transition_rules_without_flux = get_transition_rules(with_flux=False)
+    
+    # Evolving the system for 100 hours with neutron flux
+    states_A1, states_B1, states_C1 = evolve_system(initial_NA, initial_NB, initial_NC, n_timesteps, transition_rules_with_flux)
+    
+    # Evolving the system for another 100 hours without neutron flux
+    states_A2, states_B2, states_C2 = evolve_system(states_A1[-1], states_B1[-1], states_C1[-1], n_timesteps, transition_rules_without_flux)
+    
+    # Combine the results
+    combined_states_A = states_A1 + states_A2[1:]
+    
+    results_A.append(combined_states_A)
+
+# Calculate the average and standard deviation
+average_A = np.average(results_A, axis=0)
+std_A = np.std(results_A, axis=0)
+
+# Plotting the results
+plt.errorbar(np.linspace(0, 2 * total_time, 2 * n_timesteps + 1), average_A, yerr=std_A, fmt='-o', label='Number of $A$ Atoms')
+plt.xlabel('Time (hours)')
+plt.ylabel('Average Number of $A$ Atoms')
+plt.title('Average Number of $A$ Atoms Over Time with Uncertainty')
+plt.legend()
+plt.grid(True)
+plt.show()

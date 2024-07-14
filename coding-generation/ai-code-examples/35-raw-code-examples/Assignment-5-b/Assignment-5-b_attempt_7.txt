@@ -1,0 +1,79 @@
+import numpy as np
+import random
+import matplotlib.pyplot as plt
+
+def has_transition_occurred(transition_probability):
+    r = random.random()
+    return r < transition_probability
+
+def evolve_system(current_state, transition_rules):
+    new_state = current_state.copy()
+    for i, rule in enumerate(transition_rules):
+        current_atom = new_state[i]
+        for j, (transition_probability, next_atom_index) in enumerate(rule):
+            if current_atom > 0 and has_transition_occurred(transition_probability):
+                new_state[i] -= 1
+                new_state[next_atom_index] += 1
+    return new_state
+
+def run_simulation(initial_state, transition_rules_with_flux, transition_rules_without_flux, n_timestep, t_max):
+    time_points = np.linspace(0, t_max, n_timestep+1)
+    states = [initial_state]
+    current_state = initial_state
+
+    for _ in range(n_timestep):
+        if current_state[2] > 0:
+            current_state = evolve_system(current_state, transition_rules_with_flux)
+        else:
+            current_state = evolve_system(current_state, transition_rules_without_flux)
+        states.append(current_state)
+
+    return time_points, np.array(states).T
+
+def calculate_average_and_uncertainty(results):
+    averages = np.mean(results, axis=0)
+    uncertainties = np.std(results, axis=0)
+    return averages, uncertainties
+
+# Define transition probabilities
+half_life_A = 10.1
+half_life_B = 15.7
+half_life_C = 3.2
+
+prob_A_to_B = 1 / half_life_A * np.log(2)
+prob_B_to_C = 1 / half_life_B * np.log(2)
+prob_C_to_A_flux = 1 / half_life_C * np.log(2)
+prob_C_to_A_no_flux = 0
+
+# Define transition rules
+transition_rules_with_flux = [
+    [(prob_A_to_B, 1)],
+    [(prob_B_to_C, 2)],
+    [(prob_C_to_A_flux, 0)]
+]
+
+transition_rules_without_flux = [
+    [(prob_A_to_B, 1)],
+    [(prob_B_to_C, 2)],
+    [(prob_C_to_A_no_flux, 0)]
+]
+
+# Run the simulation multiple times
+n_simulations = 20
+n_timestep = 200
+t_max = 100
+
+results = []
+for _ in range(n_simulations):
+    initial_state = np.array([0, 0, 250])
+    time_points, evolution = run_simulation(initial_state, transition_rules_with_flux, transition_rules_without_flux, n_timestep, t_max)
+    results.append(evolution[0])  # Collect number of 'A' atoms at each time step
+
+averages, uncertainties = calculate_average_and_uncertainty(results)
+
+# Plot the results
+plt.errorbar(time_points, averages, yerr=uncertainties, fmt='b-', ecolor='r')
+plt.xlabel('Time (hours)')
+plt.ylabel('Number of A atoms')
+plt.title('Average and Uncertainty of A atoms over time')
+plt.show()

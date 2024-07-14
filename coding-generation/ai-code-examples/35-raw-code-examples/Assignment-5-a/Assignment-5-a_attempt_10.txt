@@ -1,0 +1,66 @@
+import numpy as np
+import random
+import matplotlib.pyplot as plt
+
+def has_transition_occurred(prob):
+    r = random.random()
+    if r < prob:
+        return True
+    return False
+
+def apply_transition(current_state, transitions):
+    new_state = current_state
+    for transition in transitions:
+        if transition['from'] == current_state and has_transition_occurred(transition['probability']):
+            new_state = transition['to']
+            break
+    return new_state
+
+def evolve_state(initial_state, transitions, n_timesteps):
+    state = initial_state
+    new_states = []
+    for _ in range(n_timesteps):
+        state = apply_transition(state, transitions)
+        new_states.append(state)
+    return np.array(new_states)
+
+def evolve_system(NA, NB, NC, n_timesteps, t_max, with_neutron_flux):
+    transitions = [
+        {'from': 'C', 'to': 'A', 'probability': 1 - 2**(-t_max/3.2)},
+        {'from': 'A', 'to': 'B', 'probability': 1 - 2**(-t_max/10.1)},
+        {'from': 'B', 'to': 'C', 'probability': 1 - 2**(-t_max/15.7)}
+    ]
+    states = {'A': [NA], 'B': [NB], 'C': [NC]}
+    current_state = 'C' if with_neutron_flux else 'A'
+    
+    for _ in range(n_timesteps):
+        new_state = apply_transition(current_state, transitions)
+        states['A'].append(states['A'][-1] + (new_state == 'A'))
+        states['B'].append(states['B'][-1] + (new_state == 'B'))
+        states['C'].append(states['C'][-1] + (new_state == 'C'))
+        current_state = new_state
+        
+    return states
+
+# Initial conditions
+NA = 0
+NB = 0
+NC = 250
+n_timesteps = 200
+t_max = 100
+with_neutron_flux = True
+
+# Evolve the system
+evolved_states = evolve_system(NA, NB, NC, n_timesteps, t_max, with_neutron_flux)
+
+# Plot the results
+plt.figure(figsize=(12, 6))
+plt.plot(evolved_states['A'], label='Nuclei A')
+plt.plot(evolved_states['B'], label='Nuclei B')
+plt.plot(evolved_states['C'], label='Nuclei C')
+plt.xlabel('Time (hours)')
+plt.ylabel('Number of Nuclei')
+plt.title('Evolution of Nuclei A, B, and C over Time')
+plt.legend()
+plt.grid(True)
+plt.show()

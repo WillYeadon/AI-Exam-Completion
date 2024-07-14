@@ -1,0 +1,61 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Constants
+nuclei = ['A', 'B', 'C']
+half_life = {'A': 10.1, 'B': 15.7, 'C': 3.2}
+transition_prob = {'C': {'A': 0.693 / half_life['C'], 'B': 0.0},
+                   'A': {'B': 0.693 / half_life['A'], 'C': 0.0},
+                   'B': {'C': 0.693 / half_life['B'], 'A': 0.0}}
+flux_on = True
+
+# Functions
+def get_transition_state(current_state):
+    possible_states = list(transition_prob[current_state].keys())
+    transition_probs = list(transition_prob[current_state].values())
+    new_state = np.random.choice(possible_states, p=transition_probs)
+    return new_state
+
+def evolve_single_state(current_state):
+    if current_state == 'C' and not flux_on:
+        return current_state
+    else:
+        return get_transition_state(current_state)
+
+def evolve_states(states):
+    new_states = [evolve_single_state(state) for state in states]
+    return new_states
+
+def evolve_system(initial_states, n_steps):
+    system_states = [initial_states]
+    for _ in range(n_steps):
+        new_states = evolve_states(system_states[-1])
+        system_states.append(new_states)
+    return system_states
+
+# Initial conditions
+initial_states = ['C'] * 250
+n_steps = 200
+
+# Evolve the system
+system_states_flux_on = evolve_system(initial_states, n_steps)
+
+# Turn off flux
+flux_on = False
+system_states_flux_off = evolve_system(system_states_flux_on[-1], n_steps)
+
+# Count the number of each nucleus type at each step
+count_A = [states.count('A') for states in system_states_flux_on]
+count_B = [states.count('B') for states in system_states_flux_on]
+count_C = [states.count('C') for states in system_states_flux_on]
+
+# Plotting
+plt.figure(figsize=(12, 6))
+plt.plot(range(n_steps+1), count_A, label='A nuclei')
+plt.plot(range(n_steps+1), count_B, label='B nuclei')
+plt.plot(range(n_steps+1), count_C, label='C nuclei')
+plt.xlabel('Time (hours)')
+plt.ylabel('Number of Nuclei')
+plt.title('Nuclei Decay and Activation')
+plt.legend()
+plt.show()

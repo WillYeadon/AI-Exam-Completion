@@ -1,0 +1,69 @@
+import numpy as np
+import random
+import matplotlib.pyplot as plt
+
+def check_transition(probability):
+    r = random.random()
+    if r < probability:
+        return True
+    else:
+        return False
+
+def implement_transition(current_state, transitions):
+    new_state = current_state[:]
+    for i, transition in enumerate(transitions):
+        if check_transition(transition['probability']):
+            if current_state[i] > 0:
+                new_state[i] -= 1
+                new_state[transition['target']] += 1
+    return new_state
+
+def evolve_system(initial_state, transitions, n_timesteps):
+    state = initial_state
+    evolution = [state]
+
+    for _ in range(n_timesteps):
+        state = implement_transition(state, transitions)
+        evolution.append(state)
+    
+    return np.array(evolution)
+
+# Define the transition rules for the system
+transitions = [
+    {'probability': 1 - 2 ** (-10/10.1), 'target': 1},  # A decays to nothing
+    {'probability': 1 - 2 ** (-10/15.7), 'target': 2},  # B decays to nothing
+    {'probability': 1 - 2 ** (-10/3.2), 'target': 0}    # C decays to A
+]
+
+# Initial amounts of A, B, and C nuclei
+initial_amounts = [0, 0, 250]  # Starting with 250 C nuclei
+
+# Evolve the system over 100 hours with neutron flux and another 100 hours without neutron flux
+n_timesteps = 200
+evolution1 = evolve_system(initial_amounts, transitions, n_timesteps)
+evolution2 = evolve_system(evolution1[-1], transitions[:2], n_timesteps)
+
+# Extract the amounts of A, B, and C nuclei at each time step
+A_counts = evolution1[:, 0]
+B_counts = evolution1[:, 1]
+C_counts = evolution1[:, 2]
+
+# Continue the evolution without neutron flux
+A_counts2 = evolution2[:, 0]
+B_counts2 = evolution2[:, 1]
+C_counts2 = evolution2[:, 2]
+
+# Plot the results
+plt.figure(figsize=(12, 8))
+plt.plot(np.arange(0, 201, 1), A_counts, label='Nuclei A with neutron flux', color='b')
+plt.plot(np.arange(0, 201, 1), B_counts, label='Nuclei B with neutron flux', color='g')
+plt.plot(np.arange(0, 201, 1), C_counts, label='Nuclei C with neutron flux', color='r')
+plt.plot(np.arange(201, 401, 1), A_counts2, linestyle='--', label='Nuclei A without neutron flux', color='b')
+plt.plot(np.arange(201, 401, 1), B_counts2, linestyle='--', label='Nuclei B without neutron flux', color='g')
+plt.plot(np.arange(201, 401, 1), C_counts2, linestyle='--', label='Nuclei C without neutron flux', color='r')
+plt.xlabel('Time (hours)')
+plt.ylabel('Number of Nuclei')
+plt.title('Nuclear Decay Simulation')
+plt.legend()
+plt.grid(True)
+plt.show()

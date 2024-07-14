@@ -1,0 +1,88 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Define the function f(x) = x - tanh(2x)
+def f(x):
+    return x - np.tanh(2*x)
+
+# Define the derivative of the function f(x)
+def df(x):
+    return 1 - 2*np.cosh(2*x)**(-2)
+
+# Newton-Raphson method
+def newton_raphson(x0, tol, max_iter):
+    x = x0
+    for i in range(max_iter):
+        x_next = x - f(x) / df(x)
+        if abs(x_next - x) < tol:
+            return x_next, i+1
+        x = x_next
+    return None, max_iter
+
+# Bisection method
+def bisection(a, b, tol, max_iter):
+    if f(a) * f(b) > 0:
+        return None, max_iter
+    for i in range(max_iter):
+        c = (a + b) / 2
+        if f(c) == 0 or (b - a) / 2 < tol:
+            return c, i+1
+        if f(c) * f(a) < 0:
+            b = c
+        else:
+            a = c
+    return (a+b) / 2, max_iter
+
+# Secant method
+def secant(x0, x1, tol, max_iter):
+    for i in range(max_iter):
+        x_next = x1 - (f(x1) * (x1 - x0)) / (f(x1) - f(x0))
+        if abs(x_next - x1) < tol:
+            return x_next, i+1
+        x0, x1 = x1, x_next
+    return None, max_iter
+
+# Initial values
+x0 = 1.5
+x1 = 2.0
+a = 1.0
+b = 2.0
+tol = 1e-6
+max_iter = 100
+
+# Perform root finding using three methods
+roots_newton, iterations_newton = newton_raphson(x0, tol, max_iter)
+roots_bisection, iterations_bisection = bisection(a, b, tol, max_iter)
+roots_secant, iterations_secant = secant(x0, x1, tol, max_iter)
+
+print("Newton-Raphson Method:")
+print("Root:", roots_newton)
+print("Iterations:", iterations_newton)
+
+print("\nBisection Method:")
+print("Root:", roots_bisection)
+print("Iterations:", iterations_bisection)
+
+print("\nSecant Method:")
+print("Root:", roots_secant)
+print("Iterations:", iterations_secant)
+
+# Plotting the graph of convergence
+x = np.linspace(-2, 2, 100)
+y = f(x)
+plt.figure(figsize=(10, 6))
+plt.plot(x, y, label='f(x) = x - tanh(2x)')
+plt.xlabel('x')
+plt.ylabel('f(x)')
+plt.axhline(y=0, color='r', linestyle='--', label='Root')
+plt.legend()
+
+# Plot the convergence points for different methods
+plt.plot(roots_newton, 0, 'ro', label='Newton-Raphson')
+plt.plot(roots_bisection, 0, 'go', label='Bisection')
+plt.plot(roots_secant, 0, 'bo', label='Secant')
+
+plt.legend()
+plt.title('Convergence of Root Finding Methods')
+plt.grid()
+plt.show()

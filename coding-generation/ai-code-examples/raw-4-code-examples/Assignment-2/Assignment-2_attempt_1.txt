@@ -1,0 +1,55 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.integrate import quad
+
+# Define the function f(x)
+def f(x):
+    return x**2 * np.cos(2*x)
+
+# Define the indefinite integral of f(x) analytically: g(x)
+def g(x):
+    # Using integration by parts, we have:
+    # g(x) = (x^2 * sin(2x) / 2) + (x * cos(2x) / 2) + (sin(2x) / 4)
+    return (x**2 * np.sin(2*x) / 2) + (x * np.cos(2*x) / 2) + (np.sin(2*x) / 4)
+
+# Define the definite integral of f(x) using g(x)
+def definite_integral_analytical(x_min, x_max):
+    return g(x_max) - g(x_min)
+
+# Function to compute the integral using Simpson's rule
+def definite_integral_simpson(f, x_min, x_max, N):
+    if N % 2 != 0:
+        raise ValueError("Number of panels N must be even")
+    
+    h = (x_max - x_min) / N
+    x = np.linspace(x_min, x_max, N+1)
+    y = f(x)
+
+    S = y[0] + y[-1]
+    S += 4 * np.sum(y[1:N:2])
+    S += 2 * np.sum(y[2:N-1:2])
+
+    return S * h / 3
+
+# Main section to compare both methods and plot the error
+x_min = 0
+x_max = np.pi  # You can change this value
+
+Ns = np.logspace(2, 5, num=20, base=10).astype(int)
+fractional_errors = []
+
+analytical_result = definite_integral_analytical(x_min, x_max)
+
+for N in Ns:
+    numerical_result = definite_integral_simpson(f, x_min, x_max, N)
+    fractional_error = abs(numerical_result - analytical_result) / abs(analytical_result)
+    fractional_errors.append(fractional_error)
+
+# Plotting the results
+plt.figure(figsize=(10, 6))
+plt.loglog(Ns, fractional_errors, marker='o', linestyle='-', color='b')
+plt.xlabel('Number of Panels (N)')
+plt.ylabel('Fractional Error')
+plt.title('Fractional Error between Numerical and Analytical Integration')
+plt.grid(True)
+plt.show()

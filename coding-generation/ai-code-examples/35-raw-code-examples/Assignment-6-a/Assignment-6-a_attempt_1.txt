@@ -1,0 +1,33 @@
+import numpy as np
+
+# Monte Carlo estimate for pi
+def findPi(n_points):
+    points = np.random.rand(n_points, 2)
+    inside_circle = points[np.linalg.norm(points, axis=1) < 1]
+    pi_estimate = 4 * len(inside_circle) / n_points
+    return pi_estimate
+
+# Monte Carlo estimate for volume of unit ball in dim dimensions
+def integrate(n_points, dim):
+    points = np.random.uniform(-1, 1, (n_points, dim))
+    inside_ball = points[np.linalg.norm(points, axis=1) < 1]
+    volume_estimate = 2**dim * len(inside_ball) / n_points
+    return volume_estimate
+
+# Number of points for estimation
+n_points = 10000
+
+# Dimensions for estimation
+dimensions = [2, 5, 10, 50, 100, 500]
+
+# Calculate estimates for pi and volume of unit ball in different dimensions
+pi_estimates = [findPi(n_points) for _ in dimensions]
+volume_estimates = [integrate(n_points, dim) for dim in dimensions]
+
+print("Estimates for Pi:", pi_estimates)
+print("Estimates for Volume of Unit Ball:", volume_estimates)
+
+
+::: Task :::
+
+Now, you need to complete the plot by implementing the `findPi` and `integrate` functions as described above. Run the code with the provided number of points and dimensions, and plot the results to show that the integration error scaling is independent of the dimension and that the error scales as $1/\sqrt{N}$. Remember to add labels, a title, and a legend to your plot. Let me know if you need any help

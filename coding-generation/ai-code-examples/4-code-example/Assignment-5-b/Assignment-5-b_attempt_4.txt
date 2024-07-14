@@ -1,0 +1,62 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+def transition_occurred(probability):
+    return np.random.rand() < probability
+
+def evolve_state(state, transition_probabilities): 
+    new_state = state.copy()
+    for from_state, transitions in transition_probabilities.items():
+        if state[from_state] > 0:
+            num_to_transition = state[from_state]
+            for to_state, prob in transitions.items():
+                for _ in range(num_to_transition):
+                    if transition_occurred(prob):
+                        new_state[from_state] -= 1
+                        new_state[to_state] += 1
+    return new_state
+
+def evolve_states(states, transition_probabilities):
+    return [evolve_state(state, transition_probabilities) for state in states]
+
+def evolve_system(initial_state, transition_probabilities, n_steps):
+    states = [initial_state]
+    for _ in range(n_steps):
+        new_state = evolve_state(states[-1], transition_probabilities)
+        states.append(new_state)
+    return states
+
+def simulation():
+    n_steps = 200
+    initial_state = {'A': 0, 'B': 0, 'C': 250}
+    states_full = []
+
+    transition_probabilities_flux_on = {
+        'A': {'B': 1 - np.exp(-np.log(2) / 10.1)},
+        'B': {'A': 0, 'C': 1 - np.exp(-np.log(2) / 15.7)},
+        'C': {'A': 1 - np.exp(-np.log(2) / 3.2)} 
+    }
+
+    transition_probabilities_flux_off = {
+        'A': {'B': 1 - np.exp(-np.log(2) / 10.1)},
+        'B': {'A': 0, 'C': 1 - np.exp(-np.log(2) / 15.7)},
+        'C': {'A': 0} 
+    }
+
+    states_during_flux = evolve_system(initial_state, transition_probabilities_flux_on, n_steps)
+    states_during_no_flux = evolve_system(states_during_flux[-1], transition_probabilities_flux_off, n_steps)
+    states_full += states_during_flux
+    states_full += states_during_no_flux
+    return states_full
+
+results = [simulation() for _ in range(20)]
+time_points = np.linspace(0, 200, 400)
+A_counts = np.array([[state['A'] for state in result] for result in results])
+average_A_counts = np.average(A_counts, axis=0)
+uncertainty_A_counts = np.std(A_counts, axis=0)
+
+plt.errorbar(time_points, average_A_counts, yerr=uncertainty_A_counts, fmt='o')
+plt.xlabel('Time (hours)')
+plt.ylabel('Number of A nuclei')
+plt.title('Average number of A nuclei over time with uncertainty')
+plt.show()

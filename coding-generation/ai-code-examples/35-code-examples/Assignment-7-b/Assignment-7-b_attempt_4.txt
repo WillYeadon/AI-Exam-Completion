@@ -1,0 +1,49 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Define the Rosenbrock's Banana Function
+def banana(r):
+    x, y = r
+    return (1 - x)**2 + 100*(y - x**2)**2
+
+# Define the gradient of the Rosenbrock's Banana Function
+def banana_grad(r):
+    x, y = r
+    grad_x = 2*(200*x**3 - 200*x*y + x - 1)
+    grad_y = 200*(y - x**2)
+    return np.array([grad_x, grad_y])
+
+# Define the gradient descent optimization function
+def gradientDescent(df, r0, eta, n_steps):
+    r = r0
+    trajectory = [r]
+    for _ in range(n_steps):
+        grad = df(r)
+        r = r - eta * grad
+        trajectory.append(r)
+    return np.array(trajectory)
+
+# Initialize parameters for the banana function plot
+n = 100
+x = np.linspace(-2, 2, n)
+y = np.linspace(-1, 3, n)
+X, Y = np.meshgrid(x, y)
+data = banana(np.array([X, Y]))
+
+# Plot the banana function
+im = plt.imshow(data, extent=(-2, 2, -1, 3), origin='lower', cmap=plt.cm.gray)
+plt.colorbar(im)
+
+# Define different step sizes
+etas = [0.001, 0.002, 0.003]
+
+# Perform gradient descent for each step size and plot the trajectories
+for eta in etas:
+    trajectory = gradientDescent(banana_grad, np.array([0.2, 1]), eta, 1000)
+    plt.plot(trajectory[:, 0], trajectory[:, 1], label=f'eta = {eta}')
+
+plt.title("Gradient Descent Trajectories for Rosenbrock's Banana Function")
+plt.xlabel("x")
+plt.ylabel("y")
+plt.legend()
+plt.show()

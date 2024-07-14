@@ -1,0 +1,67 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+def transition_prob(state, half_life, neutron_flux=False, eff_half_life=None):
+    if state == 'A':
+        if neutron_flux:
+            return 1 - np.exp(-0.693 / eff_half_life)
+        else:
+            return 1 - np.exp(-0.693 / half_life)
+    elif state == 'B':
+        return 1 - np.exp(-0.693 / half_life)
+    elif state == 'C':
+        if neutron_flux:
+            return 1 - np.exp(-0.693 / eff_half_life)
+        else:
+            return 0
+
+def evolve_state(state, half_life, neutron_flux=False, eff_half_life=None):
+    p = transition_prob(state, half_life, neutron_flux, eff_half_life)
+    if np.random.random() < p:
+        return 'A'
+    else:
+        return state
+
+def evolve_system(states, half_lives, neutron_flux=False, eff_half_life=None):
+    new_states = []
+    for state, half_life in zip(states, half_lives):
+        new_states.append(evolve_state(state, half_life, neutron_flux, eff_half_life))
+    return new_states
+
+def simulation(n_steps, neutron_flux=True):
+    n_nuclei = 250
+    states = ['C'] * n_nuclei
+    half_lives = [10.1, 15.7, 15.7]
+    eff_half_life = 3.2
+    total_time = 100
+    n_dt = 200
+    results = []
+    
+    for i in range(2):
+        for _ in range(n_dt):
+            new_states = evolve_system(states, half_lives, neutron_flux, eff_half_life)
+            states = new_states
+
+        results.append(states.count('A'))
+
+        if i == 0:
+            neutron_flux = False
+
+    return results
+
+# Average and Uncertainty Calculation
+n_simulations = 20
+n_steps = 200
+sim_results = []
+for _ in range(n_simulations):
+    sim_results.append(simulation(n_steps))
+
+avg_results = np.average(sim_results, axis=0)
+uncertainty = np.std(sim_results, axis=0)
+
+# Plotting
+plt.errorbar(np.arange(201), avg_results, yerr=uncertainty)
+plt.xlabel('Time (hours)')
+plt.ylabel('Number of A Atoms')
+plt.title('Average Number of A Atoms as a Function of Time')
+plt.show()

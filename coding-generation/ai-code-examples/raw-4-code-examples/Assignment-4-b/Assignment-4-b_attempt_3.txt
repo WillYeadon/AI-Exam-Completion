@@ -1,0 +1,43 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Define constants for the simulation
+g = 9.81  # Acceleration due to gravity (m/s^2)
+theta = np.radians(60)  # Angle in radians
+
+# Define the function to calculate range without air resistance
+def range_without_resistance(v0, theta):
+    return (v0**2 * np.sin(2 * theta)) / g
+
+# Define the function to calculate range with air resistance
+def range_with_resistance(v0, theta):
+    # Assuming air resistance is proportional to velocity squared
+    # This example uses simplified physics for drag calculation
+    b = 0.1  # Drag coefficient
+    vx = v0 * np.cos(theta)
+    vy = v0 * np.sin(theta)
+    t_flight = 2 * vy / g  # Time of flight without resistance (approx)
+    R = (vx / b) * (1 - np.exp(-b * t_flight))
+    return R
+
+# Define the velocities to simulate
+velocities = np.linspace(50, 200, 100)  # From 50 m/s to 200 m/s
+
+# Calculate ranges for each velocity
+ranges_without_resistance = [range_without_resistance(v0, theta) for v0 in velocities]
+ranges_with_resistance = [range_with_resistance(v0, theta) for v0 in velocities]
+
+# Plot the results
+plt.figure(figsize=(10, 6))
+plt.plot(velocities, ranges_without_resistance, label='Without Air Resistance', color='b')
+plt.plot(velocities, ranges_with_resistance, label='With Air Resistance', color='r')
+
+# Add labels and title
+plt.xlabel('Initial Velocity (m/s)')
+plt.ylabel('Range (m)')
+plt.title('Range of Projectile for Different Initial Velocities')
+plt.legend()
+
+# Show the plot
+plt.grid(True)
+plt.show()

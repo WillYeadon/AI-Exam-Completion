@@ -1,0 +1,102 @@
+import numpy as np
+import random
+import matplotlib.pyplot as plt
+
+def has_transition(prob, r):
+    """Determine if a transition happens based on the transition probability and random number."""
+    return r < prob
+
+def transition_state(current_state, transition_rules):
+    """Implement transitions based on transition rules."""
+    new_state = current_state.copy()
+    for old_state, new_state, prob in transition_rules:
+        if has_transition(prob, random.random()):
+            new_state += 1
+            old_state -= 1
+    return new_state
+
+def evolve_states(states, transition_rules):
+    """Evolve a list of states based on transition rules."""
+    new_states = states.copy()
+    for i in range(len(states)):
+        new_state = transition_state(states[i], transition_rules[i])
+        new_states[i] = new_state
+    return new_states
+
+def evolve_system(NA, NB, NC, n_timesteps, t_max, transition_rules_A, transition_rules_B, transition_rules_C):
+    """Evolve system over given timesteps."""
+    dt = t_max / n_timesteps
+    time = np.linspace(0, t_max, n_timesteps + 1)
+    A_vals = [NA]
+    B_vals = [NB]
+    C_vals = [NC]
+    
+    # Convert half-lives to probabilities
+    p_A = 1 - np.exp(-dt / (10.1))
+    p_B = 1 - np.exp(-dt / (15.7))
+    p_C_to_A = 1 - np.exp(-dt / (3.2))
+    
+    for t in time[1:]:
+        A_t = A_vals[-1]
+        B_t = B_vals[-1]
+        C_t = C_vals[-1]
+
+        A_t_new = max(A_t - int(np.round(A_t * p_A)), 0)
+        B_t_new = max(B_t - int(np.round(B_t * p_B)), 0)
+        
+        if transition_rules_C:
+            C_to_A_prob = int(np.round(C_t * p_C_to_A))
+            C_t_new = max(C_t - C_to_A_prob, 0)
+            A_t_new += C_to_A_prob
+
+        B_t_new += A_t
+        A_vals.append(A_t_new)
+        B_vals.append(B_t_new)
+        C_vals.append(C_t_new)
+
+    return np.array(A_vals), np.array(B_vals), np.array(C_vals)
+
+def evolve_system_in_phases(NA, NB, NC, t_phase_1, t_phase_2, n_timestep, transition_rules_C):
+    """Evolve system in two phases, first with neutron flux, second without."""
+    A_vals, B_vals, C_vals = evolve_system(NA, NB, NC, n_timestep, t_phase_1, True)
+    final_A, final_B, final_C = A_vals[-1], B_vals[-1], C_vals[-1]
+    A_vals_phase_2, B_vals_phase_2, C_vals_phase_2 = evolve_system(final_A, final_B, final_C, n_timestep, t_phase_2, False)
+
+    A_final = np.concatenate((A_vals, A_vals_phase_2[1:]))
+    B_final = np.concatenate((B_vals, B_vals_phase_2[1:]))
+    C_final = np.concatenate((C_vals, C_vals_phase_2[1:]))
+    
+    return A_final, B_final, C_final
+
+# Transition rules
+transition_rules_A = [(1, 2, 'prob_AtoB')]
+transition_rules_B = [(2, 0, 'prob_BtoC')]
+transition_rules_C = [(3, 1, 'prob_CtoA')]
+
+# Initial amounts
+NA_init = 0
+NB_init = 0
+NC_init = 250
+
+# Time parameters
+t_phase_1 = 100
+t_phase_2 = 100
+n_timesteps = 200
+
+# Evolve the system
+A_vals, B_vals, C_vals = evolve_system_in_phases(NA_init, NB_init, NC_init, t_phase_1, t_phase_2, n_timesteps, transition_rules_C)
+
+# Time for 2 phases
+t_values = np.linspace(0, 2 * t_phase_1, 2 * n_timesteps + 1)
+
+# Plot
+plt.figure(figsize=(10, 6))
+plt.plot(t_values, A_vals, label='Nuclei A')
+plt.plot(t_values, B_vals, label='Nuclei B')
+plt.plot(t_values, C_vals, label='Nuclei C')
+plt.xlabel('Time (hours)')
+plt.ylabel('Number of Nuclei')
+plt.title('Evolution of Nuclei A, B, and C with/without Neutron Flux')
+plt.legend()
+plt.grid(True)
+plt.show()

@@ -1,0 +1,81 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Constants
+g = 9.81  # acceleration due to gravity in m/s^2
+rho = 1.2  # density of air in kg/m^3
+c = 0.47  # drag coefficient
+d = 0.11  # diameter of the cannonball in m
+A = np.pi * (d/2)**2  # cross-sectional area of the cannonball
+m = 4.5  # mass of the cannonball in kg
+
+# Function to calculate cross-sectional area of a sphere
+def cross_sectional_area(diameter):
+    return np.pi * (diameter/2)**2
+
+# Function to calculate the mass of an iron sphere
+def sphere_mass(radius, density):
+    return (4/3) * np.pi * radius**3 * density
+
+# Calculating area and mass of the cannonball
+A = cross_sectional_area(d)
+m = sphere_mass(d/2, 7874)
+
+# Function to model cannonball's motion
+def f(u, t, m, g, rho, A, c):
+    x, y, vx, vy = u
+    v = np.sqrt(vx**2 + vy**2)
+    dx_dt = vx
+    dy_dt = vy
+    dvx_dt = -0.5 * rho * A * c * v * vx / m
+    dvy_dt = -g - 0.5 * rho * A * c * v * vy / m
+    return [dx_dt, dy_dt, dvx_dt, dvy_dt]
+
+# Euler's method for solving the ODE
+def solve_euler(f, u0, dt, T, m, g, rho, A, c):
+    N = int(T/dt)
+    u = np.zeros((N, 4))
+    u[0] = u0
+    for n in range(N-1):
+        u[n+1] = u[n] + dt * np.array(f(u[n], dt*n, m, g, rho, A, c))
+    return u
+
+# Function to find the x-coordinate where the trajectory crosses y=0
+def find_crossing(u):
+    x, y, vx, vy = u[:,0], u[:,1], u[:,2], u[:,3]
+    idx = np.where(y <= 0)[0]
+    if len(idx) == 0:
+        return None
+    i = idx[0]
+    return x[i-1] - y[i-1] * (x[i] - x[i-1]) / (y[i] - y[i-1])
+
+# Function to find the range of the projectile
+def find_range(u):
+    x, y, vx, vy = u[:,0], u[:,1], u[:,2], u[:,3]
+    idx = np.where(y <= 0)[0]
+    if len(idx) == 0:
+        return x[-1]
+    i = idx[0]
+    return x[i]
+
+# Stores the trajectories for different values of the initial angle
+# Uses the same velocity v0=125 m/s for all angles
+# Store the values in the results dictionary
+results = {}
+
+# Calculate the trajectory for different initial velocities
+for v0 in [100, 150, 200]:
+    theta = np.radians(60)  # initial angle in radians
+    u0 = [0, 0, v0 * np.cos(theta), v0 * np.sin(theta)]
+    dt = 0.01
+    T = 30
+    u = solve_euler(f, u0, dt, T, m, g, rho, A, c)
+    results[v0] = u
+
+# Plotting the results
+plt.figure(figsize=(12, 8))
+for v0, u in results.items():
+    range_no_air_resistance = find_range(u)
+    plt.plot(u[:,0], u[:,1], label=f'v0={v0}, No Air Resistance (Range={range_no_air_resistance:.2f} m)', linestyle='--')
+
+# HERE HERE HER

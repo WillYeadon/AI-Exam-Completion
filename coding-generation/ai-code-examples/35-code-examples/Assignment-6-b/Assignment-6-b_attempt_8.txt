@@ -1,0 +1,24 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Function to generate samples according to the given probability density function
+def genSample(n_points):
+    x = np.linspace(0, 10, n_points)
+    f = (1 + 2/(1+x**2) + np.cos(np.sqrt(3*x))**2)
+    norm = np.trapz(f, x)
+    pdf = f / norm
+    sample = np.random.choice(x, size=n_points, p=pdf)
+    return sample
+
+# Generate samples
+n_points = 10000
+samples = genSample(n_points)
+
+# Plot the distribution of generated samples
+plt.figure(figsize=(10, 6))
+plt.hist(samples, bins=50, color='skyblue', edgecolor='black', alpha=0.7)
+plt.title('Distribution of Generated Samples', fontsize=16)
+plt.xlabel('Generated Samples', fontsize=12)
+plt.ylabel('Frequency', fontsize=12)
+plt.grid(axis='y', alpha=0.75)
+plt.show()

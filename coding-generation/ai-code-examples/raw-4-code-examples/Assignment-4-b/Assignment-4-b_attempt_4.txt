@@ -1,0 +1,86 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Constants for the simulation
+g = 9.81  # gravitational acceleration in m/s^2
+theta = 60 * (np.pi / 180)  # initial angle in radians
+
+def find_zero_linear(x1, x2, y1, y2):
+    """
+    Linear approximation to determine the x-coordinate where the line between (x1, y1)
+    and (x2, y2) crosses the y=0 line.
+    """
+    return x1 - y1 * (x2 - x1) / (y2 - y1)
+
+def simulate_projectile(v0, air_resistance=False):
+    """
+    Simulate the trajectory of the projectile.
+    """
+    dt = 0.01  # time step
+    n_steps = 2000  # number of steps in the simulation
+
+    # Initialize variables
+    x = 0
+    y = 0
+    vx = v0 * np.cos(theta)
+    vy = v0 * np.sin(theta)
+    x_values = []
+    y_values = []
+
+    for _ in range(n_steps):
+        x_values.append(x)
+        y_values.append(y)
+
+        if y < 0:
+            break
+
+        if air_resistance:
+            # Air resistance coefficients
+            b_x = 0.05 * vx
+            b_y = 0.05 * vy
+        else:
+            b_x = 0
+            b_y = 0
+
+        # Update positions
+        x += vx * dt
+        y += vy * dt
+
+        # Update velocities
+        vx -= b_x * dt
+        vy -= (g + b_y) * dt
+
+    return np.array(x_values), np.array(y_values)
+
+def find_range(v0, air_resistance=False):
+    """
+    Calculate the range of the projectile.
+    """
+    x_values, y_values = simulate_projectile(v0, air_resistance)
+    for i in range(len(y_values) - 1):
+        if y_values[i] * y_values[i + 1] < 0:
+            return find_zero_linear(x_values[i], x_values[i + 1], y_values[i], y_values[i + 1])
+    return None
+
+# Task: Create a plot to show the range for different values of the initial velocity
+# Use the same angle θ = 60° for all velocities
+
+initial_velocities = np.linspace(10, 150, num=50)
+ranges_no_air_resistance = []
+ranges_with_air_resistance = []
+
+for v0 in initial_velocities:
+    ranges_no_air_resistance.append(find_range(v0, air_resistance=False))
+    ranges_with_air_resistance.append(find_range(v0, air_resistance=True))
+
+# Plotting the results
+plt.figure(figsize=(10, 6))
+plt.plot(initial_velocities, ranges_no_air_resistance, label='Without Air Resistance', color='blue')
+plt.plot(initial_velocities, ranges_with_air_resistance, label='With Air Resistance', color='red')
+
+plt.xlabel('Initial Velocity (m/s)')
+plt.ylabel('Range (m)')
+plt.title('Range of Projectile vs Initial Velocity')
+plt.legend()
+plt.grid(True)
+plt.show()

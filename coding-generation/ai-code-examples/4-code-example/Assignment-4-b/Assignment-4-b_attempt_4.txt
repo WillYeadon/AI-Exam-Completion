@@ -1,0 +1,102 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Constants
+g = 9.81  # Acceleration due to gravity (m/s^2)
+rho = 1.225  # Air density (kg/m^3)
+Cd = 0.47  # Drag coefficient for a sphere
+r = 0.08  # Radius of the cannonball (m)
+iron_density = 7874  # Density of iron (kg/m^3)
+area = np.pi * r**2  # Cross-sectional area of the cannonball (m^2)
+mass = 4/3 * np.pi * r**3 * iron_density  # Mass of the cannonball (kg)
+
+# Function to compute drag force
+def drag_force(v):
+    return 0.5 * Cd * rho * area * v**2
+
+# Function to compute the trajectory with air resistance
+def trajectory_with_drag(v0, theta):
+    t_max = 15  # Simulation time (seconds)
+    dt = 0.01  # Time step (seconds)
+    
+    theta_rad = np.radians(theta)
+    vx = v0 * np.cos(theta_rad)
+    vy = v0 * np.sin(theta_rad)
+    
+    x, y = 0, 0
+    trajectory = []
+
+    for _ in np.arange(0, t_max, dt):
+        v = np.sqrt(vx**2 + vy**2)
+        ax = -drag_force(v) * vx / mass
+        ay = (-drag_force(v) * vy / mass) - g
+        
+        vx += ax * dt
+        vy += ay * dt
+        
+        x += vx * dt
+        y += vy * dt
+        
+        trajectory.append((x, y))
+        
+        if y < 0:
+            break
+    
+    return np.array(trajectory)
+
+# Function to compute the trajectory without air resistance
+def trajectory_without_drag(v0, theta):
+    t_max = 15  # Simulation time (seconds)
+    dt = 0.01  # Time step (seconds)
+    
+    theta_rad = np.radians(theta)
+    vx = v0 * np.cos(theta_rad)
+    vy = v0 * np.sin(theta_rad)
+    
+    x, y = 0, 0
+    trajectory = []
+
+    for _ in np.arange(0, t_max, dt):
+        ay = -g
+        
+        vy += ay * dt
+        
+        x += vx * dt
+        y += vy * dt
+        
+        trajectory.append((x, y))
+        
+        if y < 0:
+            break
+    
+    return np.array(trajectory)
+
+# Function to find the range from a trajectory
+def find_range(trajectory):
+    return trajectory[-1, 0]
+
+# Simulation parameters
+theta = 60  # Initial angle (degrees)
+initial_velocities = np.arange(50, 201, 10)  # Different initial velocities (m/s)
+
+# Store results
+range_with_drag = []
+range_without_drag = []
+
+for v0 in initial_velocities:
+    traj_with_drag = trajectory_with_drag(v0, theta)
+    traj_without_drag = trajectory_without_drag(v0, theta)
+    
+    range_with_drag.append(find_range(traj_with_drag))
+    range_without_drag.append(find_range(traj_without_drag))
+
+# Plotting
+plt.figure(figsize=(10, 6))
+plt.plot(initial_velocities, range_with_drag, label='With Air Resistance', marker='o')
+plt.plot(initial_velocities, range_without_drag, label='Without Air Resistance', marker='x')
+plt.xlabel('Initial Velocity (m/s)')
+plt.ylabel('Range (m)')
+plt.title('Range of a Cannonball with and without Air Resistance')
+plt.legend()
+plt.grid(True)
+plt.show()

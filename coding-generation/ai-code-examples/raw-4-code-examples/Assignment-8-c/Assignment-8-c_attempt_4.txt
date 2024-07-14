@@ -1,0 +1,77 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+class Walker:
+    def __init__(self, ndim=1, step_size=1):
+        self.ndim = ndim
+        self.step_size = step_size
+        self.pos = np.zeros(ndim)
+        self.steps = self._create_steps()
+
+    def _create_steps(self):
+        steps = []
+        for dim in range(self.ndim):
+            step = np.zeros(self.ndim)
+            step[dim] = self.step_size
+            steps.append(step)
+            steps.append(-step)
+        return steps
+
+    def pickStep(self):
+        return self.steps[np.random.choice(len(self.steps))]
+
+    def doSteps(self, n):
+        trajectory = [self.pos.copy()]
+        for _ in range(n):
+            self.pos += self.pickStep()
+            trajectory.append(self.pos.copy())
+        return np.array(trajectory)
+
+def simulate_walkers(n_walkers, n_steps, step_size=0.05, dimensions=2):
+    rand_pos = np.random.rand(n_walkers, dimensions)
+    trajectories = []
+    for i in range(n_walkers):
+        walker = Walker(ndim=dimensions, step_size=step_size)
+        walker.pos = rand_pos[i]
+        trajectory = walker.doSteps(n_steps)
+        trajectories.append(trajectory)
+    return np.array(trajectories)
+
+# Simulating the diffusion of 1000 walkers in 2D with a step size of 0.05.
+n_walkers = 1000
+step_size = 0.05
+dimensions = 2
+
+# Simulating for 10, 100, 500 steps
+trajectories_10 = simulate_walkers(n_walkers, 10, step_size, dimensions)
+trajectories_100 = simulate_walkers(n_walkers, 100, step_size, dimensions)
+trajectories_500 = simulate_walkers(n_walkers, 500, step_size, dimensions)
+
+# Extract positions after 10, 100, and 500 steps
+positions_10 = trajectories_10[:, -1, :]
+positions_100 = trajectories_100[:, -1, :]
+positions_500 = trajectories_500[:, -1, :]
+
+# Plot the positions
+fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(18, 6))
+
+ax1.scatter(positions_10[:, 0], positions_10[:, 1], s=1)
+ax1.set_title("Positions after 10 steps")
+ax1.set_xlabel("x coordinate")
+ax1.set_ylabel("y coordinate")
+ax1.grid(True)
+
+ax2.scatter(positions_100[:, 0], positions_100[:, 1], s=1)
+ax2.set_title("Positions after 100 steps")
+ax2.set_xlabel("x coordinate")
+ax2.set_ylabel("y coordinate")
+ax2.grid(True)
+
+ax3.scatter(positions_500[:, 0], positions_500[:, 1], s=1)
+ax3.set_title("Positions after 500 steps")
+ax3.set_xlabel("x coordinate")
+ax3.set_ylabel("y coordinate")
+ax3.grid(True)
+
+plt.tight_layout()
+plt.show()

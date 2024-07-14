@@ -1,0 +1,53 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Function to determine if a transition occurs based on the transition probability
+def transition_occurs(probability):
+    return np.random.rand() < probability
+
+# Function to evolve a single state according to the transition rules
+def evolve_state(state, transition_prob):
+    if state == 'C':
+        if transition_occurs(transition_prob):
+            return 'A'
+    elif state == 'A':
+        if transition_occurs(1/(2*10.1)):
+            return 'B'
+    return state
+
+# Function to evolve a list of states
+def evolve_states(states, transition_prob):
+    new_states = [evolve_state(state, transition_prob) for state in states]
+    return new_states
+
+# Function to evolve the entire system over 'n_steps'
+def evolve_system(initial_states, transition_prob, n_steps, neutron_flux=True):
+    states_list = [initial_states]
+    for _ in range(n_steps):
+        new_states = evolve_states(states_list[-1], transition_prob)
+        if neutron_flux:
+            new_states = evolve_states(new_states, 1/(2*3.2))
+        states_list.append(new_states)
+    return states_list
+
+# Initial number of nuclei
+nuclei = ['C']*250
+
+# Evolve the system
+states_list = evolve_system(nuclei, 1, 200, neutron_flux=True)
+states_list += evolve_system(states_list[-1], 0, 200, neutron_flux=False)
+
+# Plotting the results
+A_counts = [states.count('A') for states in states_list]
+B_counts = [states.count('B') for states in states_list]
+C_counts = [states.count('C') for states in states_list]
+
+plt.figure(figsize=(12, 8))
+plt.plot(range(401), A_counts, label='A nuclei')
+plt.plot(range(401), B_counts, label='B nuclei')
+plt.plot(range(401), C_counts, label='C nuclei')
+plt.xlabel('Time (hours)')
+plt.ylabel('Number of Nuclei')
+plt.title('Decay and Activation of Nuclei Over Time')
+plt.legend()
+plt.show()

@@ -1,0 +1,52 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Constants
+g = 9.81  # acceleration due to gravity in m/s^2
+theta_deg = 60  # launch angle in degrees
+theta = np.deg2rad(theta_deg)  # convert angle to radians
+
+# Function to find the x at which the trajectory crosses the y=0 line
+def find_zero_linear(x1, x2, y1, y2):
+    return x1 - y1 * (x2 - x1) / (y2 - y1)
+
+# Simulation
+v0 = 125  # initial velocity in m/s
+vx = v0 * np.cos(theta)  # x component of velocity remains constant
+vy = v0 * np.sin(theta)  # y component of velocity changes due to gravity
+
+# Initialize lists to store x and y values for the trajectory
+x_values = []
+y_values = []
+
+# Initial conditions
+x = 0
+y = 0
+dt = 0.01
+
+# Projectile motion with air resistance (linear model)
+while y >= 0:
+    x_values.append(x)
+    y_values.append(y)
+    
+    # Update x and y coordinates
+    x = x + vx * dt
+    y = y + vy * dt
+    
+    # Update velocity components
+    v = np.sqrt(vx**2 + vy**2)
+    vx = vx - 0.1 * vx * dt  # accounting for air resistance
+    vy = vy - g * dt
+
+# Find range of the projectile using linear approximation
+range_x = find_zero_linear(x_values[-2], x_values[-1], y_values[-2], y_values[-1])
+print("Range of the projectile: {:.2f} meters".format(range_x))
+
+# Plotting the trajectory
+plt.plot(x_values, y_values, label='With air resistance')
+plt.xlabel('Horizontal Distance (m)')
+plt.ylabel('Vertical Distance (m)')
+plt.title('Projectile Motion with Air Resistance')
+plt.legend()
+plt.grid()
+plt.show()

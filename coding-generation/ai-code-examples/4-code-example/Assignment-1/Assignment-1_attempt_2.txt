@@ -1,0 +1,45 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Define the function f(x) = sin(2x) and its analytical derivative
+def f(x):
+    return np.sin(2 * x)
+
+def df_analytical(x):
+    return 2 * np.cos(2 * x)
+
+# Define the forward difference method for numerical differentiation
+def df_numerical(x, dx):
+    return (f(x + dx) - f(x)) / dx
+
+# Choose x values for evaluation
+x = np.linspace(0, 2 * np.pi, 1000)
+
+# Define different dx values
+dx1 = 0.1
+dx2 = 0.01
+dx3 = 0.001
+
+# Calculate analytical derivatives
+df_true = df_analytical(x)
+
+# Calculate numerical derivatives
+df_num1 = df_numerical(x, dx1)
+df_num2 = df_numerical(x, dx2)
+df_num3 = df_numerical(x, dx3)
+
+# Calculate differences
+diff1 = df_true - df_num1
+diff2 = df_true - df_num2
+diff3 = df_true - df_num3
+
+# Plot the differences
+plt.figure(figsize=(10, 6))
+plt.plot(x, diff1, label=f'Difference with dx={dx1}', linestyle='--')
+plt.plot(x, diff2, label=f'Difference with dx={dx2}', linestyle='-.')
+plt.plot(x, diff3, label=f'Difference with dx={dx3}', linestyle='-')
+plt.xlabel('x')
+plt.ylabel('Difference')
+plt.legend()
+plt.title('Difference between Analytical and Numerical Derivatives for Different dx Values')
+plt.show()

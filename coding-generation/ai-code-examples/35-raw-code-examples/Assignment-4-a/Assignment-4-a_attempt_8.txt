@@ -1,0 +1,46 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Constants
+g = 9.81  # acceleration due to gravity in m/s^2
+v0 = 125  # initial velocity in m/s
+
+# Function to find x at y=0 using linear approximation
+def find_zero_linear(x1, x2, y1, y2):
+    return x1 - y1 * (x2 - x1) / (y2 - y1)
+
+# Initialize variables
+angles = [30, 45, 60]  # angles in degrees
+colors = ['blue', 'green', 'red']  # colors for the plots
+
+plt.figure(figsize=(10, 6))
+plt.xlabel('Horizontal Distance (m)')
+plt.ylabel('Vertical Distance (m)')
+plt.title('Projectile Motion Trajectories for Different Initial Angles')
+
+for angle, color in zip(angles, colors):
+    theta = np.radians(angle)  # convert angle to radians
+    vx0 = v0 * np.cos(theta)  # initial velocity in x direction
+    vy0 = v0 * np.sin(theta)  # initial velocity in y direction
+    
+    # Time of flight
+    t_flight = 2 * vy0 / g
+    
+    # Time array
+    t = np.linspace(0, t_flight, num=100)
+    
+    # Calculate x and y positions
+    x = vx0 * t
+    y = vy0 * t - 0.5 * g * t**2
+    
+    # Find where y=0
+    mask = y >= 0
+    idx = np.where(mask)[0]
+    x_intersect = find_zero_linear(x[idx-1], x[idx], y[idx-1], y[idx])
+    print(f"For angle {angle} degrees, range is {x_intersect} meters.")
+    
+    plt.plot(x, y, label=f'{angle} degrees', color=color)
+
+plt.legend()
+plt.grid(True)
+plt.show()

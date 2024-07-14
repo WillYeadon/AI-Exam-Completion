@@ -1,0 +1,34 @@
+import matplotlib.pyplot as plt
+import numpy as np
+
+# Constants
+g = 9.81  # m/s^2, acceleration due to gravity
+v0 = 125  # m/s, initial velocity
+
+# Function to find the x position where the trajectory crosses y = 0 based on linear interpolation
+def find_zero_linear(x1, x2, y1, y2):
+    return x1 - y1 * (x2 - x1) / (y2 - y1)
+
+# Function to get the trajectory for given angle
+def get_trajectory(angle):
+    angle_rad = np.radians(angle)
+    t_flight = 2 * v0 * np.sin(angle_rad) / g  # total time of flight
+    t = np.linspace(0, t_flight, num=500)
+    x = v0 * np.cos(angle_rad) * t
+    y = v0 * np.sin(angle_rad) * t - 0.5 * g * t**2
+    return x, y
+
+# Main plotting function
+def plot_trajectories(angles):
+    plt.figure(figsize=(10, 6))
+
+    for angle in angles:
+        x, y = get_trajectory(angle)
+        plt.plot(x, y, label=f'{angle} degrees')
+
+    plt.xlabel('Range (m)')
+    plt.ylabel('Height (m)')
+    plt.title('Projectile Trajectories for Different Angles')
+    plt.legend()
+    plt.grid(True)
+    plt.show()

@@ -1,0 +1,60 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Constants
+g = 9.81  # acceleration due to gravity in m/s^2
+mass = 0.145  # mass of the projectile in kg
+rho = 1.2  # density of air in kg/m^3
+C_d = 0.47  # drag coefficient
+v0 = 125  # initial velocity in m/s
+theta = np.radians(60)  # initial angle in radians
+
+# Function to calculate the drag force
+def drag_force(v):
+    return 0.5 * rho * v**2 * C_d
+
+# Function to calculate the x and y components of the acceleration
+def acceleration(vx, vy):
+    v = np.sqrt(vx**2 + vy**2)
+    ax = -drag_force(v) * vx / (mass * v)
+    ay = -g - drag_force(v) * vy / (mass * v)
+    return ax, ay
+
+# Function to find the zero linearly
+def find_zero_linear(x1, x2, y1, y2):
+    return x1 - y1 * (x2 - x1) / (y2 - y1)
+
+# Projectile motion simulation
+def projectile_motion(v0, theta):
+    x = [0.]
+    y = [0.]
+    vx = v0 * np.cos(theta)
+    vy = v0 * np.sin(theta)
+    dt = 0.01
+    while y[-1] >= 0:
+        ax, ay = acceleration(vx, vy)
+        vx = vx + ax * dt
+        vy = vy + ay * dt
+        x.append(x[-1] + vx * dt)
+        y.append(y[-1] + vy * dt)
+    # Find the zero point
+    x_range = find_zero_linear(x[-2], x[-1], y[-2], y[-1])
+    return x_range
+
+# Plotting the range for different initial velocities
+v0_values = np.linspace(50, 150, 100)
+ranges_no_air_resistance = []
+ranges_with_air_resistance = []
+
+for v in v0_values:
+    ranges_no_air_resistance.append(v**2 * np.sin(2*theta) / g)
+    ranges_with_air_resistance.append(projectile_motion(v, theta))
+
+plt.figure()
+plt.plot(v0_values, ranges_no_air_resistance, label='No Air Resistance')
+plt.plot(v0_values, ranges_with_air_resistance, label='With Air Resistance')
+plt.xlabel('Initial Velocity (m/s)')
+plt.ylabel('Range (m)')
+plt.title('Projectile Range for Different Initial Velocities')
+plt.legend()
+plt.show()

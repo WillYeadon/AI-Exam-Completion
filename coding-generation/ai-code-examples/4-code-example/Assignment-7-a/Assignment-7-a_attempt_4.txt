@@ -1,0 +1,80 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Define the function and its derivative
+def f(x):
+    return np.cos(x) - x
+
+def df(x):
+    return -np.sin(x) - 1
+
+# Newton-Raphson method
+def NewtonRaphson(f, df, x0, tol=1e-10, max_iter=1000):
+    x = x0
+    errors = []
+    for i in range(max_iter):
+        x_new = x - f(x) / df(x)
+        error = abs(x_new - 0.9575040240772687)
+        errors.append(error)
+        if error < tol:
+            break
+        x = x_new
+    return x, errors
+
+# Bisection method
+def bisect(f, a, b, tol=1e-10, max_iter=1000):
+    mid = (a + b) / 2.0
+    errors = []
+    for i in range(max_iter):
+        error = abs(mid - 0.9575040240772687)
+        errors.append(error)
+        if error < tol:
+            break
+        if f(mid) == 0:
+            break
+        elif f(a) * f(mid) < 0:
+            b = mid
+        else:
+            a = mid
+        mid = (a + b) / 2.0
+    return mid, errors
+
+# Secant method
+def secant(f, x0, x1, tol=1e-10, max_iter=1000):
+    errors = []
+    for i in range(max_iter):
+        f_x0, f_x1 = f(x0), f(x1)
+        if abs(f_x1 - f_x0) < tol:
+            break
+        x2 = x1 - f_x1 * (x1 - x0) / (f_x1 - f_x0)
+        error = abs(x2 - 0.9575040240772687)
+        errors.append(error)
+        if error < tol:
+            break
+        x0, x1 = x1, x2
+    return x1, errors
+
+# Initial guesses
+x0_NR = 1.0
+x0_bisect_a = 0.0
+x0_bisect_b = 1.0
+x0_secant_0 = 0.0
+x0_secant_1 = 1.0
+
+# Run methods
+root_NR, errors_NR = NewtonRaphson(f, df, x0_NR)
+root_bisect, errors_bisect = bisect(f, x0_bisect_a, x0_bisect_b)
+root_secant, errors_secant = secant(f, x0_secant_0, x0_secant_1)
+
+# Plotting
+plt.figure(figsize=(10, 6))
+plt.plot(errors_NR, label='Newton-Raphson', color='blue')
+plt.plot(errors_bisect, label='Bisection', color='green')
+plt.plot(errors_secant, label='Secant', color='red')
+plt.yscale('log')
+plt.xlabel('Iteration')
+plt.ylabel('Error')
+plt.title('Convergence Comparison of Root-Finding Methods')
+plt.legend()
+plt.grid(True)
+plt.show()

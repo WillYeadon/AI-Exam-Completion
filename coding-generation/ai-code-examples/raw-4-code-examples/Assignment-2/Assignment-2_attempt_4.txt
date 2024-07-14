@@ -1,0 +1,56 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.integrate import quad
+
+# Define the function f(x)
+def f(x):
+    return x**2 * np.cos(2*x)
+
+# Define the analytically derived indefinite integral g(x)
+def g(x):
+    # The integral of x^2 * cos(2x) dx can be derived using integration by parts:
+    # Integral = (x^2 * sin(2x)) / 2 + Integral (x * sin(2x)) dx
+    # Let u = x, dv = sin(2x) dx, then du = dx, v = -cos(2x) / 2
+    # Integration by parts again for the remaining integral
+    return (x**2 * np.sin(2*x)) / 2 + (x * np.cos(2*x)) / 2 - (np.sin(2*x)) / 4
+
+# Define the function to find the definite integral of f(x) using g(x)
+def definite_integral_analytical(x_min, x_max):
+    return g(x_max) - g(x_min)
+
+# Define the function to find the definite integral using Simpson's rule
+def definite_integral_simpsons(x_min, x_max, N):
+    if N % 2 != 0:
+        N += 1  # Increase N by 1 if it is not even for Simpson's rule
+    
+    h = (x_max - x_min) / N
+    x = np.linspace(x_min, x_max, N + 1)
+    y = f(x)
+    
+    S = y[0] + y[-1]
+    S += 4 * np.sum(y[1:-1:2])
+    S += 2 * np.sum(y[2:-2:2])
+    
+    return S * h / 3
+
+# Set up the plot data
+x_min = 0
+x_max = 5
+Ns = np.logspace(1, 5, num=20, dtype=int)
+errors = []
+
+analytical_result = definite_integral_analytical(x_min, x_max)
+
+for N in Ns:
+    numerical_result = definite_integral_simpsons(x_min, x_max, N)
+    error = np.abs((numerical_result - analytical_result) / analytical_result)
+    errors.append(error)
+
+# Create the log-log plot
+plt.figure(figsize=(10, 6))
+plt.loglog(Ns, errors, marker='o', linestyle='-', color='b')
+plt.xlabel('Number of Panels (N)')
+plt.ylabel('Fractional Error')
+plt.title('Fractional Error of Numerical Integration Using Simpson\'s Rule')
+plt.grid(True, which='both', linestyle='--', linewidth=0.5)
+plt.show()

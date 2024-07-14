@@ -1,0 +1,45 @@
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.cm
+
+def banana(r):
+    x, y = r
+    return (1 - x)**2 + 100 * (y - x**2)**2
+
+def banana_grad(r):
+    x, y = r
+    grad_x = -400 * x * (y - x**2) - 2 * (1 - x)
+    grad_y = 200 * (y - x**2)
+    return np.array([grad_x, grad_y])
+
+def gradientDescent(df, r0, eta, n_steps):
+    r = np.array(r0, dtype=float)
+    trajectory = [r.copy()]
+    for _ in range(n_steps):
+        grad = df(r)
+        r -= eta * grad
+        trajectory.append(r.copy())
+    return np.array(trajectory)
+
+etas = [0.0001, 0.0005, 0.001]
+r0 = [0.2, 1]
+n_steps = 10000
+
+x = np.linspace(-2, 2, 100)
+y = np.linspace(-1, 3, 100)
+X, Y = np.meshgrid(x, y)
+Z = banana([X, Y])
+
+plt.figure(figsize=(10, 6))
+im = plt.imshow(Z, extent=(-2, 2, -1, 3), origin='lower', cmap=matplotlib.cm.gray, alpha=0.3)
+
+for eta in etas:
+    trajectory = gradientDescent(banana_grad, r0, eta, n_steps)
+    plt.plot(trajectory[:, 0], trajectory[:, 1], label=f'eta={eta}')
+
+plt.scatter([1], [1], color='red')  # The known minimum
+plt.title('Gradient Descent Trajectories on Rosenbrock\'s Banana Function')
+plt.xlabel('x')
+plt.ylabel('y')
+plt.legend()
+plt.show()

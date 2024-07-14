@@ -1,0 +1,30 @@
+class Walker:
+    def __init__(self, steps):
+        self.steps = steps
+        self.position = 0
+
+    def take_steps(self):
+        self.position += 2*(np.random.randint(0, 2, self.steps) - 0.5)
+
+walkers = 100
+steps = 1000
+positions = np.zeros((walkers, steps))
+squared_positions = np.zeros((walkers, steps))
+
+for i in range(walkers):
+    walker = Walker(steps)
+    walker.take_steps()
+    positions[i] = walker.position
+    squared_positions[i] = walker.position**2
+
+avg_position = np.mean(positions, axis=0)
+avg_squared_position = np.mean(squared_positions, axis=0)
+
+plt.figure(figsize=(10, 6))
+plt.plot(np.arange(steps), avg_position, label='Average Position', color='blue')
+plt.plot(np.arange(steps), avg_squared_position, label='Average Squared Position', color='red')
+plt.legend()
+plt.title('Random Walk Simulation of 1D Walkers')
+plt.xlabel('Steps')
+plt.ylabel('Average Position / Average Squared Position')
+plt.show()

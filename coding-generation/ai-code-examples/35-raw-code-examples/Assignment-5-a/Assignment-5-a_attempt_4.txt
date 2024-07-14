@@ -1,0 +1,59 @@
+import numpy as np
+import matplotlib.pyplot as plt
+import random
+
+# Function to check if a transition has occurred based on transition probability
+def transition_occurred(transition_prob):
+    r = random.random()
+    return r < transition_prob
+
+# Function to implement the transition and return the new state
+def evolve_state(current_state, transition_rules):
+    new_state = list(current_state)
+    for i, rule in enumerate(transition_rules):
+        if transition_occurred(rule[1]):
+            new_state[i] -= 1
+            new_state[rule[0]] += 1
+    return new_state
+
+# Function to evolve the system based on transition rules for a given number of time steps
+def evolve_system(initial_state, transition_rules, n_timesteps):
+    states = [initial_state]
+    current_state = initial_state
+    for _ in range(n_timesteps):
+        new_state = evolve_state(current_state, transition_rules)
+        states.append(new_state)
+        current_state = new_state
+    return states
+
+# Define transition rules for the system
+# A -> B with half-life of 10.1 hours
+# B -> C with half-life of 15.7 hours
+# C -> A with effective half-life of 3.2 hours when neutron flux is on
+transition_rules = [(1, np.log(2) / 10.1), (2, np.log(2) / 15.7), (0, np.log(2) / 3.2)]
+
+# Initial amounts of nuclei: 250 C nuclei
+initial_state = [0, 0, 250]
+
+# Evolve the system for 100 hours with neutron flux on (200 steps)
+states_flux_on = evolve_system(initial_state, transition_rules, 200)
+
+# Evolve the system for another 100 hours without neutron flux (200 steps)
+states_flux_off = evolve_system(states_flux_on[-1], transition_rules[:2], 200)
+
+# Extract the number of each type of nucleus at each time step
+A_counts = [state[0] for state in states_flux_on] + [state[0] for state in states_flux_off[1:]]
+B_counts = [state[1] for state in states_flux_on] + [state[1] for state in states_flux_off[1:]]
+C_counts = [state[2] for state in states_flux_on] + [state[2] for state in states_flux_off[1:]
+
+# Create a plot with the number of A, B, and C nuclei
+plt.figure(figsize=(12, 6))
+plt.plot(A_counts, label='Nuclei A')
+plt.plot(B_counts, label='Nuclei B')
+plt.plot(C_counts, label='Nuclei C')
+plt.xlabel('Time Steps')
+plt.ylabel('Number of Nuclei')
+plt.title('Evolution of Nuclei A, B, and C')
+plt.legend()
+plt.grid(True)
+plt.show()

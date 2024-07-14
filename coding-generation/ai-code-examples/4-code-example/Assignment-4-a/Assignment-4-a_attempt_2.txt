@@ -1,0 +1,49 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Constants
+g = 9.81  # acceleration due to gravity (m/s^2)
+v0 = 125  # initial velocity (m/s)
+
+# Function to calculate the cross-sectional area of a sphere
+def cross_sectional_area(radius):
+    return np.pi * radius**2
+
+# Function to calculate the mass of an iron sphere
+def mass_of_iron_sphere(radius, density=7874):
+    volume = (4/3) * np.pi * radius**3
+    return density * volume
+
+# Function to model cannonball's motion using Euler's method
+def projectile_motion(v0, angle, dt=0.01):
+    theta = np.radians(angle)
+    vx = v0 * np.cos(theta)
+    vy = v0 * np.sin(theta)
+    x, y = [0], [0]
+    
+    while y[-1] >= 0:
+        x_new = x[-1] + vx * dt
+        vy_new = vy - g * dt
+        y_new = y[-1] + vy * dt
+        x.append(x_new)
+        y.append(y_new)
+        vy = vy_new
+        
+    return x, y
+
+# Angles to visualize
+angles = [15, 30, 45, 60, 75]
+
+# Plot trajectories
+plt.figure(figsize=(10, 6))
+
+for angle in angles:
+    x, y = projectile_motion(v0, angle)
+    plt.plot(x, y, label=f'{angle} degrees')
+
+plt.xlabel('Distance (m)')
+plt.ylabel('Height (m)')
+plt.title('Trajectories of a Cannonball at Various Launch Angles')
+plt.legend()
+plt.grid(True)
+plt.show()

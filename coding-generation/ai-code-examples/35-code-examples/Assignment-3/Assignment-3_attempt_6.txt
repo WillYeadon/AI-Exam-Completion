@@ -1,0 +1,65 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Constants
+half_life_C14 = 5730  # half-life of Carbon-14 in years
+
+# Function to calculate mean lifetime from half-life
+def calc_mean_lifetime(half_life):
+    return half_life / np.log(2)
+
+# Radioactive decay process function
+def decay_func(N, t):
+    decay_const = np.log(2) / half_life_C14
+    return -decay_const * N
+
+# Analytical solution of the decay equation
+def analytical_solution(N0, t):
+    return N0 * np.exp(-decay_func(1, t))
+
+# Euler's method for solving the ODE
+def solve_euler(N0, dt, steps):
+    N = N0
+    for _ in range(steps):
+        N += dt * decay_func(N, _ * dt)
+    return N
+
+# RK4 method for solving the ODE
+def solve_RK4(N0, dt, steps):
+    N = N0
+    for _ in range(steps):
+        k1 = dt * decay_func(N, _ * dt)
+        k2 = dt * decay_func(N + 0.5 * k1, (_ + 0.5) * dt)
+        k3 = dt * decay_func(N + 0.5 * k2, (_ + 0.5) * dt)
+        k4 = dt * decay_func(N + k3, (_ + 1) * dt)
+        N += (k1 + 2 * k2 + 2 * k3 + k4) / 6
+    return N
+
+# Initial conditions
+N0 = 1
+T = calc_mean_lifetime(half_life_C14) * 5
+analytical_result = analytical_solution(N0, T)
+
+# Error versus number of steps
+steps_range = np.arange(100, 10000, 100)
+euler_errors = []
+RK4_errors = []
+
+for steps in steps_range:
+    dt = T / steps
+    
+    euler_result = solve_euler(N0, dt, steps)
+    RK4_result = solve_RK4(N0, dt, steps)
+    
+    euler_errors.append(np.abs(euler_result - analytical_result))
+    RK4_errors.append(np.abs(RK4_result - analytical_result)
+
+# Log-log plot
+plt.figure(figsize=(10, 6))
+plt.loglog(steps_range, euler_errors, label='Euler Method', marker='o', color='b')
+plt.loglog(steps_range, RK4_errors, label='RK4 Method', marker='s', color='r')
+plt.xlabel('Number of Steps')
+plt.ylabel('Error')
+plt.title('Error Comparison in Euler and RK4 Methods')
+plt.legend()
+plt.show()

@@ -1,0 +1,89 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Constants
+g = 9.81  # acceleration due to gravity in m/s^2
+rho = 1.225  # air density in kg/m^3
+r = 0.08  # radius of the cannonball in meters
+Cd = 0.47  # drag coefficient
+iron_density = 7874  # density of iron in kg/m^3
+alpha = np.radians(60)  # initial angle in radians
+
+# Function to calculate cross-sectional area of a sphere
+def cross_sectional_area(radius):
+    return np.pi * radius**2
+
+# Function to calculate the mass of an iron sphere
+def mass_of_sphere(radius, density):
+    volume = 4/3 * np.pi * radius**3
+    return volume * density
+
+# Calculate area and mass of the cannonball
+A = cross_sectional_area(r)
+m = mass_of_sphere(r, iron_density)
+
+# Function to model cannonball's motion
+def cannonball_motion(v0, theta, with_air_resistance):
+    dt = 0.01  # time step
+    t = 0
+    vx = v0 * np.cos(theta)
+    vy = v0 * np.sin(theta)
+    x = 0
+    y = 0
+    trajectory = {'x': [], 'y': []}
+    
+    while y >= 0:
+        trajectory['x'].append(x)
+        trajectory['y'].append(y)
+        
+        if with_air_resistance:
+            # Calculate drag force
+            v = np.sqrt(vx**2 + vy**2)
+            Fd = 0.5 * Cd * A * rho * v**2
+            Fdx = Fd * (vx / v)
+            Fdy = Fd * (vy / v)
+        else:
+            Fdx = 0
+            Fdy = 0
+        
+        ax = -Fdx / m
+        ay = -g - (Fdy / m)
+        
+        vx += ax * dt
+        vy += ay * dt
+        x += vx * dt
+        y += vy * dt
+        t += dt
+    
+    return trajectory
+
+# Function to find the range of the projectile
+def find_range(trajectory):
+    return max(trajectory['x'])
+
+# List of initial velocities to analyze
+initial_velocities = np.linspace(50, 200, num=20)
+ranges_with_air_resistance = []
+ranges_without_air_resistance = []
+
+# Calculate the range for each initial velocity
+for v0 in initial_velocities:
+    trajectory_with_air = cannonball_motion(v0, alpha, True)
+    trajectory_without_air = cannonball_motion(v0, alpha, False)
+    
+    range_with_air = find_range(trajectory_with_air)
+    range_without_air = find_range(trajectory_without_air)
+    
+    ranges_with_air_resistance.append(range_with_air)
+    ranges_without_air_resistance.append(range_without_air)
+
+# Plot the results
+plt.figure(figsize=(10, 6))
+plt.plot(initial_velocities, ranges_with_air_resistance, label="With Air Resistance", color='b', linestyle='-')
+plt.plot(initial_velocities, ranges_without_air_resistance, label="Without Air Resistance", color='r', linestyle='--')
+plt.xlabel("Initial Velocity (m/s)")
+plt.ylabel("Range (m)")
+plt.title("Range of a Cannonball for Different Initial Velocities")
+plt.legend()
+plt.grid(True)
+plt.show()

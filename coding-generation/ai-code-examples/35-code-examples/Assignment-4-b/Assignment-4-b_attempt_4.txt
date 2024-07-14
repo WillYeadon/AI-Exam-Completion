@@ -1,0 +1,99 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Constants
+g = 9.81  # acceleration due to gravity in m/s^2
+rho = 1.2  # density of air in kg/m^3
+Cd = 0.47  # drag coefficient
+r = 0.05  # radius of the cannonball in meters
+A = np.pi * r**2  # cross-sectional area of the cannonball
+m = 4.5  # mass of the cannonball in kg
+
+# Function to calculate cross-sectional area of a sphere
+def cross_sectional_area(radius):
+    return np.pi * radius**2
+
+# Function to calculate the mass of an iron sphere
+def iron_sphere_mass(radius):
+    return (4/3) * np.pi * radius**3 * 7850
+
+# Calculating area and mass of the cannonball
+A = cross_sectional_area(r)
+m = iron_sphere_mass(r)
+
+# Function to model cannonball's motion
+def f(u, t):
+    v = u[0]
+    theta = u[1]
+    x = u[2]
+    y = u[3]
+    
+    dxdt = v * np.cos(theta)
+    dydt = v * np.sin(theta)
+    dvdt = - (0.5 * rho * A * Cd * v**2) / m - g * np.sin(theta)
+    dthetadt = - g * np.cos(theta) / v
+    
+    return np.array([dvdt, dthetadt, dxdt, dydt])
+
+# Euler's method for solving the ODE
+def solve_euler(f, u0, dt, T):
+    num_steps = int(T / dt)
+    u = np.empty((num_steps, 4))
+    u[0] = u0
+    
+    for i in range(1, num_steps):
+        u[i] = u[i-1] + dt * f(u[i-1], i*dt)
+    
+    return u
+
+# Function to find the x-coordinate where the trajectory crosses y=0
+def find_x_intercept(u):
+    y_values = u[:, 3]
+    x_values = u[:, 2]
+    
+    for i in range(1, len(y_values)):
+        if y_values[i-1] * y_values[i] < 0:
+            return x_values[i]
+    
+    return None
+
+# Function to find the range of the projectile
+def calculate_range(x_intercept):
+    return x_intercept
+
+# Stores the trajectories for different values of the initial angle
+# Uses the same velocity v0=125 m/s for all angles
+def calculate_trajectories(angles):
+    results = {}
+    v0 = 125
+    
+    for angle in angles:
+        u0 = np.array([v0, np.radians(angle), 0, 0])
+        u = solve_euler(f, u0, 0.01, 30)
+        x_intercept = find_x_intercept(u)
+        range_value = calculate_range(x_intercept)
+        results[angle] = range_value
+    
+    return results
+
+# Initial angles in degrees
+angles = [30, 45, 60, 75]
+
+# Calculate trajectories
+results = calculate_trajectories(angles)
+
+# Plotting the ranges for different initial velocities
+v0_values = [100, 125, 150, 175]
+
+for v0 in v0_values:
+    u0 = np.array([v0, np.radians(60), 0, 0])
+    u = solve_euler(f, u0, 0.01, 30)
+    x_intercept = find_x_intercept(u)
+    range_values = calculate_range(x_intercept)
+    plt.plot(range_values, label=f'v0 = {v0} m/s')
+
+plt.xlabel('Angle (degrees)')
+plt.ylabel('Range (m)')
+plt.title('Effect of Initial Velocity on the Range of a Projectile')
+plt.legend()
+plt.show()

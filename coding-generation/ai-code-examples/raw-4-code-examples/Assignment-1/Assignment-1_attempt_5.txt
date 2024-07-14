@@ -1,0 +1,45 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Define the function f
+def f(x):
+    return np.sin(2 * x)
+
+# Define the analytical derivative of f
+def analytic_derivative_f(x):
+    return 2 * np.cos(2 * x)
+
+# Define the forward difference method for numerical differentiation
+def forward_difference(f, x, dx):
+    return (f(x + dx) - f(x)) / dx
+
+# Define a range of x values for which to evaluate the derivatives
+x_values = np.linspace(0, 2 * np.pi, 100)
+
+# Define different dx values for comparison
+dx_large = 0.5
+dx_medium = 0.01
+dx_small = 1e-6
+
+# Calculate the analytic and numerical derivatives
+analytic_deriv_values = analytic_derivative_f(x_values)
+numerical_deriv_values_large = forward_difference(f, x_values, dx_large)
+numerical_deriv_values_medium = forward_difference(f, x_values, dx_medium)
+numerical_deriv_values_small = forward_difference(f, x_values, dx_small)
+
+# Calculate the difference between the numerical and analytic derivatives
+error_large = numerical_deriv_values_large - analytic_deriv_values
+error_medium = numerical_deriv_values_medium - analytic_deriv_values
+error_small = numerical_deriv_values_small - analytic_deriv_values
+
+# Plot the errors
+plt.figure(figsize=(10, 6))
+plt.plot(x_values, error_large, label=f'dx = {dx_large}')
+plt.plot(x_values, error_medium, label=f'dx = {dx_medium}')
+plt.plot(x_values, error_small, label=f'dx = {dx_small}')
+plt.legend()
+plt.xlabel('x')
+plt.ylabel('Difference')
+plt.title('Difference between Analytical and Numerical Derivatives')
+plt.grid(True)
+plt.show()

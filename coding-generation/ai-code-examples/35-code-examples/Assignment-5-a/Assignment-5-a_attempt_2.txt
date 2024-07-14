@@ -1,0 +1,76 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Function to determine if a transition occurs based on the transition probability
+def transition_occurs(transition_prob):
+    return np.random.rand() < transition_prob
+
+# Function to evolve a single state according to the transition rules
+def evolve_state(state, decay_prob):
+    if state == 'A':
+        if transition_occurs(decay_prob):
+            return 'B'
+    elif state == 'B':
+        if transition_occurs(decay_prob):
+            return 'C'
+    return state
+
+# Function to evolve a list of states
+def evolve_system(states, decay_prob):
+    new_states = []
+    for state in states:
+        new_states.append(evolve_state(state, decay_prob))
+    return new_states
+
+# Function to evolve the entire system over 'n_steps'
+def evolve_system_over_time(initial_states, decay_prob, n_steps):
+    system_states = [initial_states]
+    for _ in range(n_steps):
+        new_states = evolve_system(system_states[-1], decay_prob)
+        system_states.append(new_states)
+    return system_states
+
+# Parameters
+initial_states = ['C']*250
+n_steps = 200
+total_time = 100
+time_steps = 200
+decay_prob_A = np.log(2) / 10.1
+decay_prob_B = np.log(2) / 15.7
+activation_prob_C = np.log(2) / 3.2
+
+# Evolve the system for 100 hours with neutron flux
+system_states = evolve_system_over_time(initial_states, activation_prob_C, n_steps)
+
+num_A = [states.count('A') for states in system_states]
+num_B = [states.count('B') for states in system_states]
+num_C = [states.count('C') for states in system_states]
+
+plt.figure(figsize=(12, 6))
+plt.plot(np.linspace(0, total_time, time_steps+1), num_A, label='A nuclei')
+plt.plot(np.linspace(0, total_time, time_steps+1), num_B, label='B nuclei')
+plt.plot(np.linspace(0, total_time, time_steps+1), num_C, label='C nuclei')
+plt.xlabel('Time (hours)')
+plt.ylabel('Number of Nuclei')
+plt.title('Nuclei Decay and Activation over Time')
+plt.legend()
+
+plt.show()
+
+# Evolve the system for another 100 hours without neutron flux
+system_states_no_flux = evolve_system_over_time(system_states[-1], 0, n_steps)
+
+num_A_no_flux = [states.count('A') for states in system_states_no_flux]
+num_B_no_flux = [states.count('B') for states in system_states_no_flux]
+num_C_no_flux = [states.count('C') for states in system_states_no_flux]
+
+plt.figure(figsize=(12, 6))
+plt.plot(np.linspace(0, total_time, time_steps+1), num_A_no_flux, label='A nuclei')
+plt.plot(np.linspace(0, total_time, time_steps+1), num_B_no_flux, label='B nuclei')
+plt.plot(np.linspace(0, total_time, time_steps+1), num_C_no_flux, label='C nuclei')
+plt.xlabel('Time (hours)')
+plt.ylabel('Number of Nuclei')
+plt.title('Nuclei Decay over Time (No Neutron Flux)')
+plt.legend()
+
+plt.show()

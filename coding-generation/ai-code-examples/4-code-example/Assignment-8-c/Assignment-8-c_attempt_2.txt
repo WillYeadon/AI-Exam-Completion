@@ -1,0 +1,47 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+class Walker:
+    def __init__(self, num_walkers=1000, step_size=0.05):
+        self.num_walkers = num_walkers
+        self.step_size = step_size
+        self.positions = np.random.rand(num_walkers, 2)
+    
+    def walk(self, steps):
+        angles = np.random.uniform(0, 2 * np.pi, (steps, self.num_walkers))
+        dx = np.cos(angles) * self.step_size
+        dy = np.sin(angles) * self.step_size
+        self.positions[:, 0] += np.sum(dx, axis=0)
+        self.positions[:, 1] += np.sum(dy, axis=0)
+
+# Create the walker instance
+walker = Walker()
+
+# Positions after 10 steps
+plt.subplot(1, 3, 1)
+walker_10 = Walker()
+walker_10.walk(10)
+plt.scatter(walker_10.positions[:, 0], walker_10.positions[:, 1], alpha=0.5)
+plt.title("Position after 10 steps")
+plt.xlabel('X')
+plt.ylabel('Y')
+
+# Positions after 100 steps
+plt.subplot(1, 3, 2)
+walker_100 = Walker()
+walker_100.walk(100)
+plt.scatter(walker_100.positions[:, 0], walker_100.positions[:, 1], alpha=0.5, color="g")
+plt.title("Position after 100 steps")
+plt.xlabel('X')
+plt.ylabel('Y')
+
+# Positions after 500 steps
+plt.subplot(1, 3, 3)
+walker_500 = Walker()
+walker_500.walk(500)
+plt.scatter(walker_500.positions[:, 0], walker_500.positions[:, 1], alpha=0.5, color="r")
+plt.title("Position after 500 steps")
+plt.xlabel('X')
+plt.ylabel('Y')
+
+plt.show()

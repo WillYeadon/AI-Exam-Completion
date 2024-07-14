@@ -1,0 +1,46 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Define the function and its analytical derivative
+def f(x):
+    return np.sin(2 * x)
+
+def analytical_derivative(x):
+    return 2 * np.cos(2 * x)
+
+# Function for numerical derivative using the forward difference method
+def numerical_derivative(f, x, dx):
+    return (f(x + dx) - f(x)) / dx
+
+# Define the range for x and three different dx values
+x = np.linspace(0, 2 * np.pi, 1000)
+dx1 = 0.1
+dx2 = 0.01
+dx3 = 0.0001
+
+# Compute analytical derivative values
+f_prime_analytical = analytical_derivative(x)
+
+# Compute numerical derivative values for different dx
+f_prime_numerical_dx1 = numerical_derivative(f, x, dx1)
+f_prime_numerical_dx2 = numerical_derivative(f, x, dx2)
+f_prime_numerical_dx3 = numerical_derivative(f, x, dx3)
+
+# Compute the differences between analytical and numerical derivatives
+difference_dx1 = np.abs(f_prime_analytical - f_prime_numerical_dx1)
+difference_dx2 = np.abs(f_prime_analytical - f_prime_numerical_dx2)
+difference_dx3 = np.abs(f_prime_analytical - f_prime_numerical_dx3)
+
+# Plot the differences
+plt.plot(x, difference_dx1, label='dx=0.1', color='red')
+plt.plot(x, difference_dx2, label='dx=0.01', color='blue')
+plt.plot(x, difference_dx3, label='dx=0.0001', color='green')
+
+# Add legend, labels, and title
+plt.legend()
+plt.xlabel('x')
+plt.ylabel('Difference between Analytical and Numerical Derivative')
+plt.title('Comparison of Analytical and Numerical Derivatives with Different dx Values')
+
+# Show the plot
+plt.show()

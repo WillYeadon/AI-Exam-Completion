@@ -1,0 +1,64 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+def transition_prob(src, dst, half_life, neutron_flux=False, eff_half_life=None):
+    if neutron_flux and src == 'C' and dst == 'A':
+        return 1 - np.exp(-1 / eff_half_life)
+    elif src == 'A' and dst == 'B':
+        return 1 - np.exp(-1 / half_life)
+    elif src == 'B' and dst == 'C':
+        return 1 - np.exp(-1 / half_life)
+    else:
+        return 0
+
+def evolve_state(state, half_life, neutron_flux=False, eff_half_life=None):
+    transitions = ['AB', 'BC']
+    for transition in transitions:
+        src, dst = transition
+        prob = transition_prob(src, dst, half_life, neutron_flux, eff_half_life)
+        if np.random.rand() < prob:
+            state = state.replace(src, dst, 1)
+    return state
+
+def evolve_system(states, half_life, neutron_flux=False, eff_half_life=None):
+    new_states = []
+    for state in states:
+        new_state = evolve_state(state, half_life, neutron_flux, eff_half_life)
+        new_states.append(new_state)
+    return new_states
+
+def simulation(n_steps, n_initial, half_life_A, half_life_B, half_life_C, neutron_flux=True, eff_half_life=None):
+    states = ['C'] * n_initial
+
+    for _ in range(n_steps):
+        states = evolve_system(states, half_life_A, neutron_flux, eff_half_life)
+    
+    neutron_flux = False
+    
+    for _ in range(n_steps):
+        states = evolve_system(states, half_life_A, neutron_flux, eff_half_life)
+    
+    return states
+
+n_simulations = 20
+n_steps = 200
+n_initial = 250
+half_life_A = 10.1
+half_life_B = 15.7
+half_life_C = 3.2
+eff_half_life = 3.2
+
+results = []
+for _ in range(n_simulations):
+    final_states = simulation(n_steps, n_initial, half_life_A, half_life_B, half_life_C, neutron_flux=True, eff_half_life=eff_half_life)
+    n_A = final_states.count('A')
+    results.append(n_A)
+
+avg_n_A = np.average(results)
+std_n_A = np.std(results)
+
+plt.errorbar(range(n_steps), avg_n_A, yerr=std_n_A, fmt='o', color='b')
+plt.xlabel('Time (hours)')
+plt.ylabel('Average number of A nuclei')
+plt.title('Average number of A nuclei as a function of time')
+plt.show()

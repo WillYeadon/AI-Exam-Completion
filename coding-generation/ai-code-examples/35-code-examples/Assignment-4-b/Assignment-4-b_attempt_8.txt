@@ -1,0 +1,76 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+results = {}
+
+# Constants
+g = 9.81  # acceleration due to gravity in m/s^2
+rho = 1.2  # density of air in kg/m^3
+Cd = 0.47  # drag coefficient
+r = 0.105  # radius of the cannonball in meters
+A = np.pi * r**2  # cross-sectional area of the cannonball
+m = 4.5  # mass of the cannonball in kg
+
+def area(r):
+    return np.pi * r**2
+
+def mass(rho, V):
+    return 4/3 * np.pi * r**3 * rho
+
+def f(v, theta):
+    return -Cd * A * rho * v**2 / (2 * m) 
+
+def euler_method(v0, theta, dt, with_air_resistance):
+    v = v0
+    x = 0
+    y = 0
+    vx = v * np.cos(np.radians(theta))
+    vy = v * np.sin(np.radians(theta))
+    x_traj = [x]
+    y_traj = [y]
+    
+    while y >= 0:
+        if with_air_resistance:
+            v = np.sqrt(vx**2 + vy**2)
+            ax = f(v, theta) * vx / v
+            ay = -g + f(v, theta) * vy / v
+        else:
+            ax = 0
+            ay = -g
+        
+        x += vx * dt
+        y += vy * dt
+        vx += ax * dt
+        vy += ay * dt
+        
+        x_traj.append(x)
+        y_traj.append(y)
+    
+    return x_traj, y_traj
+
+def find_range(x_traj, y_traj):
+    return x_traj[-1]
+
+# Generate trajectories for different initial velocities
+v0_values = [100, 150, 200]
+
+for v0 in v0_values:
+    results[v0] = {}
+    
+    x_range_air_resistance, _ = euler_method(v0, 60, 0.01, True)
+    results[v0]['range_air_resistance'] = find_range(x_range_air_resistance, _)
+    
+    x_range_no_air_resistance, _ = euler_method(v0, 60, 0.01, False)
+    results[v0]['range_no_air_resistance'] = find_range(x_range_no_air_resistance, _)
+
+# Plotting
+plt.figure(figsize=(10, 6))
+for v0 in results:
+    plt.plot(v0, results[v0]['range_air_resistance'], 'bo', label='With Air Resistance')
+    plt.plot(v0, results[v0]['range_no_air_resistance'], 'ro', label='No Air Resistance')
+
+plt.xlabel('Initial Velocity (m/s)')
+plt.ylabel('Range (m)')
+plt.title('Effect of Initial Velocity on the Range of a Projectile')
+plt.legend()
+plt.show()

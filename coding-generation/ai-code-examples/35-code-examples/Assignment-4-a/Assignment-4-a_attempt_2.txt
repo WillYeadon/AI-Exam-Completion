@@ -1,0 +1,82 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Constants
+g = 9.81  # acceleration due to gravity in m/s^2
+rho = 1.2  # density of air in kg/m^3
+Cd = 0.47  # drag coefficient
+r = 0.11  # radius of the cannonball in m
+A = np.pi * r**2  # cross-sectional area of the cannonball
+m = 4.4  # mass of the cannonball in kg
+v0 = 125  # initial velocity of the cannonball in m/s
+
+# Function to calculate cross-sectional area of a sphere
+def sphere_area(radius):
+    return np.pi * radius**2
+
+# Function to calculate the mass of an iron sphere
+def sphere_mass(density, radius):
+    return (4/3) * np.pi * radius**3 * density
+
+# Calculating area and mass of the cannonball
+A = sphere_area(r)
+m = sphere_mass(rho, r)
+
+# Function to model cannonball's motion
+def projectile_motion(v0, theta):
+    vx = v0 * np.cos(np.radians(theta))
+    vy = v0 * np.sin(np.radians(theta))
+    t_flight = 2 * vy / g
+    t = np.linspace(0, t_flight, num=1000)
+    dt = t[1] - t[0]
+    x = np.zeros_like(t)
+    y = np.zeros_like(t)
+    x[0] = 0
+    y[0] = 0
+    for i in range(1, len(t)):
+        vx -= (Cd * rho * A * vx * np.sqrt(vx**2 + vy**2) * dt) / (2 * m)
+        vy -= (g + (Cd * rho * A * vy * np.sqrt(vx**2 + vy**2) * dt) / (2 * m))
+        x[i] = x[i-1] + vx * dt
+        y[i] = y[i-1] + vy * dt
+        if y[i] < 0:
+            x[i] = x[i-1] - y[i-1] * (x[i] - x[i-1]) / (y[i] - y[i-1])
+            y[i] = 0
+            x = x[:i+1]
+            y = y[:i+1]
+            break
+    return x, y
+
+# Euler's method for solving the ODE
+def solve_euler(f, x0, y0, h, n):
+    x = np.zeros(n)
+    y = np.zeros(n)
+    x[0] = x0
+    y[0] = y0
+    for i in range(1, n):
+        y[i] = y[i-1] + h * f(x[i-1], y[i-1])
+        x[i] = x[i-1] + h
+    return x, y
+
+# Function to find the x-coordinate where the trajectory crosses y=0
+def find_range(x, y):
+    idx = np.argmax(y >= 0)
+    return x[idx]
+
+# Function to find the range of the projectile
+def find_projectile_range(v0, theta):
+    x, y = projectile_motion(v0, theta)
+    return find_range(x, y)
+
+# Plotting trajectories for various initial angles
+angles = [30, 45, 60, 75]
+colors = ['r', 'g', 'b', 'y']
+plt.figure(figsize=(10, 6))
+for i in range(len(angles)):
+    x, y = projectile_motion(v0, angles[i])
+    plt.plot(x, y, label=f'Angle = {angles[i]}', color=colors[i])
+plt.xlabel('Horizontal Distance (m)')
+plt.ylabel('Height (m)')
+plt.title('Projectile Motion Trajectories for Different Initial Angles')
+plt.legend()
+plt.grid(True)
+plt.show()

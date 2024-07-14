@@ -1,0 +1,69 @@
+import random
+import numpy as np
+import matplotlib.pyplot as plt
+
+def has_transition_occurred(transition_prob):
+    r = random.random()
+    return r < transition_prob
+
+def evolve_system(states, transition_rules):
+    new_states = states.copy()
+    for i in range(len(states)):
+        for rule in transition_rules:
+            current_state, next_state, prob = rule
+            if states[i] == current_state:
+                if has_transition_occurred(prob):
+                    new_states[i] = next_state
+    return new_states
+
+def run_simulation(NA, NB, NC, n_timesteps, t_max, rules_with_flux, rules_without_flux):
+    times = np.linspace(0, t_max, n_timesteps+1)
+    A_counts = []
+    B_counts = []
+    C_counts = []
+    
+    states = ['A'] * NA + ['B'] * NB + ['C'] * NC
+    
+    for t in times:
+        transition_rules = rules_with_flux if t < t_max/2 else rules_without_flux
+        A_count = sum(1 for x in states if x == 'A')
+        B_count = sum(1 for x in states if x == 'B')
+        C_count = sum(1 for x in states if x == 'C')
+        A_counts.append(A_count)
+        B_counts.append(B_count)
+        C_counts.append(C_count)
+        states = evolve_system(states, transition_rules)
+    
+    return times, np.array(A_counts), np.array(B_counts), np.array(C_counts)
+
+def average_and_error(data):
+    avg = np.average(data, axis=0)
+    err = np.std(data, axis=0)
+    return avg, err
+
+# Transition probabilities
+prob_A_to_B = np.log(2) / 10.1
+prob_B_to_C = np.log(2) / 15.7
+prob_C_to_A_flux = np.log(2) / 3.2
+
+# Transition rules with and without neutron flux
+rules_with_flux = [('A', 'B', prob_A_to_B), ('B', 'C', prob_B_to_C), ('C', 'A', prob_C_to_A_flux)]
+rules_without_flux = [('A', 'B', prob_A_to_B), ('B', 'C', prob_B_to_C)]
+
+# Running the simulation multiple times
+n_simulations = 20
+results_A = []
+
+for _ in range(n_simulations):
+    times, A_counts, _, _ = run_simulation(0, 0, 250, 200, 100, rules_with_flux, rules_without_flux)
+    results_A.append(A_counts)
+
+# Calculating average and uncertainty for A atoms
+avg_A, err_A = average_and_error(results_A)
+
+# Plotting the results
+plt.errorbar(times, avg_A, yerr=err_A, fmt='o', color='b')
+plt.xlabel('Time (hours)')
+plt.ylabel('Number of A atoms')
+plt.title('Average Number of A atoms with Uncertainty')
+plt.show()

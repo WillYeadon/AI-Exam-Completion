@@ -1,0 +1,85 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Define the function and its derivative
+def f(x):
+    return x**3 - x - 2
+
+def df(x):
+    return 3*x**2 - 1
+
+# Newton-Raphson method
+def newton_raphson(x0, tol=1e-10, max_iter=100):
+    errors = []
+    x = x0
+    for i in range(max_iter):
+        fx = f(x)
+        dfx = df(x)
+        if dfx == 0:
+            break
+        x_new = x - fx / dfx
+        error = abs(x_new - x)
+        errors.append(error)
+        if error < tol:
+            break
+        x = x_new
+    return x, errors
+
+# Secant method
+def secant(x0, x1, tol=1e-10, max_iter=100):
+    errors = []
+    for i in range(max_iter):
+        fx0 = f(x0)
+        fx1 = f(x1)
+        if fx0 == fx1:
+            break
+        x_new = x1 - fx1 * (x1 - x0) / (fx1 - fx0)
+        error = abs(x_new - x1)
+        errors.append(error)
+        if error < tol:
+            break
+        x0, x1 = x1, x_new
+    return x1, errors
+
+# Bisection method
+def bisect(a, b, tol=1e-10, max_iter=100):
+    errors = []
+    fa = f(a)
+    for i in range(max_iter):
+        c = (a + b) / 2
+        fc = f(c)
+        error = abs(b - a) / 2
+        errors.append(error)
+        if fc == 0 or error < tol:
+            break
+        if fa * fc < 0:
+            b = c
+        else:
+            a = c
+            fa = fc
+    return c, errors
+
+# Initial guesses
+x0_nr = 1.5
+x0_secant = 1
+x1_secant = 2
+a_bisection = 1
+b_bisection = 2
+
+# Apply methods
+root_nr, errors_nr = newton_raphson(x0_nr)
+root_secant, errors_secant = secant(x0_secant, x1_secant)
+root_bisect, errors_bisect = bisect(a_bisection, b_bisection)
+
+# Plotting convergence
+plt.figure(figsize=(10, 6))
+plt.plot(errors_nr, label="Newton-Raphson", color="blue")
+plt.plot(errors_secant, label="Secant", color="green")
+plt.plot(errors_bisect, label="Bisection", color="red")
+plt.yscale("log")
+plt.xlabel("Iteration")
+plt.ylabel("Error")
+plt.title("Convergence of Root-Finding Methods")
+plt.legend()
+plt.grid(True)
+plt.show()

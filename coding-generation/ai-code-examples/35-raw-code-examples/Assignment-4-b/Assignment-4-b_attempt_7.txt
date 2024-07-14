@@ -1,0 +1,36 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Constants
+g = 9.81  # acceleration due to gravity in m/s^2
+theta = np.deg2rad(60)  # angle in radians
+v0 = 125  # initial velocity in m/s
+
+# Function to find x at y=0 using linear interpolation
+def find_zero_linear(x1, x2, y1, y2):
+    return x1 - y1 * (x2 - x1) / (y2 - y1)
+
+# Function to calculate the range of the projectile
+def calculate_range(v0, theta):
+    t_flight = 2 * v0 * np.sin(theta) / g
+    return v0 * np.cos(theta) * t_flight
+
+# Calculate ranges for different initial velocities
+v0_values = np.linspace(100, 150, 20)
+ranges_with_air_resistance = []
+ranges_without_air_resistance = []
+
+for v in v0_values:
+    ranges_with_air_resistance.append(calculate_range(v, theta))
+    ranges_without_air_resistance.append((v ** 2) * np.sin(2*theta) / g)
+
+# Plotting
+plt.figure(figsize=(10, 6))
+plt.plot(v0_values, ranges_with_air_resistance, label="With Air Resistance")
+plt.plot(v0_values, ranges_without_air_resistance, label="Without Air Resistance")
+plt.xlabel("Initial Velocity (m/s)")
+plt.ylabel("Range (m)")
+plt.title("Range of a Projectile for Different Initial Velocities")
+plt.legend()
+plt.grid(True)
+plt.show()

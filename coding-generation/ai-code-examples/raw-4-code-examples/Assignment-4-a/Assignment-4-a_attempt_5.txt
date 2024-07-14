@@ -1,0 +1,49 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Define constants
+g = 9.81  # gravitational acceleration in m/s^2
+v0 = 125  # initial velocity in m/s
+
+# Define function to find zero using linear approximation
+def find_zero_linear(x1, x2, y1, y2):
+    m = (y2 - y1) / (x2 - x1)  # slope of the line
+    c = y1 - m * x1            # y-intercept of the line
+    x_zero = -c / m           # x when y=0
+    return x_zero
+
+# Function to calculate trajectory
+def projectile_trajectory(v0, angle):
+    t_max = 2 * v0 * np.sin(np.radians(angle)) / g  # total time of flight (s)
+    t = np.linspace(0, t_max, num=500)              # time points
+
+    # Calculate x and y trajectories
+    x = v0 * np.cos(np.radians(angle)) * t
+    y = v0 * np.sin(np.radians(angle)) * t - 0.5 * g * t**2
+    
+    return x, y
+
+# Create plot for different angles
+angles = [15, 30, 45, 60, 75]
+plt.figure(figsize=(10, 6))
+
+for angle in angles:
+    x, y = projectile_trajectory(v0, angle)
+    
+    plt.plot(x, y, label=f'{angle} degrees')
+
+# Adding last point with positive and first point with negative to find the true range approximation
+true_ranges = []
+for angle in angles:
+    x, y = projectile_trajectory(v0, angle)
+    idx_neg = np.where(y < 0)[0][0]  # first negative y
+    x_zero = find_zero_linear(x[idx_neg-1], x[idx_neg], y[idx_neg-1], y[idx_neg])
+    true_ranges.append(x_zero)
+    plt.scatter(x_zero, 0, marker='o')  # Mark true range on the graph
+
+plt.xlabel('Distance (m)')
+plt.ylabel('Height (m)')
+plt.title('Projectile trajectories for different initial angles at v0=125m/s')
+plt.legend()
+plt.grid(True)
+plt.show()

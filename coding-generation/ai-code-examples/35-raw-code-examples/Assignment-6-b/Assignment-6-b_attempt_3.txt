@@ -1,0 +1,27 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Define the probability density function f(x)
+def f(x):
+    return (1 + 2/(1+x**2) + np.cos(np.sqrt(3*x))**2)
+
+# Define a function to generate a sample of npts values distributed according to f(x)
+def genSample(npts):
+    x = np.linspace(0, 10, 1000)
+    pdf = f(x)
+    pdf_norm = np.trapz(pdf, x)
+    sample = np.random.choice(x, size=npts, p=pdf/pdf_norm)
+    return sample
+
+# Generate a sample of 10000 points according to f(x)
+sample = genSample(10000)
+
+# Make a plot to show that the values generated are distributed according to f(x)
+plt.figure(figsize=(10, 6))
+plt.hist(sample, bins=50, density=True, color='skyblue', edgecolor='black')
+plt.plot(np.linspace(0, 10, 1000), f(np.linspace(0, 10, 1000))/np.trapz(f(np.linspace(0, 10, 1000)), np.linspace(0, 10, 1000)), color='red', linewidth=2)
+plt.title("Distribution of Generated Values vs. Probability Density Function")
+plt.xlabel("x")
+plt.ylabel("Probability Density")
+plt.legend(["Probability Density Function", "Generated Values"])
+plt.show()

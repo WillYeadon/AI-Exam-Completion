@@ -1,0 +1,37 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Script
+
+def findPi(n_points):
+    x = np.random.random(n_points)
+    y = np.random.random(n_points)
+    inside_circle = (x**2 + y**2) < 1
+    pi_estimate = 4 * np.sum(inside_circle) / n_points
+    return pi_estimate
+
+def integrate(n_points, dim):
+    points = np.random.uniform(low=-1, high=1, size=(n_points, dim))
+    inside = np.linalg.norm(points, ord=2, axis=1) < 1
+    volume_estimate = 2**dim * np.sum(inside) / n_points
+    return volume_estimate
+
+dims = np.arange(2, 101, 2)
+n_points = 10**4
+errors = []
+
+for dim in dims:
+    volume_exact = np.pi**(dim / 2) / np.math.gamma(dim / 2 + 1)
+    volume_estimate = integrate(n_points, dim)
+    error = np.abs(volume_estimate - volume_exact)
+    errors.append(error)
+
+# ::: Task :::
+
+plt.figure()
+plt.plot(dims, errors, label='Monte Carlo error')
+plt.xlabel('Dimensions')
+plt.ylabel('Error')
+plt.title('Monte Carlo Integration Error vs Dimensions')
+plt.legend()
+plt.show()

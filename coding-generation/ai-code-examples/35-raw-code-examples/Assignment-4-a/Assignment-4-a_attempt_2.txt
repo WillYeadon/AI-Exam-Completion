@@ -1,0 +1,33 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Constants
+g = 9.81  # gravity in m/s^2
+v0 = 125  # initial velocity in m/s
+angles = [30, 45, 60]  # angles in degrees
+
+# Function to find zero using linear approximation
+def find_zero_linear(x1, x2, y1, y2):
+    return x1 - y1 * (x2 - x1) / (y2 - y1)
+
+# Function to calculate trajectory
+def calculate_trajectory(angle):
+    theta = np.radians(angle)
+    t_total = 2 * v0 * np.sin(theta) / g
+    t = np.linspace(0, t_total, num=100)
+    x = v0 * np.cos(theta) * t
+    y = v0 * np.sin(theta) * t - 0.5 * g * t**2
+    return x, y
+
+# Plotting trajectories for different angles
+plt.figure(figsize=(10, 6))
+for angle in angles:
+    x, y = calculate_trajectory(angle)
+    plt.plot(x, y, label=f'{angle} degrees')
+
+plt.xlabel('Distance (m)')
+plt.ylabel('Height (m)')
+plt.title('Projectile Motion Trajectories for Different Launch Angles')
+plt.legend()
+plt.grid(True)
+plt.show()

@@ -1,0 +1,58 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+def transition_prob(half_life, time_step):
+    return 1 - np.exp(-time_step*np.log(2)/half_life)
+
+def evolve_state(current_state, p):
+    if current_state == 'A':
+        if np.random.random() < p:
+            return 'B'
+    elif current_state == 'B':
+        if np.random.random() < p:
+            return 'C'
+    elif current_state == 'C':
+        return 'A' if np.random.random() < p else 'C'
+
+def evolve_system(states, p):
+    new_states = []
+    for state in states:
+        new_state = evolve_state(state, p)
+        if new_state:
+            new_states.append(new_state)
+    return new_states
+
+def evolve_system_over_time(initial_state, n_steps, time_step, p, neutron_flux=True):
+    counts = {'A': [], 'B': [], 'C': []}
+    states = initial_state
+    for _ in range(n_steps):
+        if neutron_flux and states.count('C') > 0:
+            p_eff = transition_prob(3.2, time_step)
+            states = evolve_system(states, p_eff)
+        else:
+            states = evolve_system(states, p)
+        
+        counts['A'].append(states.count('A'))
+        counts['B'].append(states.count('B'))
+        counts['C'].append(states.count('C'))
+
+    return counts
+
+# Initial conditions
+initial_state = ['C'] * 250
+n_steps = 200
+time_step = 0.5
+
+# Evolve the system over time
+counts = evolve_system_over_time(initial_state, n_steps, time_step, transition_prob(10.1, time_step), neutron_flux=True)
+
+# Create plot
+plt.figure(figsize=(12, 6))
+plt.plot(range(n_steps), counts['A'], label='A')
+plt.plot(range(n_steps), counts['B'], label='B')
+plt.plot(range(n_steps), counts['C'], label='C')
+plt.xlabel('Time Steps')
+plt.ylabel('Number of Nuclei')
+plt.title('Decay and Activation of Nuclei Over Time')
+plt.legend()
+plt.show()

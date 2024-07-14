@@ -1,0 +1,39 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Define the function f(x) = x^2 * cos(2x)
+def f(x):
+    return x**2 * np.cos(2*x)
+
+# Define the analytical integral of f
+def analytical_integral(x):
+    return (x**2 * np.sin(2*x) / 4) - (x * np.cos(2*x) / 2) + (np.sin(2*x) / 4)
+
+# Function to calculate the analytical integral from xmin to xmax
+def calculate_analytical_integral(xmin, xmax):
+    return analytical_integral(xmax) - analytical_integral(xmin)
+
+# Function to calculate the numerical integral using Simpson's rule
+def simpsons_rule_integration(f, a, b, N):
+    h = (b - a) / N
+    x = np.linspace(a, b, N+1)
+    y = f(x)
+    return h/3 * np.sum(y[0:-1:2] + 4*y[1::2] + y[2::2])
+
+# Panel counts to investigate
+panel_counts = [4, 8, 16, 32, 64, 128, 256, 512, 1024]
+
+error_values = []
+for N in panel_counts:
+    numerical_result = simpsons_rule_integration(f, 0, np.pi, N)
+    analytical_result = calculate_analytical_integral(0, np.pi)
+    fractional_error = np.abs((numerical_result - analytical_result) / analytical_result)
+    error_values.append(fractional_error)
+
+plt.figure()
+plt.loglog(panel_counts, error_values, marker='o', color='b', linestyle='-')
+plt.xlabel('Number of Panels')
+plt.ylabel('Fractional Error')
+plt.title('Fractional Error in Numerical Integration using Simpson\'s Rule')
+plt.grid(True)
+plt.show()

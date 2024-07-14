@@ -1,0 +1,60 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+def transition_occurs(prob):
+    return np.random.rand() < prob
+
+def evolve_state(state, transition_probs):
+    if state == 'A' and transition_occurs(transition_probs['A_to_B']):
+        return 'B'
+    elif state == 'B' and transition_occurs(transition_probs['B_to_C']):
+        return 'C'
+    elif state == 'C' and transition_occurs(transition_probs['C_to_A']):
+        return 'A'
+    return state
+
+def evolve_states(states, transition_probs):
+    return [evolve_state(state, transition_probs) for state in states]
+
+def evolve_system(initial_states, transition_probs, n_steps):
+    states = initial_states
+    results = []
+    for _ in range(n_steps):
+        states = evolve_states(states, transition_probs)
+        results.append(states.count('A'))
+    return results
+
+def simulate(n_runs, n_steps, flux_on_steps, init_states):
+    a_counts = np.zeros((n_runs, n_steps))
+    
+    for i in range(n_runs):
+        transition_probs_flux_on = {'A_to_B': np.log(2) / 10.1 / 200, 'B_to_C': np.log(2) / 15.7 / 200, 'C_to_A': np.log(2) / 3.2 / 200}
+        transition_probs_flux_off = {'A_to_B': np.log(2) / 10.1 / 200, 'B_to_C': np.log(2) / 15.7 / 200, 'C_to_A': 0}
+        
+        results_flux_on = evolve_system(init_states, transition_probs_flux_on, flux_on_steps)
+        results_flux_off = evolve_system(init_states, transition_probs_flux_off, n_steps - flux_on_steps)
+        
+        results = results_flux_on + results_flux_off
+        a_counts[i, :] = results[:]
+        
+    mean_a_counts = np.mean(a_counts, axis=0)
+    std_a_counts = np.std(a_counts, axis=0)
+    return mean_a_counts, std_a_counts
+
+def main():
+    n_runs = 20
+    n_steps = 400
+    flux_on_steps = 200
+    initial_states = ['C'] * 250
+    time_points = np.linspace(0, 200, n_steps)
+    
+    mean_a_counts, std_a_counts = simulate(n_runs, n_steps, flux_on_steps, initial_states)
+    
+    plt.figure(figsize=(10, 6))
+    plt.errorbar(time_points, mean_a_counts, yerr=std_a_counts, fmt='-o', ecolor='r', capsize=5, label='Mean number of A atoms')
+    plt.xlabel('Time (hours)')
+    plt.ylabel('Number of A atoms')
+    plt.title('Decay and Activation of Nuclei Over Time')
+    plt.legend()
+    plt.grid(True)
+    plt.show()

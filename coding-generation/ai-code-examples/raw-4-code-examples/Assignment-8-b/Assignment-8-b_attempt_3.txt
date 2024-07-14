@@ -1,0 +1,65 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+class Walker:
+    def __init__(self, ndim=1, step_size=1):
+        self.ndim = ndim
+        self.step_size = step_size
+        self.steps = self.get_steps()
+        self.pos = np.zeros(ndim)
+
+    def get_steps(self):
+        if self.ndim == 1:
+            return [np.array([+self.step_size]), np.array([-self.step_size])]
+        elif self.ndim == 2:
+            return [np.array([+self.step_size, 0]), np.array([-self.step_size, 0]), np.array([0, +self.step_size]), np.array([0, -self.step_size])]
+        else:
+            result = []
+            for i in range(self.ndim):
+                for step in [+self.step_size, -self.step_size]:
+                    vec = np.zeros(self.ndim)
+                    vec[i] = step
+                    result.append(vec)
+            return result
+
+    def pickStep(self):
+        return self.steps[np.random.choice(len(self.steps))]
+
+    def doSteps(self, n):
+        path = [np.copy(self.pos)]
+        for _ in range(n):
+            step = self.pickStep()
+            self.pos += step
+            path.append(np.copy(self.pos))
+        return np.array(path)
+
+def simulate_walkers(num_walkers, steps, dimensions):
+    avg_sq_displacement = []
+    for ndim in dimensions:
+        sq_distance_sum = 0
+        for _ in range(num_walkers):
+            walker = Walker(ndim=ndim)
+            path = walker.doSteps(steps)
+            sq_displacement = np.sum(np.square(path[-1]))
+            sq_distance_sum += sq_displacement
+        avg_sq_displacement.append(sq_distance_sum / num_walkers)
+    return avg_sq_displacement
+
+# Simulation parameters
+num_walkers = 400
+steps = 100
+dimensions = [1, 2, 3, 4]
+
+# Perform the simulation
+avg_sq_displacement = simulate_walkers(num_walkers, steps, dimensions)
+
+# ::: Task :::
+# Plot to show that the average squared distance scaling is independent of the dimension in which the walker moves.
+plt.figure(figsize=(10, 6))
+plt.plot(dimensions, avg_sq_displacement, marker='o', linestyle='-')
+plt.title('Average Squared Distance vs Dimension')
+plt.xlabel('Dimension (D)')
+plt.ylabel('Average Squared Distance after 100 Steps')
+plt.legend(['Average Squared Distance'])
+plt.grid(True)
+plt.show()

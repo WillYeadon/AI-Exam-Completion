@@ -1,0 +1,83 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Constants
+g = 9.81  # gravitational acceleration (m/s^2)
+rho = 1.225  # air density (kg/m^3)
+Cd = 0.47  # drag coefficient for a sphere
+r = 0.1  # radius of the cannonball (m)
+v0 = 125  # initial velocity (m/s)
+theta = 60  # initial angle (degrees)
+
+# Conversion factor
+theta_radians = np.deg2rad(theta)
+
+# Define functions
+
+def cross_sectional_area(r):
+    return np.pi * r**2
+
+def mass_of_sphere(r, density=7874):
+    volume = (4/3) * np.pi * r**3
+    return density * volume
+
+A = cross_sectional_area(r)
+m = mass_of_sphere(r)
+
+def drag_force(v):
+    return 0.5 * rho * Cd * A * v**2
+
+def equations_of_motion(v0, theta, with_air_resistance=True):
+    vx = v0 * np.cos(theta)
+    vy = v0 * np.sin(theta)
+    
+    positions = [[0, 0]]
+    dt = 0.01
+    t = 0
+    
+    while positions[-1][1] >= 0:
+        if with_air_resistance:
+            ax = -drag_force(np.sqrt(vx**2 + vy**2)) * vx / m
+            ay = -g - drag_force(np.sqrt(vx**2 + vy**2)) * vy / m
+        else:
+            ax = 0
+            ay = -g
+
+        vx = vx + ax * dt
+        vy = vy + ay * dt
+        
+        new_x = positions[-1][0] + vx * dt
+        new_y = positions[-1][1] + vy * dt
+        positions.append([new_x, new_y])
+        
+        t = t + dt
+
+    return positions
+
+def calculate_range(positions):
+    return positions[-1][0]
+
+# Store the results for different initial velocities
+initial_velocities = np.linspace(50, 200, 10)
+results_no_resistance = []
+results_with_resistance = []
+
+for v0 in initial_velocities:
+    pos_no_resistance = equations_of_motion(v0, theta_radians, with_air_resistance=False)
+    pos_with_resistance = equations_of_motion(v0, theta_radians, with_air_resistance=True)
+    
+    range_no_resistance = calculate_range(pos_no_resistance)
+    range_with_resistance = calculate_range(pos_with_resistance)
+    
+    results_no_resistance.append(range_no_resistance)
+    results_with_resistance.append(range_with_resistance)
+
+# Plotting
+plt.plot(initial_velocities, results_no_resistance, label='Without Air Resistance', linestyle='-', marker='o')
+plt.plot(initial_velocities, results_with_resistance, label='With Air Resistance', linestyle='--', marker='x')
+plt.xlabel('Initial Velocity (m/s)')
+plt.ylabel('Range (m)')
+plt.title('Range of Cannonball at Different Initial Velocities\n(With and Without Air Resistance)')
+plt.legend()
+plt.grid(True)
+plt.show()

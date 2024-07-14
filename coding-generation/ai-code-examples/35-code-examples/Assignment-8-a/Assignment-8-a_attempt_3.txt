@@ -1,0 +1,37 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Define the Walker class
+class Walker:
+    def __init__(self, steps):
+        self.steps = steps
+        
+    def move(self):
+        return 2*np.random.randint(2, size=self.steps) - 1
+
+# Simulate 100 1D walkers, each taking 1000 steps
+num_walkers = 100
+num_steps = 1000
+
+positions = np.zeros(num_steps)
+positions_squared = np.zeros(num_steps)
+
+for _ in range(num_walkers):
+    walker = Walker(num_steps)
+    steps = walker.move()
+    positions += np.cumsum(steps)
+    positions_squared += np.cumsum(steps**2)
+
+# Calculate the average position and average squared position
+avg_position = positions / num_walkers
+avg_position_squared = positions_squared / num_walkers
+
+# Plot the average position and average squared position
+plt.figure(figsize=(12, 6))
+plt.plot(avg_position, label='Average Position', color='blue', linestyle='-', marker='o')
+plt.plot(avg_position_squared, label='Average Squared Position', color='red', linestyle='--', marker='x')
+plt.legend()
+plt.title('Movement of 1D walkers')
+plt.xlabel('Number of Steps')
+plt.ylabel('Position')
+plt.show()

@@ -1,0 +1,87 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Define constants for the simulation
+g = 9.81  # acceleration due to gravity (m/s^2)
+
+# Function to calculate cross-sectional area of a sphere
+def cross_sectional_area(radius):
+    return np.pi * radius**2
+
+# Function to calculate the mass of an iron sphere
+def iron_sphere_mass(radius):
+    density = 7850  # density of iron in kg/m^3
+    return (4/3) * np.pi * radius**3 * density
+
+# Calculating area and mass of the cannonball
+radius = 0.2  # in meters
+A = cross_sectional_area(radius)  # cross-sectional area of the cannonball
+m = iron_sphere_mass(radius)  # mass of the cannonball
+
+# Function to model cannonball's motion
+def cannonball_motion(t, u):
+    x, y, vx, vy = u
+    dx_dt = vx
+    dy_dt = vy
+    dvx_dt = -0.5 * 0.47 * A * 1.225 * vx**2 / m
+    dvy_dt = -g - 0.5 * 0.47 * A * 1.225 * vy**2 / m
+    return np.array([dx_dt, dy_dt, dvx_dt, dvy_dt])
+
+# Euler's method for solving the ODE
+def solve_euler(ode, initial_conditions, interval, n_steps):
+    dt = (interval[1] - interval[0]) / n_steps
+    t_values = np.linspace(interval[0], interval[1], n_steps + 1)
+    u_values = np.empty((n_steps + 1, len(initial_conditions)))
+    u = np.array(initial_conditions)
+    u_values[0] = u
+    for i in range(n_steps):
+        u += dt * ode(t_values[i], u)
+        u_values[i + 1] = u
+    return t_values, u_values
+
+# Function to find the x-coordinate where the trajectory crosses y=0
+def find_crossing(t_values, u_values):
+    for i in range(1, len(t_values)):
+        if u_values[i - 1][1] * u_values[i][1] < 0:
+            t_intersect = t_values[i - 1] - u_values[i - 1][1] * (t_values[i] - t_values[i - 1]) / (u_values[i][1] - u_values[i - 1][1])
+            x_intersect = u_values[i - 1][0] - u_values[i - 1][2] * (t_values[i] - t_values[i - 1]) / (u_values[i][1] - u_values[i - 1][1])
+            return x_intersect, t_intersect
+    return None, None
+
+# Function to find the range of the projectile
+def find_range(t_values, u_values):
+    x_values = u_values[:, 0]
+    return x_values.max()
+
+# Stores the trajectories for different values of the initial angle
+results = {}
+
+# Range of initial velocities to analyze
+v0_values = np.linspace(50, 150, 11)
+
+# Constant initial angle
+theta = np.radians(60)
+
+# Iterate over different initial velocities
+for v0 in v0_values:
+    # Initial conditions for the cannonball
+    u0 = [0, 0, v0 * np.cos(theta), v0 * np.sin(theta)]
+    
+    # Solve the ODE for cannonball's motion without air resistance
+    t_values, u_values = solve_euler(cannonball_motion, u0, [0, 25], 1000)
+    range_no_air_resistance = find_range(t_values, u_values)
+    
+    # Store the results for no air resistance
+    results[v0] = {"no_air": range_no_air_resistance}
+
+# Plotting the range for different initial velocities with and without air resistance
+plt.figure(figsize=(10, 6))
+plt.xlabel("Initial Velocity (m/s)")
+plt.ylabel("Range (m)")
+plt.title("Effect of Initial Velocity on the Range of a Projectile")
+plt.grid(True)
+
+# Plotting the range with and without air resistance for each initial velocity
+plt.plot(list(results.keys()), [results[v]["no_air"] for v in results], label="No Air Resistance", marker='o')
+plt.legend()
+plt.show()

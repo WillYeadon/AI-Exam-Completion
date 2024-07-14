@@ -1,0 +1,81 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Function to find the root
+def f(x):
+    return x**3 - 2*x**2 + 4*x - 8
+
+# Derivative of the function
+def f_prime(x):
+    return 3*x**2 - 4*x + 4
+
+# Newton-Raphson method
+def NewtonRaphson(x0, tol, max_iter):
+    errors = []
+    iterations = 0
+    while True:
+        x1 = x0 - f(x0) / f_prime(x0)
+        error = np.abs(x1 - x0)
+        errors.append(error)
+        x0 = x1
+        iterations += 1
+        if error < tol or iterations >= max_iter:
+            break
+    return errors
+
+# Secant method
+def secant(x0, x1, tol, max_iter):
+    errors = []
+    iterations = 0
+    while True:
+        x2 = x1 - f(x1) * (x1 - x0) / (f(x1) - f(x0))
+        error = np.abs(x2 - x1)
+        errors.append(error)
+        x0 = x1
+        x1 = x2
+        iterations += 1
+        if error < tol or iterations >= max_iter:
+            break
+    return errors
+
+# Bisection method
+def bisect(a, b, tol, max_iter):
+    errors = []
+    iterations = 0
+    while True:
+        c = (a + b) / 2
+        if f(c) == 0 or np.abs(b-a) < tol:
+            break
+        if f(a) * f(c) < 0:
+            b = c
+        else:
+            a = c
+        error = np.abs(b - a)
+        errors.append(error)
+        iterations += 1
+        if error < tol or iterations >= max_iter:
+            break
+    return errors
+
+# Initial values
+x0 = 3
+x1 = 2.5
+tol = 1e-8
+max_iter = 100
+
+# Calculate errors for each method
+errors_newton = NewtonRaphson(x0, tol, max_iter)
+errors_secant = secant(x0, x1, tol, max_iter)
+errors_bisect = bisect(0.5, 6, tol, max_iter)
+
+# Plotting
+plt.figure(figsize=(12, 8))
+plt.plot(range(1, len(errors_newton)+1), errors_newton, label='Newton-Raphson', color='blue')
+plt.plot(range(1, len(errors_secant)+1), errors_secant, label='Secant', color='orange')
+plt.plot(range(1, len(errors_bisect)+1), errors_bisect, label='Bisection', color='green')
+plt.yscale('log')
+plt.xlabel('Iterations')
+plt.ylabel('Error')
+plt.title('Comparison of Convergence Efficiency of Root Finding Methods')
+plt.legend()
+plt.show()

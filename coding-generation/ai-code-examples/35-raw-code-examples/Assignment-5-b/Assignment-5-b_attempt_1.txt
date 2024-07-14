@@ -1,0 +1,3 @@
+The script provided lays out the structure for simulating the decay of three types of nuclei ('A', 'B', 'C') over time using transition probabilities and rules. After completing the provided code with the described functions, we will run the simulation 20 times to calculate the average and uncertainty on the number of 'A' atoms as a function of time.
+
+Let's now move on to completing the tasks described in the script by defining the transition probabilities, rules, simulation functions, and running the full simulation 20 times

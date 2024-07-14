@@ -1,0 +1,57 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Constants
+g = 9.81  # acceleration due to gravity m/s^2
+dt = 0.1  # time step s
+v0 = 125  # initial velocity m/s
+theta = np.radians(60)  # initial angle in radians
+rho = 1.22  # air density kg/m^3
+C = 0.5  # drag coefficient
+A = 0.1  # cross-sectional area m^2
+
+def find_zero_linear(x1, x2, y1, y2):
+    # Linear interpolation to find x value at y=0
+    return x1 - y1 * (x2 - x1) / (y2 - y1)
+
+def range_no_air_resistance(v0, theta):
+    return v0**2 * np.sin(2*theta) / g
+
+def range_with_air_resistance(v0, theta):
+    range_x = 0
+    # Initial conditions
+    x = 0
+    y = 0
+    vx = v0 * np.cos(theta)
+    vy = v0 * np.sin(theta)
+    
+    while y >= 0:
+        # Update velocity
+        v = np.sqrt(vx**2 + vy**2)
+        ax = - rho * v * vx * A * C / 2
+        ay = - g - rho * v * vy * A * C / 2
+        # Update position
+        x += vx * dt
+        y += vy * dt
+        # Update velocity
+        vx += ax * dt
+        vy += ay * dt
+        range_x = x
+    
+    return range_x
+
+# Generate range values for different initial velocities
+v0_values = np.linspace(50, 200, 100)
+ranges_no_air_resistance = [range_no_air_resistance(v0, theta) for v0 in v0_values]
+ranges_with_air_resistance = [range_with_air_resistance(v0, theta) for v0 in v0_values]
+
+# Plot ranges for different initial velocities
+plt.figure()
+plt.plot(v0_values, ranges_no_air_resistance, label='No Air Resistance')
+plt.plot(v0_values, ranges_with_air_resistance, label='With Air Resistance')
+plt.xlabel('Initial Velocity (m/s)')
+plt.ylabel('Range (m)')
+plt.title('Range of Projectile vs Initial Velocity at 60 degrees')
+plt.legend()
+plt.grid(True)
+plt.show()

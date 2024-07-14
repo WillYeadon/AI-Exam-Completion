@@ -1,0 +1,47 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Constants
+g = 9.81  # acceleration due to gravity (m/s^2)
+v0 = 125  # initial velocity (m/s)
+theta = np.radians(60)  # angle in radians
+dt = 0.001  # time step
+
+def find_zero_linear(x1, x2, y1, y2):
+    if y1*y2 > 0:
+        print("Error: the y values have the same sign!")
+        return None
+    else:
+        m = (y2 - y1) / (x2 - x1)
+        x = x1 - y1 / m
+        return x
+
+# Function to calculate the trajectory
+def projectile_motion(v0, theta, dt):
+    x = [0.0]
+    y = [0.0]
+    vx = v0 * np.cos(theta)
+    vy = v0 * np.sin(theta)
+    
+    while y[-1] >= 0.0:
+        x.append(x[-1] + vx * dt)
+        vy = vy - g * dt
+        y.append(y[-1] + vy * dt)
+        
+    # Use linear approximation to find zero crossing
+    x_range = find_zero_linear(x[-2], x[-1], y[-2], y[-1])
+    
+    return x_range, x, y
+
+# Plot of the trajectories for different angles
+angles = np.arange(5, 90, 5)
+for angle in angles:
+    theta = np.radians(angle)
+    x_range, x, y = projectile_motion(v0, theta, dt)
+    plt.plot(x, y, label=f'{angle} degrees')
+
+plt.xlabel('Horizontal Distance (m)')
+plt.ylabel('Vertical Distance (m)')
+plt.title('Projectile Motion Trajectory for Different Initial Angles')
+plt.legend()
+plt.show()

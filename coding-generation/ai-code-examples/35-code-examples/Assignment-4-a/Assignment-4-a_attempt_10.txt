@@ -1,0 +1,75 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Constants
+g = 9.81  # acceleration due to gravity in m/s^2
+rho = 1.225  # air density in kg/m^3
+Cd = 0.47  # drag coefficient
+r = 0.105  # radius of the cannonball in meters
+A = np.pi * r**2  # cross-sectional area of the cannonball
+m = 4.2  # mass of the cannonball in kg
+v0 = 125  # initial velocity of the cannonball in m/s
+
+# Function to calculate cross-sectional area of a sphere
+def cross_sectional_area(radius):
+    return np.pi * radius**2
+
+# Function to calculate the mass of an iron sphere
+def iron_sphere_mass(radius):
+    return (4/3) * np.pi * radius**3 * 7850
+
+# Calculating area and mass of the cannonball
+A = cross_sectional_area(r)
+m = iron_sphere_mass(r)
+
+# Function to model cannonball's motion
+def projectile_motion(t, u):
+    x, y, vx, vy = u
+    vm = np.sqrt(vx**2 + vy**2)
+    dx_dt = vx
+    dy_dt = vy
+    dvx_dt = -0.5 * rho * Cd * A * vm * vx / m
+    dvy_dt = -g - 0.5 * rho * Cd * A * vm * vy / m
+    return np.array([dx_dt, dy_dt, dvx_dt, dvy_dt])
+
+# Euler's method for solving the ODE
+def solve_euler(ode, initial_conditions, t):
+    u = np.zeros((len(t), len(initial_conditions)))
+    u[0] = initial_conditions
+    for n in range(len(t) - 1):
+        u[n + 1] = u[n] + ode(t[n], u[n]) * (t[n + 1] - t[n])
+    return u
+
+# Function to find the x-coordinate where the trajectory crosses y=0
+def find_ground_distance(u):
+    ratios = u[:-1, 1] / u[1:, 1]
+    index = np.where(ratios < 0)[0][0]
+    a = u[index]
+    b = u[index + 1]
+    return a[0] - a[1] * (b[0] - a[0]) / (b[1] - a[1])
+
+# Function to find the range of the projectile
+def find_range(theta):
+    theta_rad = np.deg2rad(theta)
+    initial_conditions = np.array([0, 0, v0 * np.cos(theta_rad), v0 * np.sin(theta_rad)])
+    t = np.linspace(0, 30, 10000)
+    u = solve_euler(projectile_motion, initial_conditions, t)
+    return find_ground_distance(u)
+
+# Plotting trajectories for different initial angles
+angles = [30, 45, 60]
+colors = ['b', 'g', 'r']
+plt.figure(figsize=(10, 6))
+for angle, color in zip(angles, colors):
+    theta_rad = np.deg2rad(angle)
+    initial_conditions = np.array([0, 0, v0 * np.cos(theta_rad), v0 * np.sin(theta_rad)])
+    t = np.linspace(0, 30, 10000)
+    u = solve_euler(projectile_motion, initial_conditions, t)
+    plt.plot(u[:, 0], u[:, 1], label=f'{angle} degrees', color=color)
+
+plt.xlabel('Distance (m)')
+plt.ylabel('Height (m)')
+plt.title('Projectile Motion Trajectories for Different Initial Angles')
+plt.legend()
+plt.grid(True)
+plt.show()

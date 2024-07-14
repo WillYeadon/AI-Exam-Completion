@@ -1,0 +1,72 @@
+import numpy as np
+import random
+import matplotlib.pyplot as plt
+
+# Function to check if a transition has occurred based on the transition probability and a random number
+def check_transition(prob):
+    r = random.random()
+    if r < prob:
+        return True
+    else:
+        return False
+
+# Function to implement a transition based on the rules and return the new state
+def transition(state, rules):
+    new_state = state[:]
+    for i in range(len(state)):
+        for j in range(len(rules)):
+            if state[i] == rules[j][0]:
+                if check_transition(rules[j][1]):
+                    new_state[i] = rules[j][2]
+    return new_state
+
+# Function to evolve a system based on a list of states and transition rules
+def evolve_system(states, rules, n_timesteps):
+    new_states = states[:]
+    all_states = [new_states]
+    for i in range(n_timesteps):
+        new_states = transition(new_states, rules)
+        all_states.append(new_states)
+    return all_states
+
+# Function to evolve the system starting with NA, NB, NC nuclei for n_timesteps
+def evolve_full_system(NA, NB, NC, n_timesteps, rules):
+    states = [np.zeros(NA), np.ones(NB), 2*np.ones(NC)]
+    all_states = evolve_system(states, rules, n_timesteps)
+    return all_states
+
+# Transition rules: (current state, transition probability, new state)
+rules = [(2, 1 - np.exp(-0.693/10.1), 0),  # A decay
+         (0, 1 - np.exp(-0.693/15.7), 1),  # B decay
+         (2, 1 - np.exp(-0.693/3.2), 0)]   # C activation to A
+
+# Initial amounts of nuclei
+NA = 0
+NB = 0
+NC = 250
+
+# Evolve the system
+n_timesteps = 200
+all_states = evolve_full_system(NA, NB, NC, n_timesteps, rules)
+
+# Second evolution without neutron flux
+rules_no_flux = [(2, 1 - np.exp(-0.693/10.1), 0),
+                 (0, 1 - np.exp(-0.693/15.7), 1)]
+all_states_no_flux = evolve_system(all_states[-1], rules_no_flux, n_timesteps)
+
+# Extract the number of nuclei at each time step
+nuclei_A = [sum(np.array(states) == 0) for states in all_states] + [sum(np.array(states) == 0) for states in all_states_no_flux]
+nuclei_B = [sum(np.array(states) == 1) for states in all_states] + [sum(np.array(states) == 1) for states in all_states_no_flux]
+nuclei_C = [sum(np.array(states) == 2) for states in all_states] + [sum(np.array(states) == 2) for states in all_states_no_flux]
+
+# Plotting
+plt.figure(figsize=(10, 6))
+plt.plot(range(2*n_timesteps + 2), nuclei_A, label='Nuclei A')
+plt.plot(range(2*n_timesteps + 2), nuclei_B, label='Nuclei B')
+plt.plot(range(2*n_timesteps + 2), nuclei_C, label='Nuclei C')
+plt.xlabel('Time Steps')
+plt.ylabel('Number of Nuclei')
+plt.title('Evolution of Nuclei A, B, and C over time')
+plt.legend()
+plt.grid(True)
+plt.show()

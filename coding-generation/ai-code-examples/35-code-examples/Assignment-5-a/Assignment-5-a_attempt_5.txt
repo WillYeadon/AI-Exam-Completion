@@ -1,0 +1,54 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+def transition_prob(half_life, time_step):
+    return 1 - 2**(-time_step/half_life)
+
+def evolve_state(state, prob):
+    rand = np.random.random()
+    if rand < prob:
+        return (state + 1) % 2
+    else:
+        return state
+
+def evolve_system(states, probs):
+    new_states = []
+    for i in range(len(states)):
+        new_states.append(evolve_state(states[i], probs[i]))
+    return new_states
+
+def evolve_full_system(A, B, C, n_steps, neutron_flux_on):
+    states = np.array([C]*C + [B]*B + [A]*A)
+    probs = [transition_prob(3.2, 1)]*C + [transition_prob(15.7, 1)]*B + [transition_prob(10.1, 1)]*A
+
+    for _ in range(n_steps):
+        if neutron_flux_on:
+            states = evolve_system(states, probs)
+        else:
+            states = evolve_system(states, probs[:C] + [0]*B + [0]*A)
+
+    return sum(states == A), sum(states == B), sum(states == C)
+
+# Initial nuclei counts
+A_count, B_count, C_count = 0, 0, 250
+
+# Evolve system for 100 hours with neutron flux on
+n_steps = 200
+results_neutron_on = evolve_full_system(A_count, B_count, C_count, n_steps, neutron_flux_on=True)
+
+# Evolve system for another 100 hours without neutron flux
+results_neutron_off = evolve_full_system(*results_neutron_on, n_steps, neutron_flux_on=False)
+
+# Plotting
+hours = np.linspace(0, 200, 2*n_steps+1)
+A_counts = [A_count] + [results_neutron_on[0]] + [results_neutron_off[0]]
+B_counts = [B_count] + [results_neutron_on[1]] + [results_neutron_off[1]]
+C_counts = [C_count] + [results_neutron_on[2]] + [results_neutron_off[2]
+
+plt.plot(hours, A_counts, label='A nuclei')
+plt.plot(hours, B_counts, label='B nuclei')
+plt.plot(hours, C_counts, label='C nuclei')
+plt.xlabel('Time (hours)')
+plt.ylabel('Number of Nuclei')
+plt.legend()
+plt.show()

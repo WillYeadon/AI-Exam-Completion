@@ -1,0 +1,92 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+def f(x):
+    return x**3 - 2*x - 5
+
+def f_prime(x):
+    return 3*x**2 - 2
+
+def NewtonRaphson(f, f_prime, x0, tol=1e-6, max_iter=100):
+    errors = []
+    iterations = 0
+    x = x0
+    
+    while True:
+        x_new = x - f(x) / f_prime(x)
+        error = np.abs(x_new - x)
+        errors.append(error)
+        
+        if error < tol or iterations >= max_iter:
+            break
+        
+        x = x_new
+        iterations += 1
+    
+    return errors
+
+def secant(f, x0, x1, tol=1e-6, max_iter=100):
+    errors = []
+    iterations = 0
+    
+    while True:
+        x_new = x1 - f(x1) * (x1 - x0) / (f(x1) - f(x0))
+        error = np.abs(x_new - x1)
+        errors.append(error)
+        
+        if error < tol or iterations >= max_iter:
+            break
+        
+        x0 = x1
+        x1 = x_new
+        iterations += 1
+    
+    return errors
+
+def bisect(f, a, b, tol=1e-6, max_iter=100):
+    errors = []
+    iterations = 0
+    
+    while True:
+        c = (a + b) / 2
+        error = np.abs(b - a) / 2
+        errors.append(error)
+        
+        if error < tol or iterations >= max_iter:
+            break
+        
+        if f(c) == 0:
+            break
+        elif f(a) * f(c) < 0:
+            b = c
+        else:
+            a = c
+        
+        iterations += 1
+    
+    return errors
+
+# Initialize parameters
+x0 = 1.5
+x1 = 1.0
+a = 1
+b = 2
+
+# Calculate errors for each method
+errors_newton = NewtonRaphson(f, f_prime, x0)
+errors_secant = secant(f, x0, x1)
+errors_bisect = bisect(f, a, b)
+
+# Plotting
+plt.figure(figsize=(12, 8))
+plt.plot(range(len(errors_newton)), errors_newton, label='Newton-Raphson', color='blue')
+plt.plot(range(len(errors_secant)), errors_secant, label='Secant', color='red')
+plt.plot(range(len(errors_bisect)), errors_bisect, label='Bisection', color='green')
+
+plt.yscale('log')
+plt.xlabel('Iterations')
+plt.ylabel('Error')
+plt.title('Convergence of Root-Finding Methods')
+plt.legend()
+
+plt.show()

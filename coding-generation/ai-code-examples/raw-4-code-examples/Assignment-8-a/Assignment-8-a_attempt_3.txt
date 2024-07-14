@@ -1,0 +1,54 @@
+import numpy as np
+import matplotlib.pyplot as plt
+import random
+
+class Walker:
+    def __init__(self, ndim=1, s=1):
+        self.s = s
+        self.ndim = ndim
+        self.pos = np.zeros(ndim)
+        if ndim == 1:
+            self.steps = [[+s], [-s]]
+        elif ndim == 2:
+            self.steps = [[+s, 0], [-s, 0], [0, +s], [0, -s]]
+        else:
+            raise ValueError('ndim must be 1 or 2')
+    
+    def pickStep(self):
+        return self.steps[random.randint(0, len(self.steps) - 1)]
+    
+    def doSteps(self, n):
+        trajectory = np.zeros((n + 1, self.ndim))
+        for i in range(n):
+            step = self.pickStep()
+            self.pos += step
+            trajectory[i + 1] = self.pos
+        return trajectory
+
+def run_simulation(num_walkers, num_steps):
+    trajectories = []
+
+    for _ in range(num_walkers):
+        walker = Walker(ndim=1)
+        trajectory = walker.doSteps(num_steps)
+        trajectories.append(trajectory)
+
+    return np.array(trajectories)
+
+def plot_results(num_walkers, num_steps):
+    trajectories = run_simulation(num_walkers, num_steps)
+    
+    avg_positions = np.mean(trajectories[:,:,0], axis=0)
+    avg_squared_positions = np.mean(trajectories[:,:,0]**2, axis=0)
+
+    plt.figure(figsize=(12, 6))
+    
+    plt.plot(range(num_steps + 1), avg_positions, label='Average Position')
+    plt.plot(range(num_steps + 1), avg_squared_positions, label='Average Squared Position')
+
+    plt.xlabel('Steps')
+    plt.ylabel('Position')
+    plt.title('Average Position and Average Squared Position of 100 Walkers Over 1000 Steps')
+    plt.legend()
+    plt.grid(True)
+    plt.show()

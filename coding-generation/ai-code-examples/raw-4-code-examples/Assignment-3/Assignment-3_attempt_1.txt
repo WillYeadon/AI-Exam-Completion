@@ -1,0 +1,97 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Define the constants
+T_HALF = 5730  # Half-life in years
+TAU = T_HALF / np.log(2)
+
+# Define the function to calculate the mean lifetime
+def mean_lifetime(T_HALF):
+    return T_HALF / np.log(2)
+
+# Verification
+TAU = mean_lifetime(T_HALF)
+print("Mean Lifetime (TAU):", TAU)
+
+
+Next, we'll implement the `f_rad` function to describe the radioactive decay process:
+
+
+# Define the radioactive decay function
+def f_rad(N, t):
+    return -N / TAU
+
+
+Following this, let's solve the ODE analytically:
+
+
+# Analytical solution
+def analytic(N0, t):
+    return N0 * np.exp(-t / TAU)
+
+
+Now, let's implement Euler's method:
+
+
+def solve_euler(n0, t0, dt, n_steps):
+    counts = np.zeros(n_steps + 1)
+    counts[0] = n0
+    for i in range(1, n_steps + 1):
+        counts[i] = counts[i - 1] + f_rad(counts[i - 1], t0 + (i - 1) * dt) * dt
+    return counts
+
+
+And finally, the RK4 method:
+
+
+def solve_RK4(n0, t0, dt, n_steps):
+    counts = np.zeros(n_steps + 1)
+    counts[0] = n0
+    for i in range(1, n_steps + 1):
+        t = t0 + (i - 1) * dt
+        k1 = dt * f_rad(counts[i - 1], t)
+        k2 = dt * f_rad(counts[i - 1] + k1/2, t + dt/2)
+        k3 = dt * f_rad(counts[i - 1] + k2/2, t + dt/2)
+        k4 = dt * f_rad(counts[i - 1] + k3, t + dt)
+        counts[i] = counts[i - 1] + (k1 + 2*k2 + 2*k3 + k4) / 6
+    return counts
+
+
+Now we create the plot to compare the error scaling of the RK4 method with the Euler method:
+
+
+# Initial parameters
+n0 = 1000
+t0 = 0
+dt_values = [50, 100, 200, 400, 800]  # Various time step sizes
+t_final = 16000
+
+times = np.arange(t_final+1)  # Time range for analytical solution
+N_analytic = analytic(n0, times)  # Analytical solution
+
+errors_euler = []
+errors_RK4 = []
+
+# Calculate errors for different time step sizes
+for dt in dt_values:
+    n_steps = int(t_final / dt)
+    N_euler = solve_euler(n0, t0, dt, n_steps)
+    N_RK4 = solve_RK4(n0, t0, dt, n_steps)
+    
+    # Calculate the errors at the final time
+    error_euler = abs(N_euler[-1] - N_analytic[-1])
+    error_RK4 = abs(N_RK4[-1] - N_analytic[-1])
+    
+    errors_euler.append(error_euler)
+    errors_RK4.append(error_RK4)
+
+# Plotting the results
+plt.figure(figsize=(10, 6))
+plt.loglog(dt_values, errors_euler, 'o-', label='Euler Method Error')
+plt.loglog(dt_values, errors_RK4, 's-', label='RK4 Method Error')
+plt.xlabel('Time Step (years)')
+plt.ylabel('Error at t = 16000 years')
+plt.title('Error Scaling: Euler vs. RK4 Methods')
+plt.legend()
+plt.grid(True, which='both', linestyle='--', linewidth=0.5)
+plt.show()

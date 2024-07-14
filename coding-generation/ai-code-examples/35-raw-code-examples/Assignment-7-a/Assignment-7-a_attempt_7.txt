@@ -1,0 +1,75 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Function definition
+def f(x):
+    return x - np.tanh(2*x)
+
+# Derivative of the function
+def f_prime(x):
+    return 1 - 2*np.cosh(2*x)**-2
+
+# Newton-Raphson method
+def newton_raphson_method(f, f_prime, x0, tol=1e-6, max_iter=100):
+    x = x0
+    for i in range(max_iter):
+        x_next = x - f(x) / f_prime(x)
+        if abs(x_next - x) < tol:
+            return x_next, i+1
+        x = x_next
+    return None, max_iter
+
+# Bisection method
+def bisection_method(f, a, b, tol=1e-6, max_iter=100):
+    if f(a)*f(b) >= 0:
+        return None, max_iter
+    for i in range(max_iter):
+        c = (a + b) / 2
+        if f(c) == 0 or (b - a) / 2 < tol:
+            return c, i+1
+        if f(c)*f(a) < 0:
+            b = c
+        else:
+            a = c
+    return None, max_iter
+
+# Secant method
+def secant_method(f, x0, x1, tol=1e-6, max_iter=100):
+    for i in range(max_iter):
+        x_next = x1 - f(x1)*(x1 - x0) / (f(x1) - f(x0))
+        if abs(x_next - x1) < tol:
+            return x_next, i+1
+        x0, x1 = x1, x_next
+    return None, max_iter
+
+# Starting values for the methods
+x0 = 0
+x1 = 0.5
+a = -1
+b = 1
+
+# Results of the methods
+newton_root, newton_iterations = newton_raphson_method(f, f_prime, x0)
+bisection_root, bisection_iterations = bisection_method(f, a, b)
+secant_root, secant_iterations = secant_method(f, x0, x1)
+
+print("Newton-Raphson Method: Root =", newton_root, "Iterations =", newton_iterations)
+print("Bisection Method: Root =", bisection_root, "Iterations =", bisection_iterations)
+print("Secant Method: Root =", secant_root, "Iterations =", secant_iterations)
+
+# Plotting the graph
+x = np.linspace(-1, 1, 100)
+plt.plot(x, f(x), label='f(x) = x - tanh(2x)')
+plt.axhline(y=0, color='k', linestyle='--', label='y=0')
+
+# Plot the roots found by the methods
+plt.plot(newton_root, 0, 'ro', label='Newton-Raphson Root')
+plt.plot(bisection_root, 0, 'bo', label='Bisection Root')
+plt.plot(secant_root, 0, 'go', label='Secant Root')
+
+plt.legend()
+plt.title('Comparison of Convergence Methods')
+plt.xlabel('x')
+plt.ylabel('f(x)')
+plt.grid(True)
+plt.show()

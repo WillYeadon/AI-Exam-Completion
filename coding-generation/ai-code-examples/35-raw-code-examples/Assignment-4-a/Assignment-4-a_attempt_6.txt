@@ -1,0 +1,41 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Constants
+v0 = 125  # initial velocity in m/s
+g = 9.81  # acceleration due to gravity in m/s^2
+y0 = 0    # initial height in meters
+
+# Function to find zero using linear approximation
+def find_zero_linear(x1, x2, y1, y2):
+    return x1 - y1 * (x2 - x1) / (y2 - y1)
+
+# Function to calculate the range of the projectile
+def calculate_range(theta):
+    theta_rad = np.deg2rad(theta)
+    v0x = v0 * np.cos(theta_rad)
+    v0y = v0 * np.sin(theta_rad)
+    # Calculate time of flight
+    t_flight = 2 * v0y / g
+    # Calculate range
+    range_x = v0x * t_flight
+    return range_x
+
+# Plotting trajectories for different launch angles
+angles = np.arange(5, 85, 5)  # angles from 5 to 80 degrees in 5 degree increments
+
+plt.figure(figsize=(10, 6))
+plt.xlabel('Horizontal Distance (m)')
+plt.ylabel('Vertical Distance (m)')
+plt.title('Projectile Motion Trajectories for Different Launch Angles')
+
+for angle in angles:
+    range_x = calculate_range(angle)
+    t = np.linspace(0, range_x / (v0 * np.cos(np.deg2rad(angle))), num=100)  # time array
+    x = v0 * np.cos(np.deg2rad(angle)) * t  # x position
+    y = y0 + v0 * np.sin(np.deg2rad(angle)) * t - 0.5 * g * t**2  # y position
+    plt.plot(x, y, label=f'{angle} degrees')
+
+plt.legend()
+plt.grid(True)
+plt.show()

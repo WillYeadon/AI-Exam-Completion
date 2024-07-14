@@ -1,0 +1,114 @@
+import numpy as np
+import matplotlib.pyplot as plt
+import random
+
+# Set the seed for reproducibility
+random.seed(42)
+
+def has_transition_occurred(prob):
+    """Determine whether a transition occurs based on given probability."""
+    r = random.random()
+    return r < prob
+
+def apply_transitions(current_state, transition_rules):
+    """Apply the transitions based on current state and transition rules."""
+    new_state = current_state.copy()
+    for transition in transition_rules:
+        from_state, to_state, prob = transition
+        if current_state[from_state] > 0:
+            for _ in range(current_state[from_state]):
+                if has_transition_occurred(prob):
+                    new_state[from_state] -= 1
+                    new_state[to_state] += 1
+    return new_state
+
+def evolve_system(states, transition_rules):
+    """Evolve the system based on the current states and transition rules."""
+    new_states = [apply_transitions(state, transition_rules) for state in states]
+    return new_states
+
+def simulation(NA, NB, NC, n_timesteps, t_max, transition_rules_flux_on, transition_rules_flux_off):
+    """Simulate the evolution of nuclei over a number of timesteps with and without neutron flux."""
+    timesteps = np.linspace(0, t_max, n_timesteps + 1)
+    A = np.zeros(n_timesteps + 1)
+    B = np.zeros(n_timesteps + 1)
+    C = np.zeros(n_timesteps + 1)
+    
+    # Initial conditions
+    A[0] = NA
+    B[0] = NB
+    C[0] = NC
+    
+    current_state = {'A': NA, 'B': NB, 'C': NC}
+    
+    # Evolve with neutron flux
+    for i in range(1, n_timesteps // 2 + 1):
+        current_state = apply_transitions(current_state, transition_rules_flux_on)
+        A[i] = current_state['A']
+        B[i] = current_state['B']
+        C[i] = current_state['C']
+
+    # Evolve without neutron flux
+    for i in range(n_timesteps // 2 + 1, n_timesteps + 1):
+        current_state = apply_transitions(current_state, transition_rules_flux_off)
+        A[i] = current_state['A']
+        B[i] = current_state['B']
+        C[i] = current_state['C']
+    
+    return A, B, C
+
+def run_simulations(n_runs, NA, NB, NC, n_timesteps, t_max, transition_rules_flux_on, transition_rules_flux_off):
+    """Run multiple simulations and compute average and standard deviation of A nuclei over time."""
+    all_A = np.zeros((n_runs, n_timesteps + 1))
+    
+    # Run simulations
+    for run in range(n_runs):
+        A, _, _ = simulation(NA, NB, NC, n_timesteps, t_max, transition_rules_flux_on, transition_rules_flux_off)
+        all_A[run, :] = A
+        
+    # Calculate average and standard deviation
+    avg_A = np.average(all_A, axis=0)
+    std_A = np.std(all_A, axis=0)
+    
+    return avg_A, std_A
+
+# Given data
+NA, NB, NC = 0, 0, 250
+n_runs = 20
+n_timesteps = 200
+t_max = 200
+
+# Calculate decay constants
+def half_life_to_prob(half_life, delta_t):
+    return 1 - np.exp(-delta_t / half_life)
+
+delta_t = t_max / n_timesteps
+prob_A_to_B = half_life_to_prob(10.1, delta_t)
+prob_B_to_C = half_life_to_prob(15.7, delta_t)
+prob_C_to_A_flux = half_life_to_prob(3.2, delta_t)
+prob_C_to_A_no_flux = 0
+
+# Define transition rules
+transition_rules_flux_on = [
+    ('A', 'B', prob_A_to_B),
+    ('B', 'C', prob_B_to_C),
+    ('C', 'A', prob_C_to_A_flux)
+]
+
+transition_rules_flux_off = [
+    ('A', 'B', prob_A_to_B),
+    ('B', 'C', prob_B_to_C),
+    ('C', 'A', prob_C_to_A_no_flux)
+]
+
+# Run simulations
+avg_A, std_A = run_simulations(n_runs, NA, NB, NC, n_timesteps, t_max, transition_rules_flux_on, transition_rules_flux_off)
+
+# Plot results
+timesteps = np.linspace(0, t_max, n_timesteps + 1)
+plt.errorbar(timesteps, avg_A, yerr=std_A, fmt='-o', label='Number of A atoms')
+plt.xlabel('Time (hours)')
+plt.ylabel('Number of A atoms')
+plt.title('Average Number of A Atoms with Error Bars Over Time')
+plt.legend()
+plt.show()

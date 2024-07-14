@@ -1,0 +1,58 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Define the Walker class
+class Walker:
+    def __init__(self, initial_position):
+        self.position = initial_position
+    
+    def move(self):
+        step_size = 0.05
+        direction = np.random.choice(['up', 'down', 'left', 'right'])
+        if direction == 'up':
+            self.position[1] += step_size
+        elif direction == 'down':
+            self.position[1] -= step_size
+        elif direction == 'left':
+            self.position[0] -= step_size
+        else:
+            self.position[0] += step_size
+        return self.position
+
+# Generate random initial positions for 1000 particles
+np.random.seed(0)
+rand_pos = np.random.rand(1000, 2)
+
+# Create Walker objects for each initial position
+walkers = [Walker(pos) for pos in rand_pos]
+
+# Create subplots for each step count (10, 100, 500)
+plt.figure(figsize=(15, 5))
+
+# Initial scatter plot for starting positions
+plt.subplot(1, 3, 1)
+for walker in walkers:
+    plt.scatter(walker.position[0], walker.position[1], color='blue', alpha=0.5)
+plt.title('Positions after 10 steps')
+plt.xlabel('X')
+plt.ylabel('Y')
+
+plt.subplot(1, 3, 2)
+# Positions after 10 steps
+for walker in walkers:
+    walker.move()
+    plt.scatter(walker.position[0], walker.position[1], color='green', alpha=0.5)
+plt.title('Positions after 100 steps')
+plt.xlabel('X')
+plt.ylabel('Y')
+
+plt.subplot(1, 3, 3)
+# Positions after 100 steps
+for walker in walkers:
+    walker.move()
+    plt.scatter(walker.position[0], walker.position[1], color='red', alpha=0.5)
+plt.title('Positions after 500 steps')
+plt.xlabel('X')
+plt.ylabel('Y')
+
+plt.show()

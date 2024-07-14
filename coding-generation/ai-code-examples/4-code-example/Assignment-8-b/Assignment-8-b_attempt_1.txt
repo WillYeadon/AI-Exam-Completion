@@ -1,0 +1,57 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+class Walker:
+    def __init__(self, ndim, step_size=1):
+        self.ndim = ndim
+        self.step_size = step_size
+        self.pos = np.zeros(ndim)
+        self.steps = self._generate_steps()
+
+    def _generate_steps(self):
+        steps = []
+        for i in range(self.ndim):
+            step_positive = np.zeros(self.ndim)
+            step_positive[i] = self.step_size
+            steps.append(step_positive)
+            step_negative = np.zeros(self.ndim)
+            step_negative[i] = -self.step_size
+            steps.append(step_negative)
+        return steps
+
+    def pickStep(self):
+        return self.steps[np.random.choice(len(self.steps))]
+
+    def doSteps(self, n):
+        trajectory = np.zeros((n+1, self.ndim))
+        for i in range(1, n+1):
+            self.pos += self.pickStep()
+            trajectory[i] = self.pos
+        return trajectory
+
+# Parameters
+num_walkers = 400
+num_steps = 100
+dimensions = [1, 2, 3, 4]
+colors = ['r', 'g', 'b', 'm']
+
+plt.figure(figsize=(10, 6))
+
+# Perform simulations
+for ndim, color in zip(dimensions, colors):
+    squared_distances = np.zeros(num_steps + 1)
+    for _ in range(num_walkers):
+        walker = Walker(ndim)
+        trajectory = walker.doSteps(num_steps)
+        distances = np.sum(trajectory**2, axis=1)
+        squared_distances += distances
+    squared_distances /= num_walkers
+    plt.plot(range(num_steps + 1), squared_distances, label=f'D = {ndim}', color=color)
+
+# Plot settings
+plt.xlabel('Steps')
+plt.ylabel('Average Squared Distance')
+plt.title('Scaling of Average Squared Distance with Dimensions')
+plt.legend()
+plt.grid(True)
+plt.show()

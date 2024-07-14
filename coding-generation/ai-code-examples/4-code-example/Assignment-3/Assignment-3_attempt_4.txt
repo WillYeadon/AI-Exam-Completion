@@ -1,0 +1,86 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Given half-life of Carbon-14 in years
+half_life_C14 = 5730
+
+# Function to calculate the mean lifetime from the half-life
+def mean_lifetime(half_life):
+    return half_life / np.log(2)
+
+# Function for the radioactive decay process
+def decay_function(t, N0, mean_lifetime):
+    return N0 * np.exp(-t / mean_customer_lifetime)
+
+# Analytical solution of the decay equation
+def analytical_solution(t, N0, mean_lifetime):
+    return N0 * np.exp(-t / mean_lifetime)
+
+# Euler's method for solving the ODE
+def solve_euler(t, N0, mean_lifetime, dt):
+    N = N0
+    N_values = [N0]
+    for i in range(1, len(t)):
+        N = N - dt * (N / mean_lifetime)
+        N_values.append(N)
+    return N_values
+
+# RK4 method for solving the ODE
+def solve_RK4(t, N0, mean_lifetime, dt):
+    def f(N):
+        return -N / mean_lifetime
+    
+    N = N0
+    N_values = [N0]
+    for i in range(1, len(t)):
+        k1 = f(N)
+        k2 = f(N + 0.5 * dt * k1)
+        k3 = f(N + 0.5 * dt * k2)
+        k4 = f(N + dt * k3)
+        
+        N = N + dt * (k1 + 2*k2 + 2*k3 + k4) / 6
+        N_values.append(N)
+    return N_values
+
+# Calculate the error 
+def calculate_error(N_analytical, N_numerical):
+    return np.abs(np.array(N_numerical) - np.array(N_analytical))
+
+# Mean lifetime for Carbon-14
+mean_lifetime_C14 = mean_lifetime(half_life_C14)
+
+# Initial quantity of Carbon-14
+N0 = 1
+
+# End time for the simulation
+t_max = 20 * half_life_C14
+
+# Range of number of steps
+steps_range = [5, 10, 20, 40, 80, 160, 320, 640, 1280, 2560, 5120]
+
+# Errors for Euler's and RK4 methods
+errors_euler = []
+errors_RK4 = []
+
+times = np.linspace(0, t_max, num=max(steps_range))
+N_analytical = analytical_solution(times, N0, mean_lifetime_C14)
+
+for steps in steps_range:
+    dt = t_max / steps
+    t = np.linspace(0, t_max, num=steps)
+    
+    N_euler = solve_euler(t, N0, mean_lifetime_C14, dt)
+    N_RK4 = solve_RK4(t, N0, mean_lifetime_C14, dt)
+    
+    errors_euler.append(calculate_error(N_analytical[::len(times) // steps], N_euler).max())
+    errors_RK4.append(calculate_error(N_analytical[::len(times) // steps], N_RK4).max())
+
+# Log-log plot of the error versus the number of steps
+plt.figure()
+plt.loglog(steps_range, errors_euler, label='Euler Method', marker='o', linestyle='-')
+plt.logl og(steps_range, errors_RK4, label='RK4 Method', marker='s', linestyle='-')
+plt.xlabel('Number of Steps')
+plt.ylabel('Error')
+plt.title('Comparison of Errors in Euler\'s and RK4 methods')
+plt.legend()
+plt.show()

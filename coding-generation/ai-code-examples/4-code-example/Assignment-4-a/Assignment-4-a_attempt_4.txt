@@ -1,0 +1,55 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Constants for the simulation
+g = 9.81  # Acceleration due to gravity (m/s^2)
+v0 = 125  # Initial velocity (m/s)
+
+# Function to calculate cross-sectional area of a sphere
+def cross_sectional_area(radius):
+    return np.pi * radius**2
+
+# Function to calculate the mass of an iron sphere
+def iron_sphere_mass(density, radius):
+    volume = 4/3 * np.pi * radius**3
+    return density * volume
+
+# Function to model cannonball's motion without air resistance using Euler's method
+def euler_method(v0, angle, dt=0.01):
+    angle_rad = np.deg2rad(angle)
+    vx = v0 * np.cos(angle_rad)
+    vy = v0 * np.sin(angle_rad)
+    t = 0
+    x = 0
+    y = 0
+    trajectory_x = [x]
+    trajectory_y = [y]
+    while y >= 0:
+        t += dt
+        x += vx * dt
+        vy -= g * dt
+        y += vy * dt
+        trajectory_x.append(x)
+        trajectory_y.append(y)
+    return trajectory_x, trajectory_y
+
+# Function to find the range of the projectile
+def find_range(trajectory_x, trajectory_y):
+    return trajectory_x[-1]
+
+# List of angles
+angles = np.arange(15, 80, 15)
+
+# Plotting the trajectories
+plt.figure(figsize=(12, 6))
+
+for angle in angles:
+    traj_x, traj_y = euler_method(v0, angle)
+    plt.plot(traj_x, traj_y, label=f'{angle} degrees')
+
+plt.xlabel('Distance (m)')
+plt.ylabel('Height (m)')
+plt.title('Trajectories of a Cannonball for Various Initial Angles at v0 = 125 m/s')
+plt.legend()
+plt.grid(True)
+plt.show()

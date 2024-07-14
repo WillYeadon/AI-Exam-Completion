@@ -1,0 +1,81 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Define the function f(x) and its derivative
+def f(x):
+    return x - np.tanh(2*x)
+
+def df(x):
+    return 1 - 2*(1 - np.tanh(2*x)**2)
+
+# Newton-Raphson Method
+def newton_raphson(f, df, x0, tol=1e-6, max_iter=100):
+    x = x0
+    errors = []
+    for i in range(max_iter):
+        fx = f(x)
+        dfx = df(x)
+        if dfx == 0:
+            break
+        x_new = x - fx / dfx
+        errors.append(abs(x_new - x))
+        if abs(x_new - x) < tol:
+            break
+        x = x_new
+    return x, errors
+
+# Bisection Method
+def bisection(f, a, b, tol=1e-6, max_iter=100):
+    errors = []
+    for i in range(max_iter):
+        c = (a + b) / 2
+        errors.append(abs(b - a))
+        if f(c) == 0 or abs(b - a) < tol:
+            break
+        if f(a) * f(c) < 0:
+            b = c
+        else:
+            a = c
+    return c, errors
+
+# Secant Method
+def secant(f, x0, x1, tol=1e-6, max_iter=100):
+    errors = []
+    for i in range(max_iter):
+        fx0 = f(x0)
+        fx1 = f(x1)
+        if fx1 - fx0 == 0:
+            break
+        x2 = x1 - fx1 * (x1 - x0) / (fx1 - fx0)
+        errors.append(abs(x2 - x1))
+        if abs(x2 - x1) < tol:
+            break
+        x0, x1 = x1, x2
+    return x2, errors
+
+# Define the initial guesses and the interval for bisection
+x0_nr = 1.0  # Initial guess for Newton-Raphson
+x0_s = 0.0  # Initial guess for Secant
+x1_s = 1.0  # Second initial guess for Secant
+a_b = 0.0  # Interval start for Bisection
+b_b = 1.0  # Interval end for Bisection
+
+# Find the roots and the errors for each method
+root_nr, errors_nr = newton_raphson(f, df, x0_nr)
+root_b, errors_b = bisection(f, a_b, b_b)
+root_s, errors_s = secant(f, x0_s, x1_s)
+
+# Plot the convergence
+plt.figure(figsize=(10, 6))
+
+plt.plot(errors_nr, label='Newton-Raphson Method', marker='o')
+plt.plot(errors_b, label='Bisection Method', marker='s')
+plt.plot(errors_s, label='Secant Method', marker='^')
+
+plt.yscale('log')
+plt.xlabel('Iteration')
+plt.ylabel('Error')
+plt.title('Convergence of Root-Finding Methods')
+plt.legend()
+plt.grid(True)
+plt.show()

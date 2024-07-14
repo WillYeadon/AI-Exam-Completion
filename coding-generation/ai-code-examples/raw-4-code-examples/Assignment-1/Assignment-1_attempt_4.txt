@@ -1,0 +1,50 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Define the function f equivalent to f(x) = sin(2x)
+def f(x):
+    return np.sin(2 * x)
+
+# Define the analytic derivative of the function f
+def df_analytic(x):
+    return 2 * np.cos(2 * x)
+
+# Define the numerical derivative using the forward difference method
+def forward_difference(f, x, dx):
+    return (f(x + dx) - f(x)) / dx
+
+# Define a range of x values
+x_values = np.linspace(0, 2 * np.pi, 100)
+
+# Calculating analytical derivatives
+analytic_diff = df_analytic(x_values)
+
+# Define different dx values
+dx_large = 0.1
+dx_optimal = 0.01
+dx_small = 0.0001
+
+# Calculate numerical derivatives for different dx
+numerical_diff_large = forward_difference(f, x_values, dx_large)
+numerical_diff_optimal = forward_difference(f, x_values, dx_optimal)
+numerical_diff_small = forward_difference(f, x_values, dx_small)
+
+# Calculate differences between analytical and numerical derivatives
+diff_large = analytic_diff - numerical_diff_large
+diff_optimal = analytic_diff - numerical_diff_optimal
+diff_small = analytic_diff - numerical_diff_small
+
+# Plotting the differences
+plt.figure(figsize=(10, 6))
+plt.plot(x_values, diff_large, label=f'dx = {dx_large}', color='r')
+plt.plot(x_values, diff_optimal, label=f'dx = {dx_optimal}', color='g')
+plt.plot(x_values, diff_small, label=f'dx = {dx_small}', color='b')
+
+# Adding legend, labels, and title
+plt.legend()
+plt.xlabel('x')
+plt.ylabel('Difference')
+plt.title('Difference between Analytical and Numerical Derivative')
+
+# Show the plot
+plt.show()

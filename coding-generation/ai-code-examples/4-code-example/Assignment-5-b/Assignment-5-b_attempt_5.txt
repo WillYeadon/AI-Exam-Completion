@@ -1,0 +1,76 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Function to determine if a transition occurs based on the transition probability
+def performs_transition(p):
+    return np.random.rand() < p
+
+# Function to evolve a single state according to the transition rules
+def evolve_state(state, p_A_to_B, p_B_to_C, p_C_to_A):
+    if state == 'A':
+        if performs_transition(p_A_to_B):
+            return 'B'
+    elif state == 'B':
+        if performs_transition(p_B_to_C):
+            return 'C'
+    elif state == 'C':
+        if performs_transition(p_C_to_A):
+            return 'A'
+    return state
+
+# Function to evolve a list of states
+def evolve(states, p_A_to_B, p_B_to_C, p_C_to_A):
+    return [evolve_state(state, p_A_to_B, p_B_to_C, p_C_to_A) for state in states]
+
+# Function to evolve the entire system over 'n_steps'
+def evolve_system(states, p_A_to_B, p_B_to_C, p_C_to_A, n_steps):
+    history = []
+    for _ in range(n_steps):
+        states = evolve(states, p_A_to_B, p_B_to_C, p_C_to_A)
+        n_A = states.count('A')
+        history.append(n_A)
+    return history
+
+# Half lives and transition probabilities
+half_life_A = 10.1
+half_life_B = 15.7
+half_life_C_to_A = 3.2
+
+def transition_probability(half_life, dt):
+    return 1 - np.exp(-dt / half_life)
+
+dt = 0.5  # Time step (hours)
+p_A_to_B = transition_probability(half_life_A, dt)
+p_B_to_C = transition_probability(half_life_B, dt)
+p_C_to_A = transition_probability(half_life_C_to_A, dt)
+
+# Initialize the system
+initial_C = 250
+n_steps_part1 = 200  # First 100 hours
+n_steps_part2 = 200  # Second 100 hours
+initial_states = ['C'] * initial_C
+
+# Simulation function
+def simulation():
+    states = initial_states[:]
+    history = evolve_system(states, p_A_to_B, p_B_to_C, p_C_to_A, n_steps_part1)
+    p_C_to_A_off = 0  # No transitions from C to A in the second part
+    history += evolve_system(states, p_A_to_B, p_B_to_C, p_C_to_A_off, n_steps_part2)
+    return history
+
+# Run the simulation 20 times
+n_simulations = 20
+all_histories = np.array([simulation() for _ in range(n_simulations)])
+
+# Calculate average and standard deviation
+average_A = np.mean(all_histories, axis=0)
+std_A = np.std(all_histories, axis=0)
+
+# Plotting the results
+time = np.arange(0, len(average_A) * dt, dt)
+plt.errorbar(time, average_A, yerr=std_A, fmt='o', ecolor='r', capsize=5, label='Simulated Data')
+plt.xlabel('Time (hours)')
+plt.ylabel('Number of A nuclei')
+plt.title('Nuclei Decay and Activation Simulation')
+plt.legend()
+plt.show()

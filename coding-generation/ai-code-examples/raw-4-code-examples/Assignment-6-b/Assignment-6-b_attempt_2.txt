@@ -1,0 +1,77 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Function to estimate pi using Monte Carlo method
+def findPi(n_points):
+    inside_circle = 0
+    for _ in range(n_points):
+        x, y = np.random.rand(2)
+        if x**2 + y**2 <= 1:
+            inside_circle += 1
+    return (inside_circle / n_points) * 4
+
+# Function to estimate the volume of a unit ball in dim dimensions
+def integrate(dim, n_points):
+    inside_ball = 0
+    for _ in range(n_points):
+        point = np.random.uniform(-1, 1, dim)
+        if np.sum(point**2) <= 1:
+            inside_ball += 1
+    volume_of_cube = 2 ** dim
+    return (inside_ball / n_points) * volume_of_cube
+
+# Simulate the integration error
+def simulation_error(dimensions, n_points_list):
+    results = np.zeros((len(dimensions) + 1, len(n_points_list)))
+    
+    for i, dim in enumerate(dimensions):
+        for j, n_points in enumerate(n_points_list):
+            volume_estimate = integrate(dim, n_points)
+            results[i, j] = abs((np.pi ** (dim / 2) / np.math.gamma(dim/2 + 1)) - volume_estimate)
+    
+    # Theoretical error scaling
+    results[-1] = 1 / np.sqrt(n_points_list)
+    return results
+
+# Function to evaluate the density function
+def f(x):
+    return (1 + 2 / (1 + x**2) + np.cos(np.sqrt(3 * x))**2)
+
+# Monte Carlo integration to find normalization constant
+def findNormalizationConstant(x_values, n_samples=10000):
+    samples = np.random.uniform(0, 10, n_samples)
+    f_values = f(samples)
+    return np.mean(f_values) * 10
+
+# Define a function to generate a sample of `npts` values x distributed according to `f(x)`
+def genSample(npts):
+    # Find the value of the normalization constant using Monte Carlo integration
+    x_values = np.linspace(0, 10, 10000)
+    N = findNormalizationConstant(x_values)
+    
+    # Rejection sampling
+    x_samples = []
+    while len(x_samples) < npts:
+        x = np.random.uniform(0, 10)
+        y = np.random.uniform(0, f(0) / N)
+        if y <= f(x) / N:
+            x_samples.append(x)
+    return np.array(x_samples)
+
+# ::: Task :::
+# Generate a sample of x values
+npts = 10000
+sample = genSample(npts)
+
+# Plotting the histogram of the generated sample
+plt.hist(sample, bins=100, density=True, alpha=0.6, color='g', label='Generated Sample')
+# Superimpose the analytical function
+x_values = np.linspace(0, 10, 1000)
+f_values = f(x_values) / findNormalizationConstant(x_values)
+plt.plot(x_values, f_values, label='Analytical Function', linewidth=2, color='r')
+
+plt.title("Distribution of Generated Values")
+plt.xlabel("x")
+plt.ylabel("Density")
+plt.legend()
+plt.show()

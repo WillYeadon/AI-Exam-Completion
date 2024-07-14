@@ -1,0 +1,64 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+def transition_prob(nuclei, half_life, neutron_flux=False, effective_half_life=None):
+    if nuclei == 'A':
+        if neutron_flux:
+            return 1 - np.exp(-1/(effective_half_life))
+        else:
+            return 1 - np.exp(-1/(half_life))
+    elif nuclei == 'B':
+        return 1 - np.exp(-1/(half_life))
+    else:
+        return 1
+
+def evolve_state(state, neutron_flux=False, effective_half_life=None):
+    if state == 'C' and neutron_flux:
+        if np.random.random() < transition_prob('C', None, neutron_flux, effective_half_life):
+            return 'A'
+        else:
+            return 'C'
+    elif state == 'C':
+        return 'C'
+    else:
+        if np.random.random() < transition_prob(state, None):
+            return 'C'
+        else:
+            return state
+
+def evolve_system(states, neutron_flux=False, effective_half_life=None):
+    new_states = []
+    for state in states:
+        new_states.append(evolve_state(state, neutron_flux, effective_half_life))
+    return new_states
+
+def simulation(initial_states, neutron_flux=False, effective_half_life=None, n_steps=200):
+    states = initial_states
+    all_states = [states]
+    
+    for _ in range(n_steps):
+        states = evolve_system(states, neutron_flux, effective_half_life)
+        all_states.append(states)
+        
+    return all_states
+
+# Initial conditions
+initial_states = ['C']*250
+n_steps = 200
+
+# Run simulation 20 times
+results = []
+for _ in range(20):
+    states_evolved = simulation(initial_states, neutron_flux=True, effective_half_life=3.2, n_steps=n_steps)[-1]
+    results.append(states_evolved.count('A'))
+
+# Calculate average and uncertainty
+average_A = np.average(results)
+uncertainty_A = np.std(results)
+
+# Plot results
+plt.errorbar(range(n_steps+1), [average_A]*(n_steps+1), yerr=[uncertainty_A]*(n_steps+1), fmt='-o')
+plt.xlabel('Time (hours)')
+plt.ylabel('Number of A nuclei')
+plt.title('Average Number of A Nuclei Over Time with Neutron Flux')
+plt.show()

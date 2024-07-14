@@ -1,0 +1,10 @@
+**Script:**
+
+This script describes the radioactive decay process using first order, ordinary differential equations.
+
+1. The mean lifetime of a radioactive nucleus can be calculated using the formula: $T_{\text{mean}} = \frac{\ln(2)}{\lambda}$, where $\lambda$ is the decay constant.
+2. The half-life of a radioactive nucleus is related to the decay constant by: $T_{\frac{1}{2}} = \frac{\ln(2)}{\lambda}$.
+3. The differential equation describing radioactive decay is given by: $\frac{dN}{dt} = -\lambda N$, where $N$ is the number of radioactive nuclei at time $t$.
+4. The analytical solution to this differential equation is: $N(t) = N_0 e^{-\lambda t}$, where $N_0$ is the initial number of radioactive nuclei at $t=0$.
+
+Let us now calculate the mean lifetime of a radioactive nucleus and solve the differential equation using the analytical method

@@ -1,0 +1,100 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.optimize import newton, bisect
+
+# Define the function f(x)
+def f(x):
+    return x - np.tanh(2*x)
+
+# Define the derivative of f for Newton-Raphson method
+def df(x):
+    return 1 - 2 * (1 - np.tanh(2*x)**2)
+
+# Newton-Raphson method
+def newton_raphson(f, df, x0, tol=1e-10, max_iter=100):
+    x = x0
+    iterations = 0
+    values = []
+    
+    for i in range(max_iter):
+        iterations += 1
+        fx = f(x)
+        values.append(x)
+        if abs(fx) < tol:
+            break
+        dfx = df(x)
+        if dfx == 0:
+            print("Derivative is zero. No solution found.")
+            return None, values
+        x = x - fx / dfx
+    
+    return x, values
+
+# Bisection method
+def bisection(f, a, b, tol=1e-10, max_iter=100):
+    values = []
+    iterations = 0
+    
+    for i in range(max_iter):
+        iterations += 1
+        c = (a + b) / 2.0
+        values.append(c)
+        fc = f(c)
+        if abs(fc) < tol:
+            break
+        if f(a) * fc < 0:
+            b = c
+        else:
+            a = c
+    
+    return c, values
+
+# Secant method
+def secant_method(f, x0, x1, tol=1e-10, max_iter=100):
+    values = [x0, x1]
+    
+    for i in range(max_iter):
+        fx0 = f(x0)
+        fx1 = f(x1)
+        if abs(fx1) < tol:
+            return x1, values
+        if fx0 == fx1:
+            print("Division by zero in secant method. No solution found.")
+            return None, values
+        
+        x2 = x1 - fx1 * (x1 - x0) / (fx1 - fx0)
+        values.append(x2)
+        x0 = x1
+        x1 = x2
+    
+    return x1, values
+
+# Initial guesses and interval
+x0_newton = 0.5
+x0_secant = 0.5
+x1_secant = 0.75
+a_bisection = 0.0
+b_bisection = 1.0
+
+# Run methods
+root_newton, values_newton = newton_raphson(f, df, x0_newton)
+root_bisection, values_bisection = bisection(f, a_bisection, b_bisection)
+root_secant, values_secant = secant_method(f, x0_secant, x1_secant)
+
+# Number of iterations for each method
+iterations_newton = range(len(values_newton))
+iterations_bisection = range(len(values_bisection))
+iterations_secant = range(len(values_secant))
+
+# Plotting the convergence
+plt.figure(figsize=(10, 6))
+plt.plot(iterations_newton, values_newton, marker='o', label='Newton-Raphson')
+plt.plot(iterations_bisection, values_bisection, marker='s', label='Bisection')
+plt.plot(iterations_secant, values_secant, marker='^', label='Secant')
+plt.xlabel('Iterations')
+plt.ylabel('Root value')
+plt.title('Convergence of Newton-Raphson, Bisection, and Secant methods')
+plt.legend()
+plt.yscale('log')
+plt.grid(True)
+plt.show()

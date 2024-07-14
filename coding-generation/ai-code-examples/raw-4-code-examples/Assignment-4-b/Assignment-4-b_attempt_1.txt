@@ -1,0 +1,52 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Constants
+g = 9.81  # acceleration due to gravity (m/s^2)
+theta = 60  # launch angle in degrees
+theta_rad = np.radians(theta)  # launch angle in radians
+v0_vals = np.linspace(50, 200, 100)  # initial velocities (m/s)
+k = 0.1  # air resistance coefficient
+
+# Define the function to determine the range without air resistance
+def range_without_air_resistance(v0, theta_rad):
+    return (v0 ** 2 * np.sin(2 * theta_rad)) / g
+
+# Define the function to determine the range with air resistance
+def range_with_air_resistance(v0, theta_rad, k, g):
+    vx = v0 * np.cos(theta_rad)
+    vy = v0 * np.sin(theta_rad)
+    t_flight = (2 * vy) / g  # time of flight without air resistance
+    dt = t_flight / 1000  # small time step
+    x, y = 0, 0
+    range_with_resistance = 0
+    
+    while y >= 0:
+        ax = -k * vx
+        ay = -g - k * vy
+        vx += ax * dt
+        vy += ay * dt
+        x += vx * dt
+        y += vy * dt
+        if y < 0:
+            # Linear interpolation to find the exact x where y=0
+            y_prev, x_prev = y - vy * dt, x - vx * dt
+            range_with_resistance = x_prev + (x - x_prev) * (-y_prev / (y - y_prev))
+            break
+    
+    return range_with_resistance
+
+# Calculate the ranges for different velocities
+ranges_no_resistance = [range_without_air_resistance(v0, theta_rad) for v0 in v0_vals]
+ranges_with_resistance = [range_with_air_resistance(v0, theta_rad, k, g) for v0 in v0_vals]
+
+# Plot the results
+plt.figure(figsize=(10, 6))
+plt.plot(v0_vals, ranges_no_resistance, label='Without air resistance')
+plt.plot(v0_vals, ranges_with_resistance, label='With air resistance', linestyle='--')
+plt.xlabel('Initial Velocity (m/s)')
+plt.ylabel('Range (m)')
+plt.title('Range vs Initial Velocity for θ=60°')
+plt.legend()
+plt.grid(True)
+plt.show()

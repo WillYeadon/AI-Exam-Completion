@@ -1,0 +1,86 @@
+import numpy as anp
+import matplotlib.pyplot as plt
+
+# Define a function to calculate the mean lifetime from the half-life
+def half_life_to_mean_lifetime(half_life):
+    return half_life / anp.log(2)
+
+# Half-life of Carbon-14 in years
+half_life_C14 = 5730
+
+# Function for the radioactive decay process
+def decay(t, N, decay_constant):
+    return -decay_constant * N
+
+# Analytical solution of the decay equation
+def analytical_solution(t, N0, decay_constant):
+    return N0 * anp.exp(-decay_constant * t)
+
+# Euler's method for solving the ODE
+def solve_euler(time_steps, N0, decay_constant):
+    N_euler = [N0]
+    for i in range(1, len(time_steps)):
+        dt = time_steps[i] - time_steps[i-1]
+        N_euler.append(N_euler[-1] + dt * decay(time_steps[i-1], N_euler[-1], decay_constant))
+    return N_euler
+
+# RK4 method for solving the ODE
+def solve_RK4(time_steps, N0, decay_constant):
+    N_rk4 = [N0]
+    for i in range(1, len(time_steps)):
+        dt = time_steps[i] - time_steps[i-1]
+        k1 = decay(time_steps[i-1], N_rk4[-1], decay_constant)
+        k2 = decay(time_steps[i-1] + 0.5*dt, N_rk4[-1] + 0.5*dt*k1, decay_constant)
+        k3 = decay(time_steps[i-1] + 0.5*dt, N_rk4[-1] + 0.5*dt*k2, decay_constant)
+        k4 = decay(time_steps[i], N_rk4[-1] + dt*k3, decay_constant)
+        N_rk4.append(N_rk4[-1] + (dt/6)*(k1 + 2*k2 + 2*k3 + k4))
+    return N_rk4
+
+# Constants
+N0 = 100  # Initial amount of C14
+
+# Calculate mean lifetime of C14
+mean_lifetime_C14 = half_life_to_mean_lifetime(half_life_C14)
+
+# Decay constant
+decay_constant_C14 = 1/mean_lifetime_C14
+
+# Time end
+t_end = 2 * half_life_C14
+
+# Array of errors for Euler and RK4
+euler_errors = []
+rk4_errors = []
+step_counts = [2**n for n in range(3,12)]  # Range of step counts (8 to 2048)
+
+# Loop over different step counts
+for steps in step_counts:
+    time_steps = anp.linspace(0, t_end, steps)
+
+    # Analytical solution
+    N_analytical = analytical_solution(time_steps, N0, decay_constant_C14)
+
+    # Euler's method
+    N_euler = solve_euler(time_steps, N0, decay_constant_C14)
+    
+    # RK4 method
+    N_rk4 = solve_RK4(time_steps, N0, decay_constant_C14)
+
+    # Calculate errors
+    euler_error = anp.linalg.norm(anp.array(N_euler) - N_analytical, ord=anp.inf)
+    rk4_error = anp.linalg.norm(anp.array(N_rk4) - N_analytical, ord=anp.inf)
+    
+    # Store errors
+    euler_errors.append(euler_error)
+    rk4_errors.append(rk4_error)
+
+# Log-log plot
+plt.loglog(step_counts, euler_errors, label='Euler Method Error', marker='o', color='blue')
+plt.loglog(step_counts, rk4_errors, label='RK4 Method Error', marker='s', color='red')
+
+# Labeling the plot
+plt.xlabel('Number of steps')
+plt.ylabel('Error (Infinity Norm)')
+plt.title('Error comparison between Euler and RK4 methods')
+plt.legend()
+plt.show()

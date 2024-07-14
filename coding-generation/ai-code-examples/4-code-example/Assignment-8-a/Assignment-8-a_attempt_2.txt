@@ -1,0 +1,28 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Parameters
+num_walkers = 100
+num_steps = 1000
+
+# Initialize arrays to store positions
+positions = np.zeros((num_walkers, num_steps + 1))
+
+# Simulate the random walks
+for i in range(num_walkers):
+    steps = np.random.choice([-1, 1], size=num_steps)
+    positions[i, 1:] = np.cumsum(steps)
+
+# Calculate average position and average squared position
+avg_position = np.mean(positions, axis=0)
+avg_squared_position = np.mean(positions**2, axis=0)
+
+# Plotting
+plt.figure(figsize=(12, 6))
+plt.plot(avg_position, label="Average Position", color='blue')
+plt.plot(avg_squared_position, label="Average Squared Position", color='red')
+plt.legend()
+plt.title("Average Position and Average Squared Position of 1D Walkers")
+plt.xlabel("Steps")
+plt.ylabel("Position")
+plt.show()

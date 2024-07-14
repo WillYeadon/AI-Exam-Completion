@@ -1,0 +1,73 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Constants
+g = 9.81  # acceleration due to gravity in m/s^2
+rho = 1.225  # density of air in kg/m^3
+diameter = 0.1  # diameter of the cannonball in meters
+v0 = 125  # initial velocity in m/s
+
+# Function to calculate cross-sectional area of a sphere
+def cross_sectional_area(d):
+    return np.pi * (d/2)**2
+
+# Function to calculate the mass of an iron sphere
+def mass_of_cannonball(rho, d):
+    return (4/3) * np.pi * (d/2)**3 * rho
+
+# Calculating area and mass of the cannonball
+A = cross_sectional_area(diameter)
+m = mass_of_cannonball(rho, diameter)
+
+# Function to model cannonball's motion
+def model_motion(t, u):
+    x, y, vx, vy = u
+    dx_dt = vx
+    dy_dt = vy
+    dvx_dt = -0.5 * A * rho * vx * np.sqrt(vx**2 + vy**2) / m
+    dvy_dt = -g - 0.5 * A * rho * vy * np.sqrt(vx**2 + vy**2) / m
+    return [dx_dt, dy_dt, dvx_dt, dvy_dt]
+
+# Euler's method for solving the ODE
+def solve_euler(t, u, dt, deriv_func):
+    return u + np.array(deriv_func(t, u)) * dt
+
+# Function to find the x-coordinate where the trajectory crosses y=0
+def find_x_intercept(x1, y1, x2, y2):
+    return x1 - y1 * (x2 - x1) / (y2 - y1)
+
+# Function to find the range of the projectile
+def find_range(x_values):
+    return max(x_values)
+
+# Initial conditions
+t0 = 0
+u0 = [0, 0, v0 * np.cos(np.radians(30)), v0 * np.sin(np.radians(30))]
+
+# Time parameters
+dt = 0.001
+T = 30
+time = np.arange(t0, T, dt)
+
+# Plotting trajectories for different initial angles
+for angle in range(5, 90, 10):
+    u = np.array(u0)
+    x_values = []
+    y_values = []
+
+    for _ in time:
+        x, y, _, _ = u
+        x_values.append(x)
+        y_values.append(y)
+        if y < 0:
+            break
+        u = solve_euler(_, u, dt, model_motion)
+
+    plt.plot(x_values, y_values, label=f'Angle: {angle} degrees')
+
+plt.xlabel('Horizontal Distance (m)')
+plt.ylabel('Vertical Distance (m)')
+plt.title('Projectile Motion Trajectories for Various Initial Angles')
+plt.legend()
+plt.grid(True)
+plt.show()

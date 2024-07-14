@@ -1,0 +1,59 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+def calculate_transition_prob(half_life, time_step):
+    return 1 - 2**(-time_step / half_life)
+
+def evolve_state(state, transition_prob):
+    if np.random.random() < transition_prob:
+        return 'A'
+    else:
+        return state
+
+def evolve_system(states, transition_probs):
+    new_states = []
+    for state, prob in zip(states, transition_probs):
+        new_states.append(evolve_state(state, prob))
+    return new_states
+
+def simulate(n_steps, initial_states, neutron_flux=True):
+    states = initial_states
+    transition_probs_A = calculate_transition_prob(10.1, 1)
+    transition_probs_B = calculate_transition_prob(15.7, 1)
+    transition_probs_C = calculate_transition_prob(3.2, 1)
+    
+    all_A_counts = []
+    
+    for _ in range(n_steps):
+        if neutron_flux:
+            transition_probs = [transition_probs_A, transition_probs_B, transition_probs_C]
+        else:
+            transition_probs = [transition_probs_A, transition_probs_B, 0]
+        
+        states = evolve_system(states, transition_probs)
+        all_A_counts.append(states.count('A'))
+    
+    return all_A_counts
+
+# Simulation parameters
+n_steps = 200
+nuclei_counts = {'A': 0, 'B': 0, 'C': 250}
+initial_states = ['C'] * nuclei_counts['C']
+
+# Run the simulation 20 times
+results = []
+for _ in range(20):
+    states = initial_states.copy()
+    result = simulate(n_steps, states, neutron_flux=True)
+    results.append(result)
+
+# Calculate averages and uncertainties
+averages = np.average(results, axis=0)
+uncertainties = np.std(results, axis=0)
+
+# Plotting the results
+plt.errorbar(range(n_steps), averages, yerr=uncertainties, fmt='-o')
+plt.xlabel('Time (hours)')
+plt.ylabel('Number of A nuclei')
+plt.title('Average Number of A Nuclei Over Time with Neutron Flux')
+plt.show()

@@ -1,0 +1,71 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Function to find the root
+def f(x):
+    return x**3 - 2*x - 5
+
+# Derivative of the function
+def f_prime(x):
+    return 3*x**2 - 2
+
+# Newton-Raphson method
+def newtonRaphson(x0, tol, max_iter):
+    errors = []
+    iter = 0
+    while np.abs(f(x0)) > tol and iter < max_iter:
+        x0 = x0 - f(x0) / f_prime(x0)
+        errors.append(np.abs(f(x0)))
+        iter += 1
+    return errors
+
+# Bisection method
+def bisect(a, b, tol, max_iter):
+    errors = []
+    iter = 0
+    while (b - a) / 2 > tol and iter < max_iter:
+        c = (a + b) / 2
+        if f(c) == 0:
+            break
+        elif f(a) * f(c) < 0:
+            b = c
+        else:
+            a = c
+        errors.append(np.abs(f((a + b) / 2)))
+        iter += 1
+    return errors
+
+# Secant method
+def secant(x0, x1, tol, max_iter):
+    errors = []
+    iter = 0
+    while np.abs(f(x1)) > tol and iter < max_iter:
+        x_next = x1 - (f(x1) * (x1 - x0)) / (f(x1) - f(x0))
+        x0, x1 = x1, x_next
+        errors.append(np.abs(f(x1)))
+        iter += 1
+    return errors
+
+# Initial values
+x0_NR = 1.5
+x0_bisect = 2
+x0_secant = 1.8
+tol = 1e-10
+max_iter = 100
+
+# Calculating errors for each method
+errors_NR = newtonRaphson(x0_NR, tol, max_iter)
+errors_bisect = bisect(1, 3, tol, max_iter)
+errors_secant = secant(x0_secant, x0_NR, tol, max_iter)
+
+# Plotting the convergence of errors
+plt.figure(figsize=(12, 8))
+plt.plot(range(len(errors_NR)), errors_NR, label='Newton-Raphson', color='b')
+plt.plot(range(len(errors_bisect)), errors_bisect, label='Bisection', color='g')
+plt.plot(range(len(errors_secant)), errors_secant, label='Secant', color='r')
+plt.yscale('log')
+plt.xlabel('Iterations')
+plt.ylabel('Error')
+plt.title('Comparison of Convergence of Root-finding Methods')
+plt.legend()
+plt.show()

@@ -1,0 +1,79 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Constants
+A_half_life = 10.1  # hours
+B_half_life = 15.7  # hours
+C_to_A_half_life_with_flux = 3.2  # hours
+
+# Conversion to probabilities per time step
+def half_life_to_prob(half_life, dt):
+    return 1 - np.exp(-np.log(2) * dt / half_life)
+
+dt = 100 / 200  # hours per step
+prob_A_decay = half_life_to_prob(A_half_life, dt)
+prob_B_decay = half_life_to_prob(B_half_life, dt)
+prob_C_to_A_flux = half_life_to_prob(C_to_A_half_life_with_flux, dt)
+
+# Function to evolve a single state according to the transition rules
+def evolve_state(state, flux=True):
+    n_A, n_B, n_C = state
+    n_A_new = n_A
+    n_B_new = n_B
+    n_C_new = n_C
+    
+    # Decay A to B
+    transitions_A_to_B = np.random.binomial(n_A, prob_A_decay)
+    n_A_new -= transitions_A_to_B
+    n_B_new += transitions_A_to_B
+    
+    # Decay B to C
+    transitions_B_to_C = np.random.binomial(n_B, prob_B_decay)
+    n_B_new -= transitions_B_to_C
+    n_C_new += transitions_B_to_C
+    
+    # Activation C to A with flux
+    if flux:
+        transitions_C_to_A = np.random.binomial(n_C, prob_C_to_A_flux)
+        n_C_new -= transitions_C_to_A
+        n_A_new += transitions_C_to_A
+        
+    return (n_A_new, n_B_new, n_C_new)
+
+# Function to evolve the entire system over 'n_steps'
+def evolve_system(n_steps, flux=True):
+    states = []
+    state = (0, 0, 250)  # Initial state
+    states.append(state)
+    for _ in range(n_steps):
+        state = evolve_state(state, flux)
+        states.append(state)
+    return states
+
+# Evolve for 100 hours with neutron flux
+states_with_flux = evolve_system(200, flux=True)
+
+# Evolve for another 100 hours without neutron flux
+states_without_flux = evolve_system(200, flux=False)
+
+# Combine the results
+states = states_with_flux + states_without_flux
+
+# Extract data for plotting
+times = np.arange(0, 201*dt, dt)
+n_A = [state[0] for state in states]
+n_B = [state[1] for state in states]
+n_C = [state[2] for state in states]
+
+# Plotting
+plt.figure(figsize=(10, 6))
+plt.plot(times, n_A, label='Nuclei A', color='blue')
+plt.plot(times, n_B, label='Nuclei B', color='green')
+plt.plot(times, n_C, label='Nuclei C', color='red')
+plt.axvline(x=100, color='black', linestyle='--', label='Neutron Flux Off')
+plt.xlabel('Time (hours)')
+plt.ylabel('Number of Nuclei')
+plt.title('Nuclei Decay and Activation Over Time')
+plt.legend()
+plt.grid(True)
+plt.show()

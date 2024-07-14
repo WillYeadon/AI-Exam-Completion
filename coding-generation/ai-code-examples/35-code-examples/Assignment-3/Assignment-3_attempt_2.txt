@@ -1,0 +1,77 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Constants
+half_life_C14 = 5730  # half-life of Carbon-14 in years
+
+# Function to calculate the mean lifetime from the half-life
+def mean_lifetime(half_life):
+    return half_life / np.log(2)
+
+# Radioactive decay process function
+def decay_process(t, N0):
+    return N0 * np.exp(-t / mean_lifetime(half_life_C14))
+
+# Analytical solution of the decay equation
+def analytical_solution(t, N0):
+    return decay_process(t, N0)
+
+# Euler's method for solving the ODE
+def solve_euler(N0, dt, num_steps):
+    t_values = np.linspace(0, num_steps*dt, num_steps+1)
+    N_values = np.zeros(num_steps+1)
+    N_values[0] = N0
+    
+    for i in range(num_steps):
+        N_values[i+1] = N_values[i] - dt * N_values[i] / mean_lifetime(half_life_C14)
+    
+    return t_values, N_values
+
+# RK4 method for solving the ODE
+def solve_RK4(N0, dt, num_steps):
+    t_values = np.linspace(0, num_steps*dt, num_steps+1)
+    N_values = np.zeros(num_steps+1)
+    N_values[0] = N0
+    
+    for i in range(num_steps):
+        k1 = -(N_values[i] / mean_lifetime(half_life_C14))
+        k2 = -((N_values[i] + 0.5*dt*k1) / mean_lifetime(half_life_C14))
+        k3 = -((N_values[i] + 0.5*dt*k2) / mean_lifetime(half_life_C14))
+        k4 = -((N_values[i] + dt*k3) / mean_lifetime(half_life_C14))
+        
+        N_values[i+1] = N_values[i] + dt * (k1 + 2*k2 + 2*k3 + k4) / 6
+        
+    return t_values, N_values
+
+# Analytical solution for comparison
+N0 = 1.0
+t_analytical = np.linspace(0, 5*half_life_C14, 1000)
+N_analytical = analytical_solution(t_analytical, N0)
+
+# Number of steps for comparison
+num_steps = np.array([10, 50, 100, 200, 500, 1000, 2000, 5000, 10000])
+
+# Initialize arrays to store errors for Euler's and RK4 methods
+errors_euler = np.zeros(num_steps.shape)
+errors_RK4 = np.zeros(num_steps.shape)
+
+# Calculate errors for each number of steps
+for i, steps in enumerate(num_steps):
+    dt = 5*half_life_C14 / steps
+    
+    _, N_euler = solve_euler(N0, dt, steps)
+    _, N_RK4 = solve_RK4(N0, dt, steps)
+    
+    errors_euler[i] = np.mean(np.abs(N_euler - analytical_solution(np.linspace(0, 5*half_life_C14, steps+1), N0)))
+    errors_RK4[i] = np.mean(np.abs(N_RK4 - analytical_solution(np.linspace(0, 5*half_life_C14, steps+1), N0))
+
+# Plotting the errors vs number of steps on a log-log scale
+plt.figure(figsize=(10, 6))
+plt.loglog(num_steps, errors_euler, marker='o', label='Euler')
+plt.loglog(num_steps, errors_RK4, marker='s', label='RK4')
+
+plt.xlabel('Number of Steps')
+plt.ylabel('Error')
+plt.title('Error Comparison of Euler and RK4 Methods')
+plt.legend()
+plt.show()

@@ -1,0 +1,53 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+class Walker:
+    def __init__(self, dimensions=1, step_size=1):
+        self.dimensions = dimensions
+        self.step_size = step_size
+        self.pos = np.zeros(self.dimensions)
+        self.steps = self._generate_steps()
+
+    def _generate_steps(self):
+        steps = []
+        for i in range(self.dimensions):
+            step = np.zeros(self.dimensions)
+            step[i] = self.step_size
+            steps.append(step.copy())
+            step[i] = -self.step_size
+            steps.append(step.copy())
+        return steps
+
+    def pickStep(self):
+        return self.steps[np.random.randint(len(self.steps))]
+
+    def doSteps(self, n):
+        trajectory = np.zeros((n+1, self.dimensions))
+        for i in range(1, n+1):
+            self.pos += self.pickStep()
+            trajectory[i] = self.pos
+        return trajectory
+
+def average_squared_distance(walkers, n_steps):
+    squared_distances = []
+    for walker in walkers:
+        trajectory = walker.doSteps(n_steps)
+        squared_distances.append(np.sum(trajectory**2, axis=1))
+    return np.mean(squared_distances, axis=0)
+
+dimensions = [1, 2, 3, 4]
+n_steps = 100
+n_walkers = 400
+
+for dim in dimensions:
+    walkers = [Walker(dimensions=dim) for _ in range(n_walkers)]
+    avg_squared_dist = average_squared_distance(walkers, n_steps)
+    plt.plot(avg_squared_dist, label=f'D={dim}')
+
+plt.title('Average Squared Distance vs. Number of Steps')
+plt.xlabel('Number of Steps')
+plt.ylabel('Average Squared Distance')
+plt.legend()
+plt.yscale('log')
+plt.xscale('log')
+plt.show()

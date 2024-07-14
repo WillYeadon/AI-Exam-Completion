@@ -1,0 +1,66 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Function definition
+def f(x):
+    return x - np.tanh(2*x)
+
+# Derivative of the function
+def f_prime(x):
+    return 1 - 2*np.cosh(2*x)**(-2)
+
+# Newton-Raphson Method
+def newton_raphson(f, f_prime, x0, tol=1e-6, max_iter=100):
+    x = x0
+    for i in range(max_iter):
+        x_new = x - f(x) / f_prime(x)
+        if abs(x_new - x) < tol:
+            return x_new, i+1
+        x = x_new
+    return None, max_iter
+
+# Bisection Method
+def bisection(f, a, b, tol=1e-6, max_iter=100):
+    if f(a) * f(b) >= 0:
+        return None, max_iter
+    for i in range(max_iter):
+        c = (a + b) / 2
+        if f(c) == 0 or (b - a) / 2 < tol:
+            return c, i+1
+        if f(c) * f(a) < 0:
+            b = c
+        else:
+            a = c
+    return None, max_iter
+
+# Secant Method
+def secant(f, x0, x1, tol=1e-6, max_iter=100):
+    for i in range(max_iter):
+        x_new = x1 - f(x1) * (x1 - x0) / (f(x1) - f(x0))
+        if abs(x_new - x1) < tol:
+            return x_new, i+1
+        x0 = x1
+        x1 = x_new
+    return None, max_iter
+
+# Initial values
+x0 = -1
+x1 = 0
+
+# Convergence comparison
+x_values = np.linspace(-2, 2, 100)
+newton_iterations = [newton_raphson(f, f_prime, x)[1] for x in x_values]
+bisection_iterations = [bisection(f, -2, 2, max_iter=int(1e3), tol=1e-6)[1] for _ in x_values]
+secant_iterations = [secant(f, x0, x1, tol=1e-6)[1] for _ in x_values]
+
+# Plotting
+plt.figure(figsize=(10, 6))
+plt.plot(x_values, newton_iterations, label='Newton-Raphson')
+plt.plot(x_values, bisection_iterations, label='Bisection')
+plt.plot(x_values, secant_iterations, label='Secant')
+plt.yscale('log')
+plt.xlabel('Initial guess')
+plt.ylabel('Number of iterations')
+plt.title('Convergence Comparison of Root Finding Methods')
+plt.legend()
+plt.show()

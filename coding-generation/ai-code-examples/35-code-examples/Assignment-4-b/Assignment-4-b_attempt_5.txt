@@ -1,0 +1,86 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Define constants
+g = 9.81  # acceleration due to gravity in m/s^2
+rho = 1.2  # density of air in kg/m^3
+A = np.pi * (0.11/2)**2  # cross-sectional area of the cannonball in m^2
+rho_iron = 7860  # density of iron in kg/m^3
+r = 0.11/2  # radius of the cannonball in m
+
+# Function to calculate cross-sectional area of a sphere
+def cross_sectional_area(r):
+    return np.pi * r**2
+
+# Function to calculate the mass of an iron sphere
+def iron_sphere_mass(rho_iron, r):
+    return (4/3) * np.pi * r**3 * rho_iron
+
+# Calculating area and mass of the cannonball
+m = iron_sphere_mass(rho_iron, r)
+C = 0.5 * rho * A/m
+
+# Function to model cannonball's motion
+def projectile_motion_without_air_resistance(v0, theta, t):
+    x = v0 * np.cos(theta) * t
+    y = v0 * np.sin(theta) * t - 0.5 * g * t**2
+    return x, y
+
+# Euler's method for solving the ODE
+def euler_method(v0, theta, dt):
+    vx = v0 * np.cos(theta)
+    vy = v0 * np.sin(theta)
+    x = 0.0
+    y = 0.0
+
+    x_trajectory = [x]
+    y_trajectory = [y]
+
+    while y >= 0:
+        vx = vx
+        vy = vy - g * dt
+        x = x + vx * dt
+        y = y + vy * dt
+
+        x_trajectory.append(x)
+        y_trajectory.append(y)
+
+    return x_trajectory, y_trajectory
+
+# Function to find the x-coordinate where the trajectory crosses y=0
+def find_crossing_point(x_traj, y_traj):
+    return x_traj[-1]
+
+# Function to find the range of the projectile
+def find_range(x_traj):
+    return x_traj[-1]
+
+# Stores the trajectories for different values of the initial angle
+# Uses the same velocity v0=125 m/s for all angles
+# Store the values in the results dictionary
+results = {}
+
+# Initial angle in radians
+theta = np.radians(60)
+
+# Initial velocities to test
+velocities = [75, 100, 125, 150, 175]
+
+for v0 in velocities:
+    x_traj_no_air, y_traj_no_air = euler_method(v0, theta, 0.01)
+    x_cross_no_air = find_crossing_point(x_traj_no_air, y_traj_no_air)
+    range_no_air = find_range(x_traj_no_air)
+
+    results[v0] = {"range_no_air": range_no_air, "x_traj_no_air": x_traj_no_air, "y_traj_no_air": y_traj_no_air}
+
+# Plotting the results
+plt.figure(figsize=(12, 8))
+for v0, data in results.items():
+    plt.plot(data["x_traj_no_air"], data["y_traj_no_air"], label=f"v0 = {v0} m/s (No Air Resistance)")
+
+plt.title("Projectile Motion Trajectories without Air Resistance")
+plt.xlabel("Distance (m)")
+plt.ylabel("Height (m)")
+plt.legend()
+plt.grid(True)
+plt.show()

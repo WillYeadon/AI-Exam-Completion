@@ -1,0 +1,57 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Function to determine if a transition occurs based on the transition probability
+def check_transition(prob):
+    return np.random.rand() < prob
+
+# Function to evolve a single state according to the transition rules
+def evolve_state(state, prob):
+    if state == 'A':
+        if check_transition(prob[0]):
+            return 'B'
+    elif state == 'B':
+        if check_transition(prob[1]):
+            return 'C'
+    return state
+
+# Function to evolve a list of states
+def evolve_states(states, prob):
+    return [evolve_state(state, prob) for state in states]
+
+# Function to evolve the entire system over 'n_steps'
+def evolve_system(states, prob, n_steps):
+    all_states = [states]
+    for _ in range(n_steps):
+        states = evolve_states(states, prob)
+        all_states.append(states)
+    return all_states
+
+# Define transition probabilities
+prob_with_flux = [1/10.1, 1/15.7]
+prob_without_flux = [1/10.1, 1/15.7]
+
+# Define transition rules with and without neutron flux
+def simulation():
+    initial_states = ['C'] * 250
+    states_with_flux = evolve_system(initial_states, prob_with_flux, 200)
+    states_without_flux = evolve_system(states_with_flux[-1], prob_without_flux, 200)
+    return states_with_flux, states_without_flux
+
+np.random.seed(0)  # for reproducibility
+
+# Run the simulation 20 times
+results = [simulation() for _ in range(20)]
+
+# Calculate average and uncertainty on the number of 'A' atoms as a function of time
+a_counts = [np.sum([states.count('A') for states in res[0]]) for res in results]
+avg_a_counts = np.average(a_counts, axis=0)
+uncertainty_a_counts = np.std(a_counts, axis=0)
+
+# Plot the results using plt.errorbar
+time = np.arange(401)
+plt.errorbar(time, avg_a_counts, yerr=uncertainty_a_counts, fmt='-o', color='b')
+plt.xlabel('Time (hours)')
+plt.ylabel('Number of A atoms')
+plt.title('Average Number of A Atoms Over Time with Uncertainty')
+plt.show()

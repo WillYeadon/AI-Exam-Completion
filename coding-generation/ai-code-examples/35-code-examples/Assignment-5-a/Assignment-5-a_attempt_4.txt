@@ -1,0 +1,61 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Constants
+n_steps = 200
+nuclei = {'A': 0, 'B': 0, 'C': 250}
+probabilities = {'A': 1 - np.exp(-0.693/10.1), 'B': 1 - np.exp(-0.693/15.7), 'C': 1 - np.exp(-0.693/3.2)}
+decay_constants = {'A': np.log(2) / 10.1, 'B': np.log(2) / 15.7, 'C': np.log(2) / 3.2}
+neutron_flux = True
+
+# Functions
+def transition_prob(nucleus):
+    return probabilities[nucleus]
+
+def evolve_state(current_state):
+    random_number = np.random.rand()
+    nucleus = current_state[0]
+    
+    if random_number < transition_prob(nucleus):
+        return (np.random.choice(['A', 'B', 'C']), current_state[1])
+    else:
+        return current_state
+
+def evolve_system(current_system):
+    new_system = []
+    
+    for state in current_system:
+        new_state = evolve_state(state)
+        new_system.append(new_state)
+        
+    return new_system
+
+# Initial system
+system = [('C', 250)]
+
+# Evolve system for the first 100 hours
+for _ in range(n_steps):
+    system = evolve_system(system)
+
+# Turn off neutron flux
+neutron_flux = False
+
+# Evolve system for the next 100 hours
+for _ in range(n_steps):
+    system = evolve_system(system)
+
+# Extract the number of each nuclei type
+A_count = [state[1] for state in system if state[0] == 'A']
+B_count = [state[1] for state in system if state[0] == 'B']
+C_count = [state[1] for state in system if state[0] == 'C']
+
+# Create plot
+plt.figure(figsize=(12, 6))
+plt.plot(range(n_steps), A_count, label='Nuclei A')
+plt.plot(range(n_steps), B_count, label='Nuclei B')
+plt.plot(range(n_steps), C_count, label='Nuclei C')
+plt.xlabel('Time Steps')
+plt.ylabel('Number of Nuclei')
+plt.title('Decay and Activation of Nuclei')
+plt.legend()
+plt.show()

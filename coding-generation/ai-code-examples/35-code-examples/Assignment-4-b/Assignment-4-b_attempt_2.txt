@@ -1,0 +1,107 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Define constants for the simulation
+g = 9.81  # acceleration due to gravity in m/s^2
+density_iron = 7874  # density of iron in kg/m^3
+radius = 0.2  # radius of the cannonball in meters
+Cd = 0.47  # drag coefficient
+A = np.pi * radius**2  # cross-sectional area of the cannonball
+dt = 0.01  # time step for simulation
+
+# Function to calculate cross-sectional area of a sphere
+def cross_sectional_area(radius):
+    return np.pi * radius**2
+
+# Function to calculate the mass of an iron sphere
+def sphere_mass(radius, density):
+    return (4/3) * np.pi * radius**3 * density
+
+# Calculating area and mass of the cannonball
+A = cross_sectional_area(radius)
+mass = sphere_mass(radius, density_iron)
+
+# Function to model cannonball's motion
+def projectile_motion(v0, theta, air_resistance=True):
+    # Initial conditions
+    x = 0.0
+    y = 0.0
+    vx = v0 * np.cos(np.radians(theta))
+    vy = v0 * np.sin(np.radians(theta))
+
+    x_list = [x]
+    y_list = [y]
+
+    while y >= 0.0:
+        if air_resistance:
+            vx = vx - (Cd * A * density_iron * vx**2 / (2 * mass)) * dt
+            vy = vy - (g + (Cd * A * density_iron * vy**2 / (2 * mass))) * dt
+        else:
+            vx = vx
+            vy = vy - g * dt
+
+        x = x + vx*dt
+        y = y + vy*dt
+
+        x_list.append(x)
+        y_list.append(y)
+
+    return x_list, y_list
+
+# Euler's method for solving the ODE
+def euler_method(f, x0, y0, h, x_end):
+    x = x0
+    y = y0
+    x_result = [x]
+    y_result = [y]
+
+    while x < x_end:
+        y = y + h * f(x, y)
+        x = x + h
+        x_result.append(x)
+        y_result.append(y)
+
+    return x_result, y_result
+
+# Function to find the x-coordinate where the trajectory crosses y=0
+def find_crossing(x_values, y_values):
+    for i in range(1, len(y_values)):
+        if y_values[i] < 0:
+            return x_values[i-1], y_values[i-1], x_values[i], y_values[i]
+    return None, None, None, None
+
+# Function to find the range of the projectile
+def find_range(x_values, y_values):
+    return x_values[-1]
+
+# Stores the trajectories for different values of the initial angle
+results = {}
+
+# Using the same velocity v0=125 m/s for all angles
+v0 = 125
+theta = 60
+
+# Initial velocities for analysis
+velocities = [100, 125, 150, 175, 200]
+
+for velocity in velocities:
+    x_with_air, y_with_air = projectile_motion(velocity, theta, air_resistance=True)
+    x_without_air, y_without_air = projectile_motion(velocity, theta, air_resistance=False)
+
+    results[velocity] = {'x_with_air': x_with_air, 'y_with_air': y_with_air,
+                         'x_without_air': x_without_air, 'y_without_air': y_without_air}
+
+# Plotting the ranges for different initial velocities with and without air resistance
+plt.figure(figsize=(12, 6))
+for velocity, data in results.items():
+    range_with_air = find_range(data['x_with_air'], data['y_with_air'])
+    range_without_air = find_range(data['x_without_air'], data['y_without_air'])
+
+    plt.plot(velocity, range_with_air, 'bo', label=f'With Air Resistance ({velocity} m/s)')
+    plt.plot(velocity, range_without_air, 'ro', label=f'Without Air Resistance ({velocity} m/s)')
+
+plt.xlabel('Initial Velocity (m/s)')
+plt.ylabel('Range (m)')
+plt.title('Effect of Initial Velocity on the Range of a Projectile')
+plt.legend()
+plt.show()

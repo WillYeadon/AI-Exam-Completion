@@ -1,0 +1,87 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+class Walker:
+    def __init__(self, ndim=1, step_size=1):
+        self.ndim = ndim
+        self.step_size = step_size
+        self.steps = [(self.step_size*np.eye(self.ndim))[i] for i in range(self.ndim)]
+        self.pos = np.zeros(self.ndim)
+    
+    def pickStep(self):
+        return self.steps[np.random.choice(len(self.steps))]
+    
+    def doSteps(self, n):
+        trajectory = np.zeros((n+1, self.ndim))
+        trajectory[0] = self.pos
+        for i in range(1, n+1):
+            step = self.pickStep()
+            self.pos = self.pos + step
+            trajectory[i] = self.pos
+        return trajectory
+
+# Simulation of average position and average squared position of 100 1D walkers using 1000 steps
+nsteps = 1000
+nwalkers = 100
+dim = 1
+avg_pos = np.zeros(nsteps+1)
+avg_pos_sq = np.zeros(nsteps+1)
+
+for i in range(nwalkers):
+    walker = Walker(ndim=dim)
+    trajectory = walker.doSteps(nsteps)
+    avg_pos += trajectory
+    avg_pos_sq += trajectory**2
+
+avg_pos /= nwalkers
+avg_pos_sq /= nwalkers
+
+plt.figure()
+plt.plot(range(nsteps+1), avg_pos, label='Average Position')
+plt.plot(range(nsteps+1), avg_pos_sq, label='Average Squared Position')
+plt.xlabel('Number of Steps')
+plt.ylabel('Position')
+plt.legend()
+plt.title('Average Position and Average Squared Position of 100 1D Walkers')
+
+# Simulation showing that the average squared distance scaling is independent of dimension
+dims = [1, 2, 3, 4]
+nsteps = 100
+nwalkers = 400
+avg_pos_sq_list = []
+
+for dim in dims:
+    avg_pos_sq = np.zeros(nsteps+1)
+    for i in range(nwalkers):
+        walker = Walker(ndim=dim)
+        trajectory = walker.doSteps(nsteps)
+        avg_pos_sq += np.sum(trajectory**2, axis=1)
+    avg_pos_sq /= nwalkers
+    avg_pos_sq_list.append(avg_pos_sq)
+
+plt.figure()
+for i, dim in enumerate(dims):
+    plt.plot(range(nsteps+1), avg_pos_sq_list[i], label='D='+str(dim))
+plt.xlabel('Number of Steps')
+plt.ylabel('Average Squared Distance')
+plt.legend()
+plt.title('Average Squared Distance Scaling for Different Dimensions')
+
+# Simulation of diffusion of particles in the unit square
+rand_pos = np.random.rand(1000, 2)
+walker = Walker(ndim=2, step_size=0.05)
+
+steps = [10, 100, 500]
+for step in steps:
+    plt.figure()
+    plt.scatter(rand_pos[:, 0], rand_pos[:, 1], label='Initial Positions')
+    for i in range(len(rand_pos)):
+        walker.pos = rand_pos[i]
+        trajectory = walker.doSteps(step)
+        plt.scatter(trajectory[-1, 0], trajectory[-1, 1])
+    plt.xlabel('X Position')
+    plt.ylabel('Y Position')
+    plt.title('Diffusion of Particles after {} Steps'.format(step))
+    plt.legend()
+
+plt.show()

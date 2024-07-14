@@ -1,0 +1,18 @@
+## Requirements
+
+1. **Monte Carlo Estimate for Pi:**
+   - A function `estimate_pi(n_points)` to calculate the Monte Carlo estimate for pi using `n_points` random 2D points.
+   - Display a scatter plot of the random points falling inside and outside the unit circle.
+   
+2. **Monte Carlo Estimate for Volume of a Unit Ball:**
+   - A function `estimate_volume(dim, n_points)` to calculate the Monte Carlo estimate for the volume of a unit ball in `dim` dimensions using `n_points` random points.
+   - Display a scatter plot of the random points falling inside and outside the unit ball.
+   
+3. **Integration Error Simulation:**
+   - A function `error_simulation()` to evaluate the integration error scaling with varying dimensions and number of points.
+   - Plot the error scaling for different dimensions using a log-log plot.
+
+4. **Distribution Verification:**
+   - Generate values of x between 0 and 10 using the provided probability density function.
+   - Plot the distribution of generated values using a histogram or scatter plot.
+   - Include a title and axis labels to describe the plot clearly

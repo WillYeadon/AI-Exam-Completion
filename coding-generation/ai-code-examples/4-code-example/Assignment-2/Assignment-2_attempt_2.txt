@@ -1,0 +1,45 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.integrate import simps
+
+# Define the function f(x) = x^2 * cos(2x)
+def f(x):
+    return x**2 * np.cos(2*x)
+
+# Define the analytical integral of f from xmin to xmax
+def analytical_integral(xmin, xmax):
+    return 0.25*(2*xmax*np.sin(2*xmax) + np.cos(2*xmax) - (2*xmin*np.sin(2*xmin) + np.cos(2*xmin)))
+
+# Function to calculate the numerical integral using Simpson's rule
+def numerical_integral(func, xmin, xmax, panels):
+    x_values = np.linspace(xmin, xmax, panels+1)
+    y_values = func(x_values)
+    return simps(y_values, x_values)
+
+# Investigate the fractional error between the numerical and analytical results
+# as the number of panels is varied
+panel_counts = [4, 8, 16, 32, 64, 128, 256, 512, 1024]
+fractional_errors = []
+
+# Constants for the range of integration
+xmin = 0
+xmax = np.pi
+
+# Analytical integral value for comparison
+analytical_value = analytical_integral(xmin, xmax)
+
+# Calculate errors for each panel count
+for panels in panel_counts:
+    numerical_value = numerical_integral(f, xmin, xmax, panels)
+    error = np.abs((numerical_value - analytical_value) / analytical_value)
+    fractional_errors.append(error)
+
+# Plot the fractional error vs. the number of panels
+plt.loglog(panel_counts, fractional_errors, 'o-', label='Fractional error')
+plt.xlabel('Number of panels')
+plt.ylabel('Fractional error')
+plt.title('Fractional error in numerical integration vs. number of panels')
+plt.legend()
+
+# Ensure the plot is displayed
+plt.show()

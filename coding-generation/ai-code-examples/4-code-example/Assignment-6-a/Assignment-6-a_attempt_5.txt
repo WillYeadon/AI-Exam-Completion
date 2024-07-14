@@ -1,0 +1,53 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+def monte_carlo_pi(n_points):
+    x = np.random.rand(n_points)
+    y = np.random.rand(n_points)
+    inside_circle = x**2 + y**2 <= 1.0
+    pi_estimate = 4 * np.sum(inside_circle) / n_points
+    return pi_estimate
+
+def volume_unit_ball(dim, n_points):
+    points = np.random.uniform(-1.0, 1.0, (n_points, dim))
+    distances = np.linalg.norm(points, axis=1)
+    inside_ball = distances <= 1.0
+    volume = np.sum(inside_ball) * (2.0**dim) / n_points
+    return volume
+
+# Define dimensions and number of points
+dimensions = [2, 3, 4, 5]
+n_point_values = np.logspace(2, 5, num=10).astype(int)  # 100 to 100000 points
+
+# Store results for plotting
+errors = {dim: [] for dim in dimensions}
+
+# Monte Carlo integration error analysis
+exact_volumes = {2: np.pi, 3: (4/3) * np.pi, 4: np.pi**2 / 2, 5: (8/15) * np.pi**2}
+
+for dim in dimensions:
+    for n_points in n_point_values:
+        if dim == 2:
+            estimate = monte_carlo_pi(n_points)
+        else:
+            estimate = volume_unit_ball(dim, n_points)
+        
+        exact_volume = exact_volumes[dim]
+        error = np.abs(estimate - exact_volume)
+        errors[dim].append(error)
+
+# Plotting the results
+plt.figure(figsize=(10, 6))
+colors = ['b', 'g', 'r', 'c', 'm', 'y']
+
+for i, dim in enumerate(dimensions):
+    plt.plot(n_point_values, errors[dim], marker='o', linestyle='-', color=colors[i % len(colors)], label=f'Dim = {dim}')
+
+plt.xscale('log')
+plt.yscale('log')
+plt.xlabel('Number of Points (N)')
+plt.ylabel('Integration Error')
+plt.title('Monte Carlo Integration Error Scaling')
+plt.legend()
+plt.grid(True)
+plt.show()

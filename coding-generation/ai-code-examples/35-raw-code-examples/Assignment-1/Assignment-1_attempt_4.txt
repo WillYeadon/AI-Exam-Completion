@@ -1,0 +1,33 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+def f(x):
+    return np.sin(2*x)
+
+def f_derivative(x):
+    return 2*np.cos(2*x)
+
+def forward_difference(f, x, dx):
+    return (f(x+dx) - f(x)) / dx
+
+# Generate some x values
+x = np.linspace(0, 2*np.pi, 100)
+
+# Calculate the exact derivative
+df_exact = f_derivative(x)
+
+# Calculate the numerical derivative for different dx values
+dx_values = [0.1, 0.01, 0.001]
+df_numerical = [forward_difference(f, x, dx) for dx in dx_values]
+
+# Plotting
+plt.figure(figsize=(10, 6))
+plt.plot(x, df_exact - df_numerical[0], label='dx too large')
+plt.plot(x, df_exact - df_numerical[1], label='about right dx')
+plt.plot(x, df_exact - df_numerical[2], label='dx too small')
+plt.xlabel('x')
+plt.ylabel('Difference')
+plt.title('Difference between Analytical Derivative and Numerical Implementation')
+plt.legend()
+plt.grid(True)
+plt.show()

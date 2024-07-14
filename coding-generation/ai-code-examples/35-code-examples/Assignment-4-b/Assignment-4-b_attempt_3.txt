@@ -1,0 +1,83 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Define constants for the simulation
+g = 9.81  # gravitational acceleration in m/s^2
+rho = 1.2  # density of air in kg/m^3
+D = 0.11  # diameter of the cannonball in m
+A = np.pi * (D/2)**2  # cross-sectional area of the cannonball
+C_d = 0.47  # drag coefficient of a sphere
+m = 4.5  # mass of the cannonball in kg
+
+# Function to calculate cross-sectional area of a sphere
+def cross_sectional_area(diameter):
+    return np.pi * (diameter/2)**2
+
+# Function to calculate the mass of an iron sphere
+def iron_sphere_mass(diameter):
+    return (4/3) * np.pi * (diameter/2)**3 * 7800
+
+# Calculating area and mass of the cannonball
+A = cross_sectional_area(D)
+m = iron_sphere_mass(D)
+
+# Function to model cannonball's motion
+def f(u, v):
+    return np.array([v, -0.5*rho*A*C_d/m*u*np.abs(u) - g])
+
+# Euler's method for solving the ODE
+def solve_euler(f, t, u0, v0):
+    u = np.zeros_like(t)
+    v = np.zeros_like(u)
+    u[0] = u0
+    v[0] = v0
+    for i in range(1, len(t)):
+        delta_t = t[i] - t[i-1]
+        u[i] = u[i-1] + delta_t * f(u[i-1], v[i-1])[0]
+        v[i] = v[i-1] + delta_t * f(u[i-1], v[i-1])[1]
+    return u, v
+
+# Function to find the x-coordinate where the trajectory crosses y=0
+def find_zero_crossing(t, u):
+    for i in range(1, len(u)):
+        if u[i-1] * u[i] < 0:
+            return t[i-1] - u[i-1] / (u[i] - u[i-1]) * (t[i] - t[i-1])
+    return 0.0
+
+# Function to find the range of the projectile
+def find_range(t, u):
+    zero_crossing_time = find_zero_crossing(t, u)
+    return zero_crossing_time * np.max(u)
+
+# Stores the trajectories for different values of the initial angle
+# Uses the same velocity v0=125 m/s for all angles
+# Store the values in the results dictionary
+results = {}
+
+# Initial angle
+theta = np.radians(60)
+
+# Initial velocities to analyze
+velocities = [50, 75, 100, 125, 150, 175]
+
+for v0 in velocities:
+    v0x = v0 * np.cos(theta)
+    v0y = v0 * np.sin(theta)
+    total_time = 2 * v0y / g
+    t_values = np.linspace(0, total_time, num=10000)
+    x_values, y_values = solve_euler(f, t_values, 0, v0x)
+    results[v0] = (x_values, y_values)
+
+# Plotting the range for different initial velocities with and without air resistance
+plt.figure(figsize=(10, 6))
+for v0, (x_values, y_values) in results.items():
+    range_with_air_resistance = find_range(t_values, x_values)
+    range_without_air_resistance = v0**2 * np.sin(2*theta) / g
+    plt.plot(v0, range_with_air_resistance, 'bo')  # with air resistance
+    plt.plot(v0, range_without_air_resistance, 'ro')  # without air resistance
+
+plt.xlabel('Initial Velocity (m/s)')
+plt.ylabel('Range (m)')
+plt.title('Effect of Initial Velocity on Projectile Range')
+plt.legend(['With Air Resistance', 'Without Air Resistance'])
+plt.show()

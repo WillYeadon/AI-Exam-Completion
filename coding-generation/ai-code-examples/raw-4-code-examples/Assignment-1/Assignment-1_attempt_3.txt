@@ -1,0 +1,105 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+This should already be in the script.
+
+### Step 2: Define the Function `f(x) = sin(2x)` and Its Analytical Derivative
+
+def f(x):
+    return np.sin(2 * x)
+
+def analytic_derivative_f(x):
+    return 2 * np.cos(2 * x)
+
+
+### Step 3: Define the Numerical Derivative Using Forward Difference Method
+
+def forward_difference(f, x, dx):
+    return (f(x + dx) - f(x)) / dx
+
+
+### Step 4: Plot the Difference for Different `dx` Values
+Let's fill in the plot code. We'll use three different `dx` values to demonstrate the difference in accuracy.
+
+
+# Define the range of x values for plotting
+x_values = np.linspace(0, 2 * np.pi, 400)
+
+# Define three different dx values
+dx_large = 0.5
+dx_optimal = 0.01
+dx_small = 1e-6
+
+# Calculate the analytical derivative
+analytic_derivative_values = analytic_derivative_f(x_values)
+
+# Calculate numerical derivatives using different dx values
+numerical_derivative_large_dx = [forward_difference(f, x, dx_large) for x in x_values]
+numerical_derivative_optimal_dx = [forward_difference(f, x, dx_optimal) for x in x_values]
+numerical_derivative_small_dx = [forward_difference(f, x, dx_small) for x in x_values]
+
+# Calculate the differences
+difference_large_dx = np.abs(analytic_derivative_values - numerical_derivative_large_dx)
+difference_optimal_dx = np.abs(analytic_derivative_values - numerical_derivative_optimal_dx)
+difference_small_dx = np.abs(analytic_derivative_values - numerical_derivative_small_dx)
+
+# Plot the differences
+plt.figure(figsize=(12, 6))
+plt.plot(x_values, difference_large_dx, label=f'dx = {dx_large} (Too Large)', color='r')
+plt.plot(x_values, difference_optimal_dx, label=f'dx = {dx_optimal} (Optimal)', color='g')
+plt.plot(x_values, difference_small_dx, label=f'dx = {dx_small} (Too Small)', color='b')
+plt.xlabel('x')
+plt.ylabel('Difference between Analytical and Numerical Derivative')
+plt.title('Difference between Analytical and Numerical Derivative for Different dx values')
+plt.legend()
+plt.grid(True)
+plt.show()
+
+
+Putting all of this together, the complete code should look like this:
+
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+def f(x):
+    return np.sin(2 * x)
+
+def analytic_derivative_f(x):
+    return 2 * np.cos(2 * x)
+
+def forward_difference(f, x, dx):
+    return (f(x + dx) - f(x)) / dx
+
+# Define the range of x values for plotting
+x_values = np.linspace(0, 2 * np.pi, 400)
+
+# Define three different dx values
+dx_large = 0.5
+dx_optimal = 0.01
+dx_small = 1e-6
+
+# Calculate the analytical derivative
+analytic_derivative_values = analytic_derivative_f(x_values)
+
+# Calculate numerical derivatives using different dx values
+numerical_derivative_large_dx = [forward_difference(f, x, dx_large) for x in x_values]
+numerical_derivative_optimal_dx = [forward_difference(f, x, dx_optimal) for x in x_values]
+numerical_derivative_small_dx = [forward_difference(f, x, dx_small) for x in x_values]
+
+# Calculate the differences
+difference_large_dx = np.abs(analytic_derivative_values - numerical_derivative_large_dx)
+difference_optimal_dx = np.abs(analytic_derivative_values - numerical_derivative_optimal_dx)
+difference_small_dx = np.abs(analytic_derivative_values - numerical_derivative_small_dx)
+
+# Plot the differences
+plt.figure(figsize=(12, 6))
+plt.plot(x_values, difference_large_dx, label=f'dx = {dx_large} (Too Large)', color='r')
+plt.plot(x_values, difference_optimal_dx, label=f'dx = {dx_optimal} (Optimal)', color='g')
+plt.plot(x_values, difference_small_dx, label=f'dx = {dx_small} (Too Small)', color='b')
+plt.xlabel('x')
+plt.ylabel('Difference between Analytical and Numerical Derivative')
+plt.title('Difference between Analytical and Numerical Derivative for Different dx values')
+plt.legend()
+plt.grid(True)
+plt.show()

@@ -1,0 +1,49 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Define the function f which is equivalent to f(x)=sin(2x)
+def f(x):
+    return np.sin(2 * x)
+
+# Define the analytical derivative of the function f which is 2*cos(2x)
+def analytical_derivative(x):
+    return 2 * np.cos(2 * x)
+
+# Define the numerical derivative using the forward difference method
+def forward_difference(f, x, dx):
+    return (f(x + dx) - f(x)) / dx
+
+# Define the x range for plotting
+x = np.linspace(0, 2 * np.pi, 400)
+
+# Define various dx values
+dx_too_large = 0.5
+dx_about_right = 0.01
+dx_too_small = 1e-10
+
+# Compute the analytical derivative
+analytical_der = analytical_derivative(x)
+
+# Compute the numerical derivatives for different dx values
+numerical_der_too_large = forward_difference(f, x, dx_too_large)
+numerical_der_about_right = forward_difference(f, x, dx_about_right)
+numerical_der_too_small = forward_difference(f, x, dx_too_small)
+
+# Compute the differences
+difference_too_large = np.abs(analytical_der - numerical_der_too_large)
+difference_about_right = np.abs(analytical_der - numerical_der_about_right)
+difference_too_small = np.abs(analytical_der - numerical_der_too_small)
+
+# Plotting
+plt.figure(figsize=(10, 6))
+
+plt.plot(x, difference_too_large, label=f'dx too large ({dx_too_large})')
+plt.plot(x, difference_about_right, label=f'dx about right ({dx_about_right})')
+plt.plot(x, difference_too_small, label=f'dx too small ({dx_too_small})')
+
+plt.xlabel('x')
+plt.ylabel('Absolute Difference')
+plt.title('Difference Between Analytical and Numerical Derivatives')
+plt.legend()
+plt.grid(True)
+plt.show()

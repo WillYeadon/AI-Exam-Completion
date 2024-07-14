@@ -1,0 +1,81 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+class walker:
+    def __init__(self, ndim=1, step_size=1):
+        self.ndim = ndim
+        self.step_size = step_size
+        if ndim == 1:
+            self.steps = [[self.step_size], [-self.step_size]]
+        elif ndim == 2:
+            self.steps = [[self.step_size, 0], [-self.step_size, 0],
+                          [0, self.step_size], [0, -self.step_size]]
+        self.pos = np.zeros(self.ndim)
+    
+    def pickStep(self):
+        return self.steps[np.random.choice(len(self.steps))]
+    
+    def doSteps(self, n):
+        trajectory = np.zeros((n+1, self.ndim))
+        trajectory[0] = self.pos
+        for i in range(1, n+1):
+            step = self.pickStep()
+            self.pos += step
+            trajectory[i] = self.pos
+        return trajectory
+
+# Simulation of 100 1D walkers
+n_steps = 1000
+n_walkers = 100
+dim1_data = np.zeros(n_steps+1)
+
+for _ in range(n_walkers):
+    w = walker(ndim=1)
+    dim1_data += np.sum(w.doSteps(n_steps), axis=1)
+
+dim1_data /= n_walkers
+
+plt.figure()
+plt.plot(dim1_data, label='Average position')
+plt.plot(np.arange(n_steps+1), dim1_data**2, label='Average squared position')
+plt.legend()
+plt.title('Simulation of 100 1D walkers with 1000 steps')
+plt.show()
+
+# Simulation of scaling in different dimensions
+n_steps = 100
+n_walkers = 400
+dims = [1, 2, 3, 4]
+results = []
+
+for dim in dims:
+    dim_data = np.zeros(n_steps+1)
+    
+    for _ in range(n_walkers):
+        w = walker(ndim=dim)
+        dim_data += np.sum(w.doSteps(n_steps)**2, axis=1)
+    
+    results.append(dim_data / n_walkers)
+
+plt.figure()
+for i, result in enumerate(results):
+    plt.plot(np.arange(n_steps+1), result, label=f'Dimension {dims[i]}')
+plt.legend()
+plt.title('Average squared distance scaling in different dimensions')
+plt.show()
+
+# Simulation of diffusion in 2D
+rand_pos = np.random.rand(1000, 2)
+n_steps = [10, 100, 500]
+step_size = 0.05
+
+for steps in n_steps:
+    plt.figure()
+    for pos in rand_pos:
+        w = walker(ndim=2, step_size=step_size)
+        trajectory = w.doSteps(steps)
+        plt.plot(trajectory[:, 0], trajectory[:, 1], alpha=0.5)
+    plt.title(f'Position of walkers after {steps} steps')
+    plt.xlabel('X position')
+    plt.ylabel('Y position')
+    plt.show()

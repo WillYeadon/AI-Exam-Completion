@@ -1,0 +1,30 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Constants
+g = 9.81  # acceleration due to gravity (m/s^2)
+v0 = 125  # initial velocity (m/s)
+angles = np.linspace(15, 75, 5)  # angles from 15 to 75 degrees
+
+# Function to calculate the projectile motion
+def calculate_trajectory(v0, angle):
+    theta = np.radians(angle)
+    t_flight = 2 * v0 * np.sin(theta) / g
+    t = np.linspace(0, t_flight, num=500)
+    x = v0 * t * np.cos(theta)
+    y = v0 * t * np.sin(theta) - 0.5 * g * t**2
+    return x, y
+
+# Plotting the trajectories
+plt.figure(figsize=(10, 6))
+
+for angle in angles:
+    x, y = calculate_trajectory(v0, angle)
+    plt.plot(x, y, label=f'{angle} degrees')
+
+plt.xlabel('Distance (m)')
+plt.ylabel('Height (m)')
+plt.title('Trajectories of a Cannonball at Different Angles')
+plt.legend()
+plt.grid(True)
+plt.show()

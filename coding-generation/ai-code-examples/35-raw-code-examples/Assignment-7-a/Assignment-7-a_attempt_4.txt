@@ -1,0 +1,65 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Define the function f(x) = x - tanh(2x)
+def f(x):
+    return x - np.tanh(2*x)
+
+# Define the derivative of f(x)
+def df(x):
+    return 1 - 2*np.cosh(2*x)**(-2)
+
+# Newton-Raphson method
+def newton_raphson(f, df, x0, tol=1e-6, max_iter=1000):
+    x = x0
+    for _ in range(max_iter):
+        x_new = x - f(x) / df(x)
+        if abs(x_new - x) < tol:
+            return x_new
+        x = x_new
+    raise ValueError("Newton-Raphson method did not converge")
+
+# Bisection method
+def bisection(f, a, b, tol=1e-6, max_iter=1000):
+    if f(a) * f(b) > 0:
+        raise ValueError("No root found in the given interval")
+    for _ in range(max_iter):
+        c = (a + b) / 2
+        if f(c) == 0 or (b - a) / 2 < tol:
+            return c
+        if f(c) * f(a) < 0:
+            b = c
+        else:
+            a = c
+    raise ValueError("Bisection method did not converge")
+
+# Secant method
+def secant(f, x0, x1, tol=1e-6, max_iter=1000):
+    for _ in range(max_iter):
+        x_new = x1 - f(x1) * (x1 - x0) / (f(x1) - f(x0))
+        if abs(x_new - x1) < tol:
+            return x_new
+        x0, x1 = x1, x_new
+    raise ValueError("Secant method did not converge")
+
+# Define the range of x values
+x_values = np.linspace(-2, 2, 100)
+# Calculate the function values
+y_values = f(x_values)
+
+# Find roots using each method
+root_newton = newton_raphson(f, df, x0=0.5)
+root_secant = secant(f, x0=0, x1=1)
+root_bisection = bisection(f, a=0, b=1)
+
+# Plot the function
+plt.figure(figsize=(10, 6))
+plt.plot(x_values, y_values, label='$f(x) = x - tanh(2x)$')
+plt.axhline(y=0, color='r', linestyle='--')
+plt.scatter([root_newton, root_secant, root_bisection], [0, 0, 0], color='green', label='Roots')
+plt.legend()
+plt.title('Comparison of Convergence Methods for Finding Roots')
+plt.xlabel('x')
+plt.ylabel('f(x)')
+plt.grid(True)
+plt.show()

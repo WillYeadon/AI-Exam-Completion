@@ -1,0 +1,68 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+def calculate_transition_probability(half_life, time_step):
+    return 1 - 0.5**(time_step/half_life)
+
+def transition_rules(state, transition_prob):
+    if np.random.random() < transition_prob:
+        return state - 1
+    else:
+        return state
+
+def evolve_state(state, neutron_flux_on, time_step):
+    A_half_life = 10.1
+    B_half_life = 15.7
+    C_half_life = 3.2
+
+    if state == 'A':
+        if neutron_flux_on:
+            transition_prob = calculate_transition_probability(C_half_life, time_step)
+            return transition_rules(state, transition_prob)
+        else:
+            transition_prob = calculate_transition_probability(A_half_life, time_step)
+            return transition_rules(state, transition_prob)
+    elif state == 'B':
+        transition_prob = calculate_transition_probability(B_half_life, time_step)
+        return transition_rules(state, transition_prob)
+    elif state == 'C':
+        transition_prob = calculate_transition_probability(C_half_life, time_step)
+        return transition_rules(state, transition_prob)
+
+def evolve_system(states, neutron_flux_on, time_step):
+    new_states = []
+    for state in states:
+        new_state = evolve_state(state, neutron_flux_on, time_step)
+        new_states.append(new_state)
+    return new_states
+
+def simulation(starting_states, n_steps, time, neutron_flux_on):
+    states = starting_states
+    all_results = []
+
+    for t in range(n_steps):
+        if t == 100:
+            neutron_flux_on = False
+        states = evolve_system(states, neutron_flux_on, time/n_steps)
+        all_results.append(states.count('A'))
+
+    return all_results
+
+# Run the simulation multiple times to calculate the average and uncertainty on the number of 'A' atoms
+n_simulations = 20
+results = []
+
+for _ in range(n_simulations):
+    starting_states = ['C'] * 250
+    all_results = simulation(starting_states, 200, 100, True)
+    results.append(all_results)
+
+average_A = np.average(results, axis=0)
+uncertainty_A = np.std(results, axis=0)
+
+# Plot the results using plt.errorbar
+plt.errorbar(range(len(average_A)), average_A, yerr=uncertainty_A, fmt='-o')
+plt.xlabel('Time (steps)')
+plt.ylabel('Number of A atoms')
+plt.title('Average Number of A Atoms with Uncertainty over Time')
+plt.show()

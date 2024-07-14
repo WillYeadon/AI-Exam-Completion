@@ -1,0 +1,49 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Constants
+v0 = 125
+theta = 60 * np.pi / 180
+g = 9.81
+k = 0.00341
+
+# Function to calculate range using linear approximation
+def find_zero_linear(x1, x2, y1, y2):
+    slope = (y2 - y1) / (x2 - x1)
+    intercept = y1 - slope * x1
+    return -intercept / slope
+
+# Function to calculate the trajectory
+def calculate_trajectory(v0, theta, g, k):
+    x = [0]
+    y = [0]
+    vx = v0 * np.cos(theta)
+    vy = v0 * np.sin(theta)
+    dt = 0.01
+
+    while y[-1] >= 0:
+        v = np.sqrt(vx**2 + vy**2)
+        ax = -k * v * vx
+        ay = -g - k * v * vy
+        x.append(x[-1] + vx * dt)
+        y.append(y[-1] + vy * dt)
+        vx += ax * dt
+        vy += ay * dt
+
+    x_range = find_zero_linear(x[-2], x[-1], y[-2], y[-1])
+    return x_range
+
+# Plotting the ranges for different velocities
+velocities = np.linspace(50, 200, 100)
+ranges_no_air_resistance = [v**2 * np.sin(2*theta) / g for v in velocities]
+ranges_with_air_resistance = [calculate_trajectory(v, theta, g, k) for v in velocities]
+
+plt.plot(velocities, ranges_no_air_resistance, label='Without Air Resistance')
+plt.plot(velocities, ranges_with_air_resistance, label='With Air Resistance')
+
+plt.xlabel('Initial Velocity (m/s)')
+plt.ylabel('Range (m)')
+plt.title('Projectile Range with and without Air Resistance')
+plt.legend()
+plt.grid(True)
+plt.show()

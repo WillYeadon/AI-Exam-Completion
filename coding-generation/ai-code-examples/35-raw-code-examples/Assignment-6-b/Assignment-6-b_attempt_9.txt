@@ -1,0 +1,54 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+def findPi(n_points):
+    points = np.random.rand(n_points, 2)  # Random points in the unit square
+    inside_circle = (points[:, 0]**2 + points[:, 1]**2) <= 1  # Check if points are inside the unit circle
+    pi_estimate = 4 * np.sum(inside_circle) / n_points  # Estimate pi based on the ratio of points inside the circle
+    return pi_estimate
+
+def integrate(n_points, dim):
+    points = np.random.uniform(-1, 1, size=(n_points, dim))  # Random points in the [-1,+1] hypercube
+    inside_ball = np.linalg.norm(points, ord=2, axis=1) <= 1  # Check if points are inside the unit ball
+    volume_estimate = 2**dim * np.sum(inside_ball) / n_points  # Estimate volume based on the ratio of points inside the ball
+    return volume_estimate
+
+def genSample(npts):
+    x = np.linspace(0, 10, 1000)
+    f_x = 1 + 2/(1 + x**2) + np.cos(np.sqrt(3*x))**2
+    f_x_norm = np.trapz(f_x, x)  # Normalization factor
+    pdf = f_x / f_x_norm
+    cdf = np.cumsum(pdf)
+    
+    # Generate sample
+    u = np.random.rand(npts)
+    x_sample = np.interp(u, cdf, x)
+    
+    return x_sample
+
+# Set parameters
+n_points = 100000
+dimensions = [2, 3, 4, 5, 10, 50, 100]
+npts = 10000
+
+# Initialize results array
+results = np.zeros((2, len(dimensions)))  # One row for estimates, one row for theoretical scaling
+
+for i, dim in enumerate(dimensions):
+    pi_estimate = findPi(n_points)
+    volume_estimate = integrate(n_points, dim)
+    results[0, i] = volume_estimate
+    
+    # Theoretical scaling for error is 1/sqrt(N)
+    results[1, i] = np.abs(results[0, i] - np.pi) * n_points**0.5
+
+# Generate sample according to f(x)
+x_sample = genSample(npts)
+
+# Plotting
+plt.figure(figsize=(10, 5))
+plt.hist(x_sample, bins=50, density=True, color='skyblue', edgecolor='black')
+plt.title('Distribution of Points Generated According to the Given PDF')
+plt.xlabel('x')
+plt.ylabel('Density')
+plt.show()

@@ -1,0 +1,37 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+def f(x):
+    return x**2 * np.cos(2*x)
+
+def g(x):
+    return (x/2)*np.sin(2*x) + (1/4)*np.cos(2*x)
+
+def integral_f(x_min, x_max):
+    return g(x_max) - g(x_min)
+
+def simpsons_rule(f, a, b, N):
+    h = (b - a) / N
+    x = np.linspace(a, b, N+1)
+    y = f(x)
+    return h/3 * (y[0] + 4*np.sum(y[1:-1:2]) + 2*np.sum(y[2:-1:2]) + y[-1])
+
+# Analytical result
+integral_analytical = integral_f(0, 2*np.pi)
+
+# Numerical results
+N_values = np.array([2, 4, 8, 16, 32, 64, 128, 256, 512])
+errors = []
+
+for N in N_values:
+    integral_numerical = simpsons_rule(f, 0, 2*np.pi, N)
+    error = np.abs(integral_numerical - integral_analytical) / integral_analytical
+    errors.append(error)
+
+plt.figure()
+plt.loglog(N_values, errors, marker='o')
+plt.xlabel('Number of Panels (N)')
+plt.ylabel('Fractional Error')
+plt.title('Fractional Error in Simpson\'s Rule Integration')
+plt.grid(True)
+plt.show()

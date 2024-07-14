@@ -1,0 +1,52 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+def transition_probability(half_life, time_step):
+    return 1 - 2**(-time_step / half_life)
+
+def evolve_state(state, transition_prob):
+    if state == 'A':
+        if np.random.uniform() < transition_prob:
+            return 'B'
+    elif state == 'B':
+        if np.random.uniform() < transition_prob:
+            return 'C'
+    elif state == 'C':
+        return np.random.choice(['C', 'A'], p=[1-transition_prob, transition_prob])
+    return state
+
+def evolve_system(states, transition_probs):
+    new_states = []
+    for i, state in enumerate(states):
+        new_states.append(evolve_state(state, transition_probs[i]))
+    return new_states
+
+def evolve_nuclei_decay(n_steps, initial_states, decay_probs, with_neutron_flux):
+    states = initial_states
+    time_steps = np.linspace(0, 200, n_steps)
+    for t in time_steps:
+        if with_neutron_flux and t < 100:
+            states = evolve_system(states, [decay_probs[2], decay_probs[0], decay_probs[1]])
+        else:
+            states = evolve_system(states, [0, decay_probs[0], decay_probs[1]])
+    return states
+
+# Initial conditions
+nuclei = ['A', 'B', 'C']
+nuclei_count = [0, 0, 250]
+decay_probs = [transition_probability(10.1, 200/100), transition_probability(15.7, 200/100), transition_probability(3.2, 200/100)]
+
+# Evolve the system
+final_states = evolve_nuclei_decay(200, nuclei_count, decay_probs, True)
+nuclei_count = [final_states.count('A'), final_states.count('B'), final_states.count('C')]
+
+final_states = evolve_nuclei_decay(200, nuclei_count, decay_probs, False)
+nuclei_count = [final_states.count('A'), final_states.count('B'), final_states.count('C')]
+
+# Plotting
+plt.plot(range(3), nuclei_count, marker='o', label='Number of Nuclei')
+plt.xticks(range(3), ['A', 'B', 'C'])
+plt.xlabel('Nuclei')
+plt.ylabel('Count')
+plt.legend()
+plt.show()

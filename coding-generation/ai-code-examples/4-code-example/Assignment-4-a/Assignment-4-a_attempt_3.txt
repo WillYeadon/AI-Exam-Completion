@@ -1,0 +1,52 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Constants
+g = 9.81  # acceleration due to gravity in m/s^2
+rho = 7.87 * 1000  # density of iron in kg/m^3
+r = 0.1  # radius of the cannonball in meters
+v0 = 125  # initial velocity in m/s
+
+def cross_sectional_area(radius):
+    """ Calculate the cross-sectional area of a sphere. """
+    return np.pi * radius**2
+
+def mass_of_sphere(radius, density):
+    """ Calculate the mass of a sphere. """
+    volume = (4/3) * np.pi * radius**3
+    return density * volume
+
+def equation_of_motion(v0, theta, dt=0.1):
+    """ Calculate the trajectory of the projectile using Euler's method. """
+    theta = np.radians(theta)  # convert to radians
+    vx = v0 * np.cos(theta)    # initial velocity in x-direction
+    vy = v0 * np.sin(theta)    # initial velocity in y-direction
+    
+    x, y = 0.0, 0.0
+    trajectory = []
+    
+    while y >= 0:
+        trajectory.append((x, y))
+        x += vx * dt
+        vy_new = vy - g * dt
+        y += vy * dt - 0.5 * g * dt**2
+        vy = vy_new
+    
+    return np.array(trajectory)
+
+# Angles in degrees
+angles = [15, 30, 45, 60, 75]
+
+# Plotting
+plt.figure(figsize=(10, 6))
+
+for angle in angles:
+    trajectory = equation_of_motion(v0, angle)
+    plt.plot(trajectory[:, 0], trajectory[:, 1], label=f'{angle} degrees')
+
+plt.xlabel('Distance (m)')
+plt.ylabel('Height (m)')
+plt.title('Trajectory of a Cannonball at Different Angles')
+plt.legend()
+plt.grid(True)
+plt.show()

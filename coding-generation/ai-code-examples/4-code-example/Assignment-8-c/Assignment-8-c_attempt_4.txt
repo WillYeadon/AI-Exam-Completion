@@ -1,0 +1,44 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Number of particles
+num_particles = 1000
+
+# Step size
+step_size = 0.05
+
+# Generate initial random positions inside the unit square
+rand_pos = np.random.rand(num_particles, 2)
+
+def random_walk(positions, steps, step_size):
+    for _ in range(steps):
+        angles = np.random.rand(num_particles) * 2 * np.pi
+        positions += step_size * np.vstack((np.cos(angles), np.sin(angles))).T
+    return positions
+
+# Create subplots
+fig, axs = plt.subplots(1, 3, figsize=(15, 5))
+
+# Plot after 10 steps
+positions_10 = random_walk(rand_pos.copy(), 10, step_size)
+axs[0].scatter(positions_10[:, 0], positions_10[:, 1], color='r', alpha=0.6)
+axs[0].set_title('After 10 Steps')
+axs[0].set_xlim(0, 1)
+axs[0].set_ylim(0, 1)
+
+# Plot after 100 steps
+positions_100 = random_walk(rand_pos.copy(), 100, step_size)
+axs[1].scatter(positions_100[:, 0], positions_100[:, 1], color='g', alpha=0.6)
+axs[1].set_title('After 100 Steps')
+axs[1].set_xlim(0, 1)
+axs[1].set_ylim(0, 1)
+
+# Plot after 500 steps
+positions_500 = random_walk(rand_pos.copy(), 500, step_size)
+axs[2].scatter(positions_500[:, 0], positions_500[:, 1], color='b', alpha=0.6)
+axs[2].set_title('After 500 Steps')
+axs[2].set_xlim(0, 1)
+axs[2].set_ylim(0, 1)
+
+# Display the plots
+plt.show()

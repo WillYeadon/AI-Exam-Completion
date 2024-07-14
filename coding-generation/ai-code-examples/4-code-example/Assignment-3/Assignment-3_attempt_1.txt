@@ -1,0 +1,73 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Given half-life of Carbon-14 in years
+half_life_C14 = 5730
+
+# Function to calculate the mean lifetime from the half-life
+def mean_lifetime(half_life):
+    return half_life / np.log(2)
+
+# Function for the radioactive decay process
+def decay_function(N0, tau, t):
+    return N0 * np.exp(-t / tau)
+
+# Analytical solution of the decay equation
+def analytical_solution(N0, tau, t):
+    return decay_function(N0, tau, t)
+
+# Euler's method for solving the ODE
+def solve_euler(N0, tau, t_final, steps):
+    dt = t_final / steps
+    t = np.linspace(0, t_final, steps + 1)
+    N = np.zeros(steps + 1)
+    N[0] = N0
+    for i in range(1, steps + 1):
+        N[i] = N[i - 1] - dt * (N[i - 1] / tau)
+    return t, N
+
+# RK4 method for solving the ODE
+def solve_RK4(N0, tau, t_final, steps):
+    dt = t_final / steps
+    t = np.linspace(0, t_final, steps + 1)
+    N = np.zeros(steps + 1)
+    N[0] = N0
+    for i in range(1, steps + 1):
+        k1 = -N[i - 1] / tau
+        k2 = -(N[i - 1] + 0.5 * k1 * dt) / tau
+        k3 = -(N[i - 1] + 0.5 * k2 * dt) / tau
+        k4 = -(N[i - 1] + k3 * dt) / tau
+        N[i] = N[i - 1] + dt * (k1 + 2*k2 + 2*k3 + k4) / 6
+    return t, N
+
+# Parameters
+N0 = 100  # initial quantity of Carbon-14
+tau = mean_lifetime(half_life_C14)
+t_final = 20000  # final time in years
+step_counts = np.geomspace(10, 10000, num=10, dtype=int)
+
+# Calculate errors
+euler_errors = []
+rk4_errors = []
+for steps in step_counts:
+    t_analytical = np.linspace(0, t_final, steps + 1)
+    N_analytical = analytical_solution(N0, tau, t_analytical)
+    
+    t_euler, N_euler = solve_euler(N0, tau, t_final, steps)
+    euler_error = np.abs(N_analytical - N_euler)
+    euler_errors.append(np.max(euler_error))
+    
+    t_rk4, N_rk4 = solve_RK4(N0, tau, t_final, steps)
+    rk4_error = np.abs(N_analytical - N_rk4)
+    rk4_errors.append(np.max(rk4_error))
+
+# Plotting the result with a log-log scale
+plt.figure(figsize=(10, 6))
+plt.loglog(step_counts, euler_errors, marker='o', color='blue', label='Euler Method Error')
+plt.loglog(step_counts, rk4_errors, marker='x', color='red', label='RK4 Method Error')
+plt.xlabel('Number of Steps')
+plt.ylabel('Maximum Absolute Error')
+plt.title('Comparison of Errors in Euler and RK4 Methods')
+plt.legend()
+plt.grid(which='both', linestyle='--', linewidth=0.5)
+plt.show()

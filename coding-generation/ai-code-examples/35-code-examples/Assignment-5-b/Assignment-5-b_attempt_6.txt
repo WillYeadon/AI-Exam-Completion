@@ -1,0 +1,65 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Constants
+nuclei = ['A', 'B', 'C']
+nuclei_half_life = {'A': 10.1, 'B': 15.7, 'C': 3.2}
+transition_probabilities = {'C': {'A': 1 - np.exp(-1/3.2)}, 'A': {'B': 1 - np.exp(-1/10.1)}, 'B': {}}
+
+# Transition rules with neutron flux
+def transition_rules_with_flux(state):
+    if state == 'C':
+        return np.random.choice(['A', 'C'], p=[transition_probabilities['C']['A'], 1 - transition_probabilities['C']['A']])
+    elif state == 'A':
+        return np.random.choice(['B', 'A'], p=[transition_probabilities['A']['B'], 1 - transition_probabilities['A']['B']])
+
+# Transition rules without neutron flux
+def transition_rules_without_flux(state):
+    if state == 'C':
+        return 'C'
+    elif state == 'A':
+        return np.random.choice(['B', 'A'], p=[transition_probabilities['A']['B'], 1 - transition_probabilities['A']['B']])
+
+# Evolve a single state according to the transition rules
+def evolve_state(state, flux):
+    if flux:
+        return transition_rules_with_flux(state)
+    else:
+        return transition_rules_without_flux(state)
+
+# Evolve a list of states
+def evolve_states(states, flux):
+    return [evolve_state(state, flux) for state in states]
+
+# Simulation function
+def simulation(n_steps, flux):
+    time_points = np.linspace(0, 200, 2*n_steps + 1)
+    num_A_atoms = np.zeros(2*n_steps + 1)
+    for _ in range(20):
+        current_states = ['C'] * 250
+        for i in range(2*n_steps + 1):
+            if i == n_steps:
+                flux = False
+            current_states = evolve_states(current_states, flux)
+            num_A_atoms[i] += current_states.count('A')
+    num_A_atoms /= 20
+    return time_points, num_A_atoms
+
+# Running the simulation 20 times
+n_steps = 200
+flux = True
+average_num_A_atoms = np.zeros(2*n_steps + 1)
+for _ in range(20):
+    time_points, num_A_atoms = simulation(n_steps, flux)
+    average_num_A_atoms += num_A_atoms
+average_num_A_atoms /= 20
+
+# Calculating uncertainty
+uncertainty_num_A_atoms = np.std([simulation(n_steps, flux)[1] for _ in range(20)], axis=0)
+
+# Plotting the results
+plt.errorbar(time_points, average_num_A_atoms, yerr=uncertainty_num_A_atoms, fmt='b')
+plt.xlabel('Time (hours)')
+plt.ylabel('Average Number of A atoms')
+plt.title('Average Number of A atoms as a function of time')
+plt.show()

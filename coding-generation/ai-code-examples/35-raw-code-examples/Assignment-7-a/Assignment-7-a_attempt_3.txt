@@ -1,0 +1,75 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+def f(x):
+    return x - np.tanh(2*x)
+
+def f_prime(x):
+    return 1 - 2*np.tanh(2*x)**2
+
+def newton_raphson_method(func, func_prime, x0, tol=1e-6, max_iter=100):
+    x = x0
+    for i in range(max_iter):
+        fx = func(x)
+        if abs(fx) < tol:
+            return x, i
+        fx_prime = func_prime(x)
+        if fx_prime == 0:
+            return None, i
+        x = x - fx / fx_prime
+    return None, max_iter
+
+def bisection_method(func, a, b, tol=1e-6, max_iter=100):
+    if func(a) * func(b) > 0:
+        return None, max_iter
+    for i in range(max_iter):
+        c = (a + b) / 2
+        if func(c) == 0 or (b - a) / 2 < tol:
+            return c, i
+        if func(c) * func(a) < 0:
+            b = c
+        else:
+            a = c
+    return None, max_iter
+
+def secant_method(func, x0, x1, tol=1e-6, max_iter=100):
+    for i in range(max_iter):
+        fx0 = func(x0)
+        fx1 = func(x1)
+        if abs(fx1) < tol:
+            return x1, i
+        if fx1 - fx0 == 0:
+            return None, i
+        x = x1 - fx1 * (x1 - x0) / (fx1 - fx0)
+        x0, x1 = x1, x
+    return None, max_iter
+
+# Initial values
+x0 = -1
+x1 = -0.9
+a = -1
+b = 1
+
+# Lists to store convergence data
+newton_iterations = []
+bisection_iterations = []
+secant_iterations = []
+
+# Perform iterations for different initial values
+for i in range(50):
+    root, iterations = newton_raphson_method(f, f_prime, x0+i*0.1)
+    newton_iterations.append(iterations)
+    root, iterations = bisection_method(f, a, b)
+    bisection_iterations.append(iterations)
+    root, iterations = secant_method(f, x0+i*0.1, x1+i*0.1)
+    secant_iterations.append(iterations)
+
+# Plotting the convergence data
+plt.plot(np.arange(50)*0.1, newton_iterations, label='Newton-Raphson')
+plt.plot(np.arange(50)*0.1, bisection_iterations, label='Bisection')
+plt.plot(np.arange(50)*0.1, secant_iterations, label='Secant')
+plt.xlabel('Initial Value')
+plt.ylabel('Number of Iterations')
+plt.title('Convergence of Root Finding Methods')
+plt.legend()
+plt.show()

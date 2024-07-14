@@ -1,0 +1,56 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+class Walker:
+    def __init__(self, ndim=1, step_size=1):
+        self.ndim = ndim
+        self.step_size = step_size
+        self.steps = np.eye(ndim)
+        self.steps = np.vstack((self.steps, -self.steps))
+    
+        self.pos = np.zeros(ndim)
+    
+    def pickStep(self):
+        return self.steps[np.random.randint(2* self.ndim)]
+    
+    def doSteps(self, n):
+        positions = [self.pos]
+        for _ in range(n):
+            self.pos = self.pos + self.pickStep() * self.step_size
+            positions.append(self.pos)
+        return np.array(positions)
+
+def simulate_walkers(num_walkers, num_steps, dimensions):
+    avg_positions = np.zeros(dimensions+1)
+    avg_positions_sq = np.zeros(dimensions+1)
+    
+    for d in range(1, dimensions+1):
+        for _ in range(num_walkers):
+            walker = Walker(ndim=d)
+            trajectory = walker.doSteps(num_steps)
+            avg_positions[d] += trajectory[-1]
+            avg_positions_sq[d] += np.sum(trajectory**2, axis=0)
+        
+        avg_positions[d] /= num_walkers
+        avg_positions_sq[d] /= num_walkers
+    
+    return avg_positions, avg_positions_sq
+
+num_walkers = 400
+num_steps = 100
+dimensions = 4
+
+avg_positions, avg_positions_sq = simulate_walkers(num_walkers, num_steps, dimensions)
+
+# Now you can plot the average squared distance scaling
+
+# Plotting the results
+plt.figure()
+for d in range(1, dimensions+1):
+    plt.plot(np.arange(num_steps+1), avg_positions_sq[d], label=f'Dimension {d}')
+
+plt.title('Average Squared Distance Scaling for Different Dimensions')
+plt.xlabel('Number of Steps')
+plt.ylabel('Average Squared Distance')
+plt.legend()
+plt.show()

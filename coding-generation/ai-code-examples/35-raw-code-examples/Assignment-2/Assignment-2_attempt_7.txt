@@ -1,0 +1,43 @@
+**Script:**
+
+Let's define the function $f(x) = x^{2}\cos(2x)$. 
+
+Now, let's find the indefinite integral of $f(x)$:
+
+$\int f(x) \,dx = \int x^{2}\cos(2x) \,dx$
+
+Integrating by parts,
+
+Let $u = x^{2}$ and $dv = \cos(2x) \,dx$
+
+Then, $du = 2x \,dx$ and $v = \frac{1}{2}\sin(2x)$
+
+Using the integration by parts formula: $\int u \,dv = uv - \int v \,du$
+
+We have:
+
+$\int x^{2}\cos(2x) \,dx = \frac{1}{2}x^{2}\sin(2x) - \int x\sin(2x) \,dx$
+
+Integrating by parts again,
+
+Let $u = x$ and $dv = \sin(2x) \,dx$
+
+Then, $du = dx$ and $v = -\frac{1}{2}\cos(2x)$
+
+Using the integration by parts formula once more, we find:
+
+$\int x^{2}\cos(2x) \,dx = \frac{1}{2}x^{2}\sin(2x) - \left(-\frac{1}{2}x\cos(2x) + \frac{1}{2}\int \cos(2x) \,dx\right)$
+
+$\int x^{2}\cos(2x) \,dx = \frac{1}{2}x^{2}\sin(2x) + \frac{1}{2}x\cos(2x) - \frac{1}{4}\sin(2x) + C$
+
+Let's set the constant of integration $C$ such that $g(0) = \int_{0}^{0} x^{2}\cos(2x) \,dx = 0$:
+
+$0 = 0 + 0 - 0 + C$
+
+Therefore, $C = 0$
+
+So, the indefinite integral of $f(x)$ is $g(x) = \frac{1}{2}x^{2}\sin(2x) + \frac{1}{2}x\cos(2x) - \frac{1}{4}\sin(2x)$
+
+Now, let's define a function to calculate the definite integral of $f(x)$ over the interval $(x_{min}, x_{max})$. We can use this indefinite integral $g(x)$ to calculate the definite integral. 
+
+We will also create a function that calculates the definite integral of the function $f(x)$ over the interval $(x_{min}, x_{max})$ using Simpson's rule with $N$ panels

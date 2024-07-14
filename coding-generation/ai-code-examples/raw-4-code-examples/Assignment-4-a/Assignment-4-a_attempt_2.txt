@@ -1,0 +1,32 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Constants
+g = 9.81  # Acceleration due to gravity (m/s^2)
+v0 = 125  # Initial velocity (m/s)
+
+def calculate_trajectory(v0, angle_degrees, g):
+    angle_radians = np.radians(angle_degrees)
+    t_flight = (2 * v0 * np.sin(angle_radians)) / g
+    t = np.linspace(0, t_flight, num=500)  # 500 steps for better resolution
+    
+    x = v0 * t * np.cos(angle_radians)
+    y = v0 * t * np.sin(angle_radians) - 0.5 * g * t**2
+    return x, y
+
+# List of angles in degrees
+angles = [15, 30, 45, 60, 75]
+
+# Set up the plot
+plt.figure(figsize=(10, 6))
+
+for angle in angles:
+    x, y = calculate_trajectory(v0, angle, g)
+    plt.plot(x, y, label=f'{angle}°')
+    
+plt.title("Projectile Motion for Different Initial Angles")
+plt.xlabel("Distance (m)")
+plt.ylabel("Height (m)")
+plt.legend()
+plt.grid(True)
+plt.show()

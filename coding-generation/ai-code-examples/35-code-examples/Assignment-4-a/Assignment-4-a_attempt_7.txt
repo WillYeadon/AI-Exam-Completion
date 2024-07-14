@@ -1,0 +1,79 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Constants
+g = 9.81  # acceleration due to gravity in m/s^2
+rho = 1.29  # air density in kg/m^3
+Cd = 0.47  # drag coefficient
+r = 0.105  # radius of the cannonball in meters
+A = np.pi * r**2  # cross-sectional area of the cannonball
+m = 4.2   # mass of the cannonball in kg
+v0 = 125  # initial velocity in m/s
+
+# Function to calculate cross-sectional area of a sphere
+def cross_sectional_area(radius):
+    return np.pi * radius ** 2
+
+# Function to calculate the mass of an iron sphere
+def sphere_mass(radius, density):
+    return (4/3) * np.pi * radius**3 * density
+
+# Calculating area and mass of the cannonball
+A = cross_sectional_area(r)
+m = sphere_mass(r, rho)
+
+# Function to model cannonball's motion
+def f(u, params):
+    x = u[0]
+    y = u[1]
+    vx = u[2]
+    vy = u[3]
+    
+    v = np.sqrt(vx**2 + vy**2)
+    Cd = params[0]
+    A = params[1]
+    m = params[2]
+    g = params[3]
+    
+    dvxdt = -Cd*rho*A*v*vx/m
+    dvydt = -g - Cd*rho*A*v*vy/m
+    
+    return np.array([vx, vy, dvxdt, dvydt])
+
+# Euler's method for solving the ODE
+def solve_euler(f, u0, dt, T, params):
+    N = int(T/dt)
+    u = np.zeros((N, 4))
+    u[0] = u0
+    for n in range(1, N):
+        u[n] = u[n-1] + dt * f(u[n-1], params)
+    return u
+
+# Function to find the x-coordinate where the trajectory crosses y=0
+def find_impact(u):
+    for n in range(len(u)-1):
+        if u[n, 1] * u[n+1, 1] < 0:
+            return u[n, 0]
+    return u[-1, 0]
+
+# Function to find the range of the projectile
+def find_range(u):
+    return find_impact(u) - u[0, 0]
+
+# Plotting trajectories for different initial angles
+angles = [np.pi/6, np.pi/4, np.pi/3]  # angles in radians
+colors = ['b', 'g', 'r']  # color for each angle
+labels = ['30 degrees', '45 degrees', '60 degrees']
+
+for angle, color, label in zip(angles, colors, labels):
+    u0 = np.array([0, 0, v0*np.cos(angle), v0*np.sin(angle)])
+    params = [Cd, A, m, g]
+    u = solve_euler(f, u0, 0.01, 10, params)
+    plt.plot(u[:, 0], u[:, 1], color=color, label=label)
+
+plt.xlabel('Horizontal Distance (m)')
+plt.ylabel('Vertical Distance (m)')
+plt.title('Projectile Motion Trajectories for Different Initial Angles')
+plt.legend()
+plt.grid(True)
+plt.show()

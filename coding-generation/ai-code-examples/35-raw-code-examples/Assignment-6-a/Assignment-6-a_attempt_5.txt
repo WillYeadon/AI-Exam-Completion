@@ -1,0 +1,68 @@
+import numpy as np
+
+def findPi(n_points):
+    # Generate n random points in a 1x1 square
+    points = np.random.rand(n_points, 2)
+    
+    # Check if points are within the unit circle
+    inside_circle = points[:,0]**2 + points[:,1]**2 < 1
+    
+    # Estimate pi
+    pi_estimate = 4 * np.sum(inside_circle) / n_points
+    return pi_estimate
+
+def integrate(n_points, dim):
+    # Generate n random points in a cube of dimension dim
+    points = np.random.uniform(-1, 1, (n_points, dim))
+    
+    # Check if points are within the unit ball
+    inside_ball = np.linalg.norm(points, axis=1) < 1
+    
+    # Estimate volume of unit ball
+    volume_estimate = 2**dim * np.sum(inside_ball) / n_points
+    return volume_estimate
+
+# Test findPi function
+n_points_pi = 10000
+pi_estimate = findPi(n_points_pi)
+print("Estimated value of pi:", pi_estimate)
+
+# Test integrate function
+n_points_int = 100000
+dim = 3
+volume_estimate = integrate(n_points_int, dim)
+print("Estimated volume of unit ball in", dim, "dimensions:", volume_estimate)
+
+
+::: Task :::
+To complete the task, we need to create a plot to show that the integration error scaling is independent of the dimension and that the error scales as $1/\sqrt{N}$. Here's how you can achieve that:
+
+
+import matplotlib.pyplot as plt
+
+# Parameters
+n_points = [1000, 5000, 10000, 50000, 100000]
+dimensions = [2, 3, 4, 5]
+
+# Calculate errors for different dimensions and number of points
+errors = []
+for dim in dimensions:
+    dim_errors = []
+    for n in n_points:
+        volume_estimate = integrate(n, dim)
+        error = np.abs(volume_estimate - np.pi**(dim/2) / np.math.gamma(dim/2 + 1))
+        dim_errors.append(error)
+    errors.append(dim_errors)
+
+# Create the plot
+plt.figure(figsize=(10, 6))
+for i in range(len(dimensions)):
+    plt.plot(n_points, errors[i], label='Dimension ' + str(dimensions[i]))
+
+plt.xscale('log')
+plt.yscale('log')
+plt.xlabel('Number of Points')
+plt.ylabel('Error')
+plt.title('Monte Carlo Integration Error vs. Number of Points in Different Dimensions')
+plt.legend()
+plt.show()

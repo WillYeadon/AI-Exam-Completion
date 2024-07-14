@@ -1,0 +1,12 @@
+::: Task :::
+
+Explore the impact of different step sizes on the optimization trajectory of the gradient descent algorithm when applied to the banana function.
+
+Objective:
+1. Using the provided plot `im = plt.imshow(data, ...`, populate `data` with the values of the banana function, creating a backdrop for your trajectories.
+2. Using only the functions defined above, create a series of trajectories using different step sizes, denoted as `etas`, to observe their effect on the convergence paths of the algorithm.
+3. Start all trajectories from the point r_0 = (0.2,1).
+4. Use plt.plot to plot the trajectories on the same figure as `im = plt.imshow(data, ...`
+5. Ensure your plot includes labels, a descriptive title, and a legend to differentiate between trajectories for each step size.
+
+Please make sure to complete the missing code in the designated area below

@@ -1,0 +1,60 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Constants
+g = 9.81  # acceleration due to gravity in m/s^2
+v0 = 125  # initial velocity in m/s
+
+# Time parameters
+t = np.linspace(0, 2 * v0 * np.sin(np.radians(90)) / g, num=500)  # a sufficiently large range of time values
+
+# Function to compute the trajectory
+def calculate_trajectory(v0, angle):
+    angle_rad = np.radians(angle)
+    x = v0 * np.cos(angle_rad) * t
+    y = v0 * np.sin(angle_rad) * t - 0.5 * g * t**2
+    return x, y
+
+# Create a plot
+plt.figure(figsize=(10, 6))
+angles = [15, 30, 45, 60, 75]  # Different initial angles in degrees
+
+for angle in angles:
+    x, y = calculate_trajectory(v0, angle)
+    plt.plot(x, y, label=f'{angle} degrees')
+
+# Adding labels and title
+plt.xlabel('Distance (m)')
+plt.ylabel('Height (m)')
+plt.title('Projectile Trajectories for Different Angles')
+plt.legend()
+plt.ylim(bottom=0)  # Ensure the plot doesn't go below y=0
+
+# Show plot
+plt.show()
+
+
+Here's a step-by-step explanation of what each part of the code does:
+
+1. **Import the necessary libraries:**
+   - `numpy` for numerical operations.
+   - `matplotlib.pyplot` for plotting.
+
+2. **Define constants:**
+   - `g` is the gravitational constant \(9.81 \text{ m/s}^2\).
+   - `v0` is the initial velocity \(125 \text{ m/s}\).
+
+3. **Time parameters:**
+   - `t` is an array of time values. The range is chosen such that it covers a full projectile motion for the maximum possible initial angle.
+
+4. **Define the `calculate_trajectory` function:**
+   - This function takes an initial velocity and an angle, then computes the x and y coordinates over time for the trajectory.
+
+5. **Plotting the trajectories:**
+   - Initialize the plot with `plt.figure`.
+   - Loop through different angles (15, 30, 45, 60, 75 degrees), calculate trajectories, and plot them.
+   - Label the x-axis as 'Distance (m)', the y-axis as 'Height (m)', and add a title 'Projectile Trajectories for Different Angles'.
+   - Include a legend to differentiate the angles.
+
+6. **Show the plot:**
+   - `plt.show()

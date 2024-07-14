@@ -1,0 +1,84 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Constants
+HALF_LIFE = 5730  # years for Carbon-14
+TAU = HALF_LIFE / np.log(2)
+
+# Define function to calculate mean lifetime
+def mean_lifetime(half_life):
+    return half_life / np.log(2)
+
+# Differential equation function for radioactive decay
+def f_rad(N, t):
+    return -N / TAU
+
+# Analytical solution function
+def analytic(N0, t):
+    return N0 * np.exp(-t / TAU)
+
+# Euler method solver
+def solve_euler(n0, t0, dt, n_steps):
+    N = np.zeros(n_steps+1)
+    N[0] = n0
+    t = t0
+
+    for i in range(1, n_steps+1):
+        N[i] = N[i-1] + dt * f_rad(N[i-1], t)
+        t += dt
+    
+    return N
+
+# RK4 method solver
+def solve_RK4(n0, t0, dt, n_steps):
+    N = np.zeros(n_steps+1)
+    N[0] = n0
+    t = t0
+    
+    for i in range(1, n_steps+1):
+        k1 = dt * f_rad(N[i-1], t)
+        k2 = dt * f_rad(N[i-1] + 0.5 * k1, t + 0.5 * dt)
+        k3 = dt * f_rad(N[i-1] + 0.5 * k2, t + 0.5 * dt)
+        k4 = dt * f_rad(N[i-1] + k3, t + dt)
+        
+        N[i] = N[i-1] + (k1 + 2*k2 + 2*k3 + k4) / 6
+        t += dt
+    
+    return N
+
+# Initial conditions
+N0 = 1000
+t0 = 0
+time_final = 15000  # years
+
+# Time steps for testing error
+dt_values = [100, 50, 25, 10]
+euler_errors = []
+rk4_errors = []
+
+# Analytical solution for final time
+N_true = analytic(N0, time_final)
+
+for dt in dt_values:
+    n_steps = int(time_final / dt)
+    
+    # Solve with Euler method
+    N_euler = solve_euler(N0, t0, dt, n_steps)
+    euler_final = N_euler[-1]
+    euler_errors.append(np.abs(euler_final - N_true))
+    
+    # Solve with RK4 method
+    N_RK4 = solve_RK4(N0, t0, dt, n_steps)
+    rk4_final = N_RK4[-1]
+    rk4_errors.append(np.abs(rk4_final - N_true))
+
+# Plot to show error scaling with number of steps
+plt.figure(figsize=(10, 6))
+plt.loglog(dt_values, euler_errors, 'o-', label='Euler method error')
+plt.loglog(dt_values, rk4_errors, 'x-', label='RK4 method error')
+plt.xlabel('Time step (dt)')
+plt.ylabel('Error in N after 15000 years')
+plt.title('Error comparison of Euler and RK4 methods')
+plt.legend()
+plt.grid(True, which="both", ls="--")
+plt.show()

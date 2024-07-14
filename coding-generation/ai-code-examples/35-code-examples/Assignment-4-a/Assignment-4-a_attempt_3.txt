@@ -1,0 +1,59 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Constants
+g = 9.81  # acceleration due to gravity in m/s^2
+rho = 1.225  # air density in kg/m^3
+d = 0.105  # diameter of the cannonball in meters
+A = np.pi * (d/2)**2  # cross-sectional area of the sphere
+m = 4/3 * np.pi * (d/2)**3 * 7874  # mass of the iron sphere
+
+# Function to model cannonball's motion
+def projectile_motion(v0, theta):
+    x = 0
+    y = 0
+    vx = v0 * np.cos(np.radians(theta))
+    vy = v0 * np.sin(np.radians(theta))
+    dt = 0.001
+    points = [[x, y]]
+    
+    while y >= 0:
+        # Update velocity
+        v = np.sqrt(vx**2 + vy**2)
+        Cd = 0.47  # drag coefficient for a sphere
+        ax = -Cd * rho * A * v * vx / (2 * m)
+        ay = -g - Cd * rho * A * v * vy / (2 * m)
+        vx += ax * dt
+        vy += ay * dt
+        
+        # Update position
+        x += vx * dt
+        y += vy * dt
+        
+        points.append([x, y])
+    
+    return np.array(points)
+
+# Function to find the range of the projectile
+def find_range(points):
+    x_values = points[:, 0]
+    y_values = points[:, 1]
+    mask = np.where(y_values >= 0)
+    range_idx = mask[0][-1]
+    return x_values[range_idx]
+
+# Initial angle values
+angles = [30, 45, 60]
+
+# Plotting trajectories for different angles
+plt.figure(figsize=(10, 6))
+for angle in angles:
+    points = projectile_motion(125, angle)
+    plt.plot(points[:, 0], points[:, 1], label=f'Angle = {angle} degrees')
+
+plt.xlabel('Horizontal Distance (m)')
+plt.ylabel('Vertical Distance (m)')
+plt.title('Trajectories of Cannonball for Different Initial Angles')
+plt.legend()
+plt.grid(True)
+plt.show()

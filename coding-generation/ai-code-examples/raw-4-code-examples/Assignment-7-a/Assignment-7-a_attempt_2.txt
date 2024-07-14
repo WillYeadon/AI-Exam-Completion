@@ -1,0 +1,75 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Function definition
+def f(x):
+    return x - np.tanh(2 * x)
+
+# Derivative of the function for Newton-Raphson
+def df(x):
+    return 1 - 2 / np.cosh(2 * x)**2
+
+# Implement the Newton-Raphson method
+def newton_raphson(x0, tol=1e-6, max_iter=100):
+    x = x0
+    for i in range(max_iter):
+        x_new = x - f(x) / df(x)
+        if abs(x_new - x) < tol:
+            return x_new, i+1
+        x = x_new
+    return x, max_iter
+
+# Implement the Bisection method
+def bisection(a, b, tol=1e-6, max_iter=100):
+    if f(a) * f(b) >= 0:
+        raise ValueError("f(a) and f(b) must have opposite signs")
+    
+    for i in range(max_iter):
+        c = (a + b) / 2
+        if abs(f(c)) < tol or (b - a) / 2 < tol:
+            return c, i+1
+        if f(c) * f(a) < 0:
+            b = c
+        else:
+            a = c
+    return c, max_iter
+
+# Implement the Secant method
+def secant(x0, x1, tol=1e-6, max_iter=100):
+    for i in range(max_iter):
+        if abs(f(x1) - f(x0)) < tol:
+            raise ValueError("Difference between f(x1) and f(x0) is too small, cannot proceed")
+        x2 = x1 - f(x1) * (x1 - x0) / (f(x1) - f(x0))
+        if abs(x2 - x1) < tol:
+            return x2, i+1
+        x0, x1 = x1, x2
+    return x1, max_iter
+
+# Initial conditions and parameters
+x0_nr = 0.5  # Initial guess for Newton-Raphson
+a_bis, b_bis = 0, 1  # Initial range for Bisection
+x0_sec, x1_sec = 0, 1  # Initial guesses for Secant
+
+# Run each method
+root_nr, iterations_nr = newton_raphson(x0_nr)
+root_bis, iterations_bis = bisection(a_bis, b_bis)
+root_sec, iterations_sec = secant(x0_sec, x1_sec)
+
+# Creating the plot
+methods = ['Newton-Raphson', 'Bisection', 'Secant']
+iterations = [iterations_nr, iterations_bis, iterations_sec]
+colors = ['blue', 'orange', 'green']
+
+plt.figure(figsize=(10, 6))
+
+# Plotting each method
+for method, iter_count, color in zip(methods, iterations, colors):
+    plt.plot(range(iter_count), [method] * iter_count, label=f"{method} (iterations: {iter_count})", color=color, marker='o')
+
+plt.title('Convergence Comparison of Root-Finding Methods')
+plt.xlabel('Iteration')
+plt.ylabel('Method')
+plt.yticks(range(len(methods)), methods)
+plt.legend()
+plt.grid(True)
+plt.show()

@@ -1,0 +1,53 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Constants
+g = 9.81  # gravitational acceleration in m/s^2
+
+def find_zero_linear(x1, x2, y1, y2):
+    # Linear approximation to find x value at y=0
+    return x1 - y1 * (x2 - x1) / (y2 - y1)
+
+def projectile_motion(v0, theta):
+    # Convert angle to radians
+    theta_rad = np.radians(theta)
+    
+    # Initial position and velocity components
+    vx0 = v0 * np.cos(theta_rad)
+    vy0 = v0 * np.sin(theta_rad)
+    
+    # Time of flight
+    tf = 2 * vy0 / g
+    
+    # Time vector
+    t = np.linspace(0, tf, num=100)
+    
+    # x and y components of motion
+    x = vx0 * t
+    y = vy0 * t - 0.5 * g * t ** 2
+
+    # Find where y becomes negative (ground level)
+    mask = y >= 0
+    idx_change = np.where(np.diff(mask))[0][0]
+    x_ground = find_zero_linear(x[idx_change - 1], x[idx_change], y[idx_change - 1], y[idx_change])
+    
+    return x, y, x_ground
+
+# Initial velocity (m/s)
+v0 = 125
+
+# Angles to simulate (degrees)
+angles = [30, 45, 60]
+
+# Plot trajectories for different angles
+plt.figure(figsize=(8, 6))
+for angle in angles:
+    x, y, x_ground = projectile_motion(v0, angle)
+    plt.plot(x, y, label=f'{angle} degrees')
+
+plt.xlabel('Horizontal Distance (m)')
+plt.ylabel('Vertical Distance (m)')
+plt.title('Projectile Trajectories at Different Launch Angles')
+plt.legend()
+plt.grid(True)
+plt.show()

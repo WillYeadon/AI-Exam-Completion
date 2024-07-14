@@ -1,0 +1,66 @@
+import numpy as np
+import random
+import matplotlib.pyplot as plt
+
+def has_transition_occurred(probability):
+    r = random.random()
+    if r < probability:
+        return True
+    else:
+        return False
+
+def evolve_system(current_state, transition_rules):
+    new_state = current_state.copy()
+    for rule in transition_rules:
+        start_state, end_state, transition_prob = rule
+        if current_state[start_state] > 0 and has_transition_occurred(transition_prob):
+            new_state[start_state] -= 1
+            new_state[end_state] += 1
+    return new_state
+
+def evolve_system_over_time(initial_state, transition_rules, n_timesteps, t_max):
+    states = [initial_state]
+    current_state = initial_state
+    dt = t_max / n_timesteps
+    for _ in range(n_timesteps):
+        new_state = evolve_system(current_state, transition_rules)
+        states.append(new_state)
+        current_state = new_state
+    return np.array(states)
+
+# Define the transition rules based on the given information
+transition_rules = [
+    (2, 0, 1 / 3.2),  # C -> A with effective half-life of 3.2 hours
+    (0, 1, 1 / 10.1),  # A decay with half-life of 10.1 hours
+    (1, 2, 1 / 15.7)   # B decay with half-life of 15.7 hours
+]
+
+# Initial amounts of nuclei
+NA = 0
+NB = 0
+NC = 250
+initial_state = np.array([NA, NB, NC])
+
+# Evolve the system for 100 hours with neutron flux on and for another 100 hours with neutron flux off
+n_timesteps = 200
+t_max = 100
+
+# Evolve the system
+states_with_flux = evolve_system_over_time(initial_state, transition_rules, n_timesteps, t_max)
+states_without_flux = evolve_system_over_time(states_with_flux[-1], transition_rules[1:], n_timesteps, t_max)
+
+# Plotting the results
+time_steps = np.linspace(0, 200, 401)
+plt.figure(figsize=(12, 6))
+plt.plot(time_steps, states_with_flux[:, 0], label='Nuclei A (with flux)', color='b')
+plt.plot(time_steps, states_with_flux[:, 1], label='Nuclei B (with flux)', color='g')
+plt.plot(time_steps, states_with_flux[:, 2], label='Nuclei C (with flux)', color='r')
+plt.plot(time_steps, states_without_flux[:, 0], linestyle='--', label='Nuclei A (without flux)', color='b')
+plt.plot(time_steps, states_without_flux[:, 1], linestyle='--', label='Nuclei B (without flux)', color='g')
+plt.plot(time_steps, states_without_flux[:, 2], linestyle='--', label='Nuclei C (without flux)', color='r')
+plt.xlabel('Time (hours)')
+plt.ylabel('Number of Nuclei')
+plt.title('Evolution of Nuclei over Time')
+plt.legend()
+plt.grid(True)
+plt.show()

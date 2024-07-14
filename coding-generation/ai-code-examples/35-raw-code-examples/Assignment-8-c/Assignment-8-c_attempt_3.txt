@@ -1,0 +1,76 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+class Walker:
+    def __init__(self, ndim=1, step_size=1):
+        self.ndim = ndim
+        self.step_size = step_size
+        if ndim == 1:
+            self.possible_steps = [[-self.step_size], [self.step_size]]
+        elif ndim == 2:
+            self.possible_steps = [[-self.step_size, 0], [self.step_size, 0], [0, -self.step_size], [0, self.step_size]]
+        self.pos = np.zeros(self.ndim)
+        
+    def pickStep(self):
+        return self.possible_steps[np.random.randint(0, len(self.possible_steps))]
+    
+    def doSteps(self, n):
+        trajectory = [self.pos]
+        for _ in range(n):
+            step = self.pickStep()
+            self.pos = self.pos + step
+            trajectory.append(self.pos)
+        return np.array(trajectory)
+    
+
+# Simulation of average position and average squared position
+nwalkers = 100
+nsteps = 1000
+results_1d = np.zeros((nsteps+1, nwalkers))
+
+for i in range(nwalkers):
+    walker = Walker(ndim=1)
+    trajectory = walker.doSteps(nsteps)
+    results_1d[:, i] = trajectory[:, 0]
+
+avg_positions_1d = np.mean(results_1d, axis=1)
+avg_squared_positions_1d = np.mean(results_1d**2, axis=1)
+
+fig, axs = plt.subplots(2, 1, figsize=(10, 8))
+axs[0].plot(avg_positions_1d, label='Average Position')
+axs[0].set_title('Average Position of 100 1D Walkers')
+axs[0].set_xlabel('Steps')
+axs[0].set_ylabel('Position')
+axs[0].legend()
+
+axs[1].plot(avg_squared_positions_1d, label='Average Squared Position')
+axs[1].set_title('Average Squared Position of 100 1D Walkers')
+axs[1].set_xlabel('Steps')
+axs[1].set_ylabel('Position^2')
+axs[1].legend()
+
+plt.tight_layout()
+plt.show()
+
+
+
+### Task ###
+ndim = 2
+nwalkers = 1000
+rand_pos = np.random.rand(nwalkers, ndim)
+
+fig, axs = plt.subplots(1, 3, figsize=(18, 6))
+
+for i, nsteps in enumerate([10, 100, 500]):
+    for j in range(nwalkers):
+        walker = Walker(ndim=ndim, step_size=0.05)
+        walker.pos = rand_pos[j]
+        trajectory = walker.doSteps(nsteps)
+        axs[i].scatter(trajectory[:, 0], trajectory[:, 1], alpha=0.3)
+
+    axs[i].set_title(f'Position of Walkers after {nsteps} Steps')
+    axs[i].set_xlabel('X')
+    axs[i].set_ylabel('Y')
+
+plt.tight_layout()
+plt.show()

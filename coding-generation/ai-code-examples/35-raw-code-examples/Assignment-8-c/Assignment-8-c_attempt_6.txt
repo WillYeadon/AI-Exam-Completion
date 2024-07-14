@@ -1,0 +1,74 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+class Walker:
+    def __init__(self, ndim=1, step_size=1):
+        self.pos = np.zeros(ndim)
+        self.ndim = ndim
+        self.possible_steps = [np.eye(ndim)[i]*step_size for i in range(ndim)] + [np.zeros(ndim)]
+
+    def pickStep(self):
+        step = self.possible_steps[np.random.choice(range(self.ndim*2))]
+        return step
+
+    def doSteps(self, n):
+        trajectory = np.zeros((n+1, self.ndim))
+        for i in range(n+1):
+            trajectory[i] = self.pos
+            self.pos += self.pickStep()
+        return trajectory
+
+# Average position and average squared position simulation
+n_steps = 1000
+n_walkers = 100
+step_size = 1
+ndim_values = [1, 2, 3, 4]
+
+avg_positions = []
+avg_sq_positions = []
+
+for ndim in ndim_values:
+    positions = np.zeros((n_walkers, n_steps+1, ndim))
+    for i in range(n_walkers):
+        walker = Walker(ndim, step_size)
+        positions[i] = walker.doSteps(n_steps)
+    avg_positions.append(np.mean(positions, axis=0))
+    avg_sq_positions.append(np.mean(positions**2, axis=0))
+
+# Plotting average position and average squared position
+fig, axs = plt.subplots(2, 1, figsize=(10, 12))
+
+for i, ndim in enumerate(ndim_values):
+    axs[0].plot(avg_positions[i][:, 0], label=f'Dimension {ndim}')
+axs[0].set_title('Average Position of 100 Walkers over 1000 Steps')
+axs[0].set_xlabel('Steps')
+axs[0].set_ylabel('Average Position')
+axs[0].legend()
+
+for i, ndim in enumerate(ndim_values):
+    axs[1].plot(avg_sq_positions[i][:, 0], label=f'Dimension {ndim}')
+axs[1].set_title('Average Squared Position of 100 Walkers over 1000 Steps')
+axs[1].set_xlabel('Steps')
+axs[1].set_ylabel('Average Squared Position')
+axs[1].legend()
+
+plt.tight_layout()
+plt.show()
+
+# Simulation of diffusion of particles in a unit square
+n_walkers = 1000
+rand_pos = np.random.rand(n_walkers, 2)
+step_size = 0.05
+
+for n_steps in [10, 100, 500]:
+    plt.figure(figsize=(8, 6))
+    plt.scatter(rand_pos[:, 0], rand_pos[:, 1], label='Initial Position')
+    for i in range(n_walkers):
+        walker = Walker(2, step_size)
+        final_pos = walker.pos + np.sum([walker.pickStep() for _ in range(n_steps)], axis=0)
+        plt.scatter(final_pos[0], final_pos[1], color='red', alpha=0.2)
+    plt.title(f'Position of Walkers after {n_steps} Steps')
+    plt.xlabel('X')
+    plt.ylabel('Y')
+    plt.legend()
+    plt.show()

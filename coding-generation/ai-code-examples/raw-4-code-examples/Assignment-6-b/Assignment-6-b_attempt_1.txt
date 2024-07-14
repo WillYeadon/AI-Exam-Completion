@@ -1,0 +1,69 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+def findPi(n_points):
+    """Monte Carlo estimate for π using `n_points`."""
+    count_inside = 0
+    for _ in range(n_points):
+        x, y = np.random.uniform(0, 1, 2)
+        if x**2 + y**2 <= 1:
+            count_inside += 1
+    return (count_inside / n_points) * 4
+
+def integrate(n_points, dim):
+    """Monte Carlo estimate for the volume of a unit ball in `dim` dimensions."""
+    count_inside = 0
+    for _ in range(n_points):
+        point = np.random.uniform(-1, 1, dim)
+        if np.sum(point**2) <= 1:
+            count_inside += 1
+    return (count_inside / n_points) * (2**dim)
+
+def func(x):
+    """Function to define the given probability density function."""
+    return 1 + (2 / (1 + x**2)) + np.cos(np.sqrt(3 * x))**2
+
+def normalize_func(func, xmin, xmax, num_points=1000):
+    """Normalize the given function over the interval [xmin, xmax] using numerical integration."""
+    x = np.linspace(xmin, xmax, num_points)
+    y = func(x)
+    normalization = np.trapz(y, x)
+    return lambda x: func(x) / normalization
+
+def genSample(npts):
+    """Generate a sample of `npts` values distributed according to the normalized function `f(x)`."""
+    xmin, xmax = 0, 10
+    normalized_func = normalize_func(func, xmin, xmax)
+    
+    # Create the sample using the rejection sampling method
+    x = np.linspace(xmin, xmax, 1000)
+    y = normalized_func(x)
+    max_y = max(y)
+    
+    samples = []
+    while len(samples) < npts:
+        x_candidate = np.random.uniform(xmin, xmax)
+        y_candidate = np.random.uniform(0, max_y)
+        if y_candidate < normalized_func(x_candidate):
+            samples.append(x_candidate)
+    
+    return np.array(samples)
+
+# Generate values using the distribution
+npts = 10000
+samples = genSample(npts)
+
+# Plot the generated sample
+plt.figure(figsize=(10, 6))
+plt.hist(samples, bins=50, density=True, alpha=0.6, color='g', label='Generated Samples')
+
+# Plot the theoretical function
+x = np.linspace(0, 10, 1000)
+normalized_func = normalize_func(func, 0, 10)
+plt.plot(x, normalized_func(x), 'r-', lw=2, label='Theoretical $f(x)$')
+
+plt.title('Distribution of Generated Values vs Theoretical Function')
+plt.xlabel('x')
+plt.ylabel('Density')
+plt.legend()
+plt.show()

@@ -1,0 +1,40 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+def f(x):
+    return x**2 * np.cos(2*x)
+
+def g(x):
+    return (1/2)*x**2 * np.sin(2*x) + (1/4) * np.cos(2*x)
+
+def integrate_f(x_min, x_max):
+    return g(x_max) - g(x_min)
+
+def simpsons_rule(f, a, b, N):
+    h = (b - a) / N
+    x = np.linspace(a, b, N+1)
+    y = f(x)
+    
+    return h/3 * np.sum(y[0:-1:2] + 4*y[1::2] + y[2::2])
+
+# Calculate the fractional error for different number of panels
+x_min = 0
+x_max = 1
+analytical_result = integrate_f(x_min, x_max)
+
+N_values = np.array([2, 4, 8, 16, 32, 64, 128, 256, 512, 1024])
+errors = []
+
+for N in N_values:
+    numerical_result = simpsons_rule(f, x_min, x_max, N)
+    error = np.abs(numerical_result - analytical_result) / np.abs(analytical_result)
+    errors.append(error)
+
+# Create log-log plot
+plt.figure(figsize=(10, 6))
+plt.loglog(N_values, errors, marker='o', linestyle='-', color='b')
+plt.xlabel('Number of Panels (N)')
+plt.ylabel('Fractional Error')
+plt.title('Fractional Error in Numerical Integration using Simpson\'s Rule')
+plt.grid(True)
+plt.show()

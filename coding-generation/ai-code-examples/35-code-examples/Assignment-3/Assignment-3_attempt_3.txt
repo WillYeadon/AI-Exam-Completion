@@ -1,0 +1,67 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+def mean_lifetime(half_life):
+    return half_life / np.log(2)
+
+def decay_process(N0, t, half_life):
+    return N0 * np.exp(-t * np.log(2) / half_life)
+
+def analytical_solution(N0, t, half_life):
+    return N0 * np.exp(-t * np.log(2) / half_life)
+
+def solve_euler(N0, dt, half_life, t_end):
+    N = [N0]
+    t = np.arange(0, t_end, dt)
+    
+    for i in range(1, len(t)):
+        dNdt = -N[i-1] * np.log(2) / half_life
+        N.append(N[i-1] + dNdt * dt)
+    
+    return N, t
+
+def solve_RK4(N0, dt, half_life, t_end):
+    N = [N0]
+    t = np.arange(0, t_end, dt)
+    
+    for i in range(1, len(t)):
+        k1 = -N[i-1] * np.log(2) / half_life
+        k2 = -(N[i-1] + 0.5*k1*dt) * np.log(2) / half_life
+        k3 = -(N[i-1] + 0.5*k2*dt) * np.log(2) / half_life
+        k4 = -(N[i-1] + k3*dt) * np.log(2) / half_life
+        
+        dNdt = (k1 + 2*k2 + 2*k3 + k4) / 6
+        N.append(N[i-1] + dNdt * dt)
+    
+    return N, t
+
+# Parameters
+N0 = 1000
+half_life = 5730
+t_end = 20000
+dt_values = np.array([1, 5, 10, 50, 100, 500, 1000, 5000])
+
+# Analytical solution
+t_analytical = np.linspace(0, t_end, 1000)
+N_analytical = analytical_solution(N0, t_analytical, half_life)
+
+# Calculate errors for different dt values
+errors_euler = []
+errors_RK4 = []
+
+for dt in dt_values:
+    N_euler, _ = solve_euler(N0, dt, half_life, t_end)
+    N_RK4, _ = solve_RK4(N0, dt, half_life, t_end)
+    
+    errors_euler.append(np.abs(N_euler - analytical_solution(N0, np.arange(0, t_end, dt), half_life)[-1]))
+    errors_RK4.append(np.abs(N_RK4 - analytical_solution(N0, np.arange(0, t_end, dt), half_life)[-1]))
+
+# Plotting
+plt.figure(figsize=(10, 6))
+plt.loglog(dt_values, errors_euler, marker='o', label='Euler Method')
+plt.loglog(dt_values, errors_RK4, marker='x', label='RK4 Method')
+plt.xlabel('Time Step Size (dt)')
+plt.ylabel('Error')
+plt.title('Error Comparison of Euler vs RK4 Method')
+plt.legend()
+plt.show()

@@ -1,0 +1,66 @@
+import numpy as np
+import random
+import matplotlib.pyplot as plt
+
+# Transition rules with neutron flux
+decay_A_with_flux = {'from': 'A', 'to': 'B', 'probability': 1 - np.exp(-np.log(2)/10.1)}
+decay_B_with_flux = {'from': 'B', 'to': 'C', 'probability': 1 - np.exp(-np.log(2)/15.7)}
+activation_C_with_flux = {'from': 'C', 'to': 'A', 'probability': 1 - np.exp(-np.log(2)/3.2)}
+
+# Transition rules without neutron flux
+decay_A_no_flux = {'from': 'A', 'to': 'B', 'probability': 1 - np.exp(-np.log(2)/10.1)}
+decay_B_no_flux = {'from': 'B', 'to': 'C', 'probability': 1 - np.exp(-np.log(2)/15.7)}
+
+def has_transitioned(probability):
+    r = random.random()
+    return r < probability
+
+def transition(current_state, rules):
+    new_state = current_state.copy()
+    for rule in rules:
+        if current_state[rule['from']] > 0:
+            num_transitions = sum(has_transitioned(rule['probability']) for _ in range(current_state[rule['from']]))
+            new_state[rule['from']] -= num_transitions
+            new_state[rule['to']] += num_transitions
+    return new_state
+
+def evolve_system(initial_state, rules, n_timesteps):
+    states = [initial_state.copy()]
+    current_state = initial_state
+    for _ in range(n_timesteps):
+        current_state = transition(current_state, rules)
+        states.append(current_state.copy())
+    return np.array([state['A'] for state in states]), np.array([state['B'] for state in states]), np.array([state['C'] for state in states])
+
+# Initial amounts of A, B, C nuclei
+initial_state = {'A': 0, 'B': 0, 'C': 250}
+
+# Simulate evolution for first 100 hours with neutron flux
+n_timesteps = 200
+A1, B1, C1 = evolve_system(initial_state, [decay_A_with_flux, decay_B_with_flux, activation_C_with_flux], n_timesteps)
+
+# Final state after first 100 hours
+final_state_with_flux = {'A': A1[-1], 'B': B1[-1], 'C': C1[-1]}
+
+# Simulate evolution for second 100 hours without neutron flux
+A2, B2, C2 = evolve_system(final_state_with_flux, [decay_A_no_flux, decay_B_no_flux], n_timesteps)
+
+# Combine results
+A = np.concatenate((A1, A2[1:]))
+B = np.concatenate((B1, B2[1:]))
+C = np.concatenate((C1, C2[1:]))
+
+# Generate time array
+time = np.linspace(0, 200, 2 * n_timesteps)
+
+# Plot nuclear decay
+plt.plot(time, A, label='Number of A nuclei')
+plt.plot(time, B, label='Number of B nuclei')
+plt.plot(time, C, label='Number of C nuclei')
+
+plt.title('Nuclear Decay with and without Neutron Flux')
+plt.xlabel('Time (hours)')
+plt.ylabel('Number of nuclei')
+plt.legend()
+plt.grid()
+plt.show()

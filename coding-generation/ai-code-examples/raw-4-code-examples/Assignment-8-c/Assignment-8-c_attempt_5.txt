@@ -1,0 +1,65 @@
+import numpy as np
+import random
+import matplotlib.pyplot as plt
+
+class Walker:
+    def __init__(self, step_size=1, ndim=2):
+        self.step_size = step_size
+        self.ndim = ndim
+        self.pos = np.zeros(ndim)
+        if ndim == 1:
+            self.steps = [[step_size], [-step_size]]
+        else:
+            self.steps = [
+                [step_size, 0], [-step_size, 0],
+                [0, step_size], [0, -step_size]
+            ]
+
+    def pickStep(self):
+        return random.choice(self.steps)
+
+    def doSteps(self, n):
+        trajectory = np.zeros((n + 1, self.ndim))
+        for i in range(1, n+1):
+            step = self.pickStep()
+            self.pos += step
+            trajectory[i] = self.pos
+        return trajectory
+
+
+# Given array of initial random positions in the unit square
+rand_pos = np.random.rand(1000, 2)
+
+# Function to perform the simulation
+def simulate_diffusion(n_walkers, n_steps, step_size=0.05):
+    walkers = []
+    trajectories = []
+    for i in range(n_walkers):
+        walker = Walker(step_size=step_size, ndim=2)
+        walker.pos = rand_pos[i]
+        walkers.append(walker)
+        trajectory = walker.doSteps(n_steps)
+        trajectories.append(trajectory)
+    return np.array(trajectories)
+
+# Perform simulations
+trajectories_10 = simulate_diffusion(1000, 10)
+trajectories_100 = simulate_diffusion(1000, 100)
+trajectories_500 = simulate_diffusion(1000, 500)
+
+# Extract the final positions after the steps
+final_positions_10 = trajectories_10[:, -1, :]
+final_positions_100 = trajectories_100[:, -1, :]
+final_positions_500 = trajectories_500[:, -1, :]
+
+# Create plots for the specified steps
+def plot_positions(final_positions, steps):
+    plt.figure(figsize=(8, 6))
+    plt.scatter(final_positions[:, 0], final_positions[:, 1], s=5)
+    plt.xlim(0, 1)
+    plt.ylim(0, 1)
+    plt.title(f'Positions after {steps} steps')
+    plt.xlabel('X position')
+    plt.ylabel('Y position')
+    plt.grid(True)
+    plt.show()

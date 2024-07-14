@@ -1,0 +1,69 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Constants
+half_life_A = 10.1  # hours
+half_life_B = 15.7  # hours
+half_life_C_to_A = 3.2  # hours
+
+decay_constant_A = np.log(2) / half_life_A
+decay_constant_B = np.log(2) / half_life_B
+activation_constant_C_to_A = np.log(2) / half_life_C_to_A
+
+initial_C_nuclei = 250
+total_hours = 200
+n_steps = 400
+time_step = total_hours / n_steps
+
+# Function to determine if transition occurs
+def is_transition(prob):
+    return np.random.rand() < prob
+
+# Function to evolve a single state
+def evolve_state(state, flux_on):
+    A, B, C = state
+    new_A, new_B, new_C = A, B, C
+    
+    decayed_A = sum(is_transition(decay_constant_A * time_step) for _ in range(A))
+    decayed_B = sum(is_transition(decay_constant_B * time_step) for _ in range(B))
+    
+    if flux_on:
+        activated_C = sum(is_transition(activation_constant_C_to_A * time_step) for _ in range(C))
+    else:
+        activated_C = 0
+    
+    new_A += activated_C - decayed_A
+    new_B += decayed_A - decayed_B
+    new_C -= activated_C
+    
+    return new_A, new_B, new_C
+
+# Function to evolve the list of states
+def evolve_system(A, B, C, steps, flux_on):
+    states = [(A, B, C)]
+    
+    for _ in range(steps):
+        A, B, C = evolve_state((A, B, C), flux_on)
+        states.append((A, B, C))
+    
+    return np.array(states)
+
+# Evolve the system
+states_with_flux = evolve_system(0, 0, initial_C_nuclei, 200, True)
+states_without_flux = evolve_system(states_with_flux[-1, 0], states_with_flux[-1, 1], states_with_flux[-1, 2], 200, False)
+
+# Combine both periods
+full_states = np.vstack((states_with_flux, states_without_flux))
+times = np.linspace(0, total_hours, n_steps + 1)
+
+# Plotting
+plt.figure(figsize=(10, 6))
+plt.plot(times, full_states[:, 0], label='A Nuclei')
+plt.plot(times, full_states[:, 1], label='B Nuclei')
+plt.plot(times, full_states[:, 2], label='C Nuclei')
+plt.xlabel('Time (hours)')
+plt.ylabel('Number of Nuclei')
+plt.title('Nuclei Decay and Activation Over Time')
+plt.legend()
+plt.grid(True)
+plt.show()

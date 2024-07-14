@@ -1,0 +1,64 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Function to determine if a transition occurs based on the transition probability
+def check_transition(probability):
+    return np.random.random() < probability
+
+# Function to evolve a single state according to the transition rules
+def evolve_state(state, transition_prob):
+    if state == 'A':
+        if check_transition(transition_prob[0]):
+            return 'B'
+    elif state == 'B':
+        if check_transition(transition_prob[1]):
+            return 'C'
+    return state
+
+# Function to evolve a list of states
+def evolve_system(states, transition_prob):
+    new_states = []
+    for state in states:
+        new_states.append(evolve_state(state, transition_prob))
+    return np.array(new_states)
+
+# Function to evolve the entire system over 'n_steps'
+def evolve_n_steps(initial_states, n_steps, transition_prob, neutron_flux=True):
+    all_states = [initial_states]
+    current_states = initial_states
+    for _ in range(n_steps):
+        if neutron_flux and 'C' in current_states:
+            prob_c_to_a = 1 - np.exp(-3.2/10.1) # effective half-life of 3.2 hours for C to A
+            current_states[np.where(current_states == 'C')] = evolve_system(np.where(current_states == 'C', 'A', current_states), [prob_c_to_a, 0])
+       
+        current_states = evolve_system(current_states, transition_prob)
+        all_states.append(current_states)
+    return np.array(all_states)
+
+# Initial number of nuclei
+num_c_nuclei = 250
+initial_states = np.array(['C'] * num_c_nuclei)
+
+# Transition probabilities
+transition_prob = [1 - np.exp(-1/10.1), 1 - np.exp(-1/15.7)]
+
+# Number of steps and evolution
+n_steps = 200
+all_evolved_states_flux_on = evolve_n_steps(initial_states, n_steps, transition_prob, neutron_flux=True)
+
+# Evolve the system for another 100 hours without neutron flux
+all_evolved_states_flux_off = evolve_n_steps(all_evolved_states_flux_on[-1], n_steps, transition_prob, neutron_flux=False)
+
+# Count the number of each nucleus in each step
+count_A = np.sum(all_evolved_states_flux_on == 'A', axis=1) + np.sum(all_evolved_states_flux_off == 'A', axis=1)
+count_B = np.sum(all_evolved_states_flux_on == 'B', axis=1) + np.sum(all_evolved_states_flux_off == 'B', axis=1)
+count_C = np.sum(all_evolved_states_flux_on == 'C', axis=1) + np.sum(all_evolved_states_flux_off == 'C', axis=1)
+
+# Create a plot with the number of A, B and C nuclei over time
+plt.plot(range(2*n_steps+1), count_A, label='A nuclei')
+plt.plot(range(2*n_steps+1), count_B, label='B nuclei')
+plt.plot(range(2*n_steps+1), count_C, label='C nuclei')
+plt.xlabel('Time (hours)')
+plt.ylabel('Number of Nuclei')
+plt.legend()
+plt.show()

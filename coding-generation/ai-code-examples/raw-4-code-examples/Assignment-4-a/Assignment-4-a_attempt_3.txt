@@ -1,0 +1,38 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Define constants for the simulation
+v_0 = 125  # Initial velocity in m/s
+g = 9.81   # Acceleration due to gravity in m/s^2
+
+# Function to calculate projectile trajectory
+def projectile_trajectory(v_0, angle, num_points=500):
+    theta = np.radians(angle)
+    t_flight = 2 * v_0 * np.sin(theta) / g  # Total flight time
+    t = np.linspace(0, t_flight, num_points)  # Time intervals
+
+    # Calculate horizontal and vertical positions
+    x = v_0 * np.cos(theta) * t
+    y = v_0 * np.sin(theta) * t - 0.5 * g * t**2
+    return x, y
+
+# Function to find range using linear approximation
+def find_zero_linear(x1, x2, y1, y2):
+    return x1 - y1 * (x2 - x1) / (y2 - y1)
+
+# Angles to plot the trajectories
+angles = [15, 30, 45, 60, 75]  # in degrees
+
+# Plotting
+plt.figure(figsize=(12, 6))
+
+for angle in angles:
+    x, y = projectile_trajectory(v_0, angle)
+    plt.plot(x, y, label=f'{angle}°')
+
+plt.xlabel('Distance (m)')
+plt.ylabel('Height (m)')
+plt.title('Projectile Trajectories for Different Angles')
+plt.legend()
+plt.grid(True)
+plt.show()

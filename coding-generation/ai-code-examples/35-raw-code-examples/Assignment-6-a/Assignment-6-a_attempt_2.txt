@@ -1,0 +1,38 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Script
+
+def findPi(n_points):
+    points = np.random.rand(n_points, 2) * 2 - 1
+    inside_circle = np.sum(np.linalg.norm(points, axis=1) < 1)
+    return 4 * inside_circle / n_points
+
+def integrate(n_points, dim):
+    points = np.random.rand(n_points, dim) * 2 - 1
+    inside_ball = np.sum(np.linalg.norm(points, axis=1) < 1)
+    return 2 ** dim * inside_ball / n_points
+
+# ::: Task :::
+
+n_points_list = [100, 1000, 10000, 100000, 1000000]
+dimensions = [2, 5, 10, 20, 50]
+
+errors = []
+
+for dim in dimensions:
+    dim_errors = []
+    for n_points in n_points_list:
+        estimated_volume = integrate(n_points, dim)
+        error = np.abs(estimated_volume - np.pi)  # true volume of unit ball in 2 dimensions
+        dim_errors.append(error)
+    errors.append(dim_errors)
+
+for i, dim in enumerate(dimensions):
+    plt.loglog(n_points_list, errors[i], label=f'{dim} dimensions')
+
+plt.xlabel('Number of points')
+plt.ylabel('Error')
+plt.title('Monte Carlo Integration Error Scaling')
+plt.legend()
+plt.show()
